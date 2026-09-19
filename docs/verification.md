@@ -113,3 +113,8 @@ Cloudflare initially rejected the configured CPU allowance on the Free plan. Rem
 - The optional Keychain prototype passed isolated tests but was removed before commit/deploy following the operator's simplification. No native helper, localhost permissions, ticket endpoints, key database or companion download ships. No actual Keychain secret or paid generation was accessed.
 
 - Pages production `ffebec54-e0d4-4f4b-a3b3-d8516351d687` deployed source `da0c2643cc8942f5c30766f58c8aa6376c74a369`. Canonical URL https://fluxstudio.pages.dev resolves and opens. Live health returns hosted:true/hasServerKey:false; history contains three library sources; MP4 delivery returns 200 and R2 Range returns 206. Published camera dialog opens; lightbox video decodes at 960px width and plays, with a download link. No console errors observed on the deployment tab. Local fixture-key check confirms Your key returns to Connect key after reload. No paid submissions.
+
+## Camera text follow-up
+
+- 54 tests, production build and Worker typecheck pass. Browser verified three borderless phrase lines in one editor, matching section colours; selecting None removes its line and choosing another angle updates the phrase. An edited shot phrase survives Done and appears in the coloured composer summary.
+- At a measured 413px viewport there is no page overflow. Longer shot/angle phrases grow to two lines without internal clipping; movement stays one line. No paid calls.

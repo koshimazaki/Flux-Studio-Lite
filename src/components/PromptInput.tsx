@@ -3,7 +3,7 @@ import {
   type CameraSelection,
   type CameraEdits,
 } from "../../shared/camera";
-import { useLayoutEffect, useRef } from "react";
+import PromptField from "./PromptField";
 import Icon from "./Icon";
 
 export const DEFAULT_PROMPT =
@@ -52,9 +52,13 @@ export default function PromptInput({
             onClick={onOpenCamera}
             aria-label="Edit camera direction"
           >
-            {cameraClauses(camera, cameraEdits).map(({ term, text }) => (
-              <span key={term.id}>{text} </span>
-            ))}
+            {cameraClauses(camera, cameraEdits).map(
+              ({ section, term, text }) => (
+                <span key={term.id} style={{ color: `var(${section.color})` }}>
+                  {text}{" "}
+                </span>
+              ),
+            )}
           </button>
         )}
       </div>
@@ -67,59 +71,6 @@ export default function PromptInput({
           </button>
         ))}
       </div>
-    </>
-  );
-}
-
-function PromptField({
-  id,
-  label,
-  value,
-  onChange,
-  maxLength,
-  placeholder,
-}: {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (text: string) => void;
-  maxLength: number;
-  placeholder: string;
-}) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-  useLayoutEffect(() => {
-    const field = ref.current!;
-    const resize = () => {
-      field.style.height = "auto";
-      const height = field.scrollHeight;
-      field.style.height = `${Math.min(height, 240)}px`;
-      field.style.overflowY = height > 240 ? "auto" : "hidden";
-    };
-    resize();
-    let width = field.clientWidth;
-    const observer = new ResizeObserver(() => {
-      if (field.clientWidth !== width) {
-        width = field.clientWidth;
-        resize();
-      }
-    });
-    observer.observe(field);
-    return () => observer.disconnect();
-  }, [value]);
-  return (
-    <>
-      <label className="sr-only" htmlFor={id}>
-        {label}
-      </label>
-      <textarea
-        ref={ref}
-        id={id}
-        value={value}
-        rows={1}
-        maxLength={maxLength}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-      />
     </>
   );
 }

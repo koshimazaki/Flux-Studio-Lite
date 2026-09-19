@@ -87,3 +87,7 @@ The operator chose FLUX Studio / fluxstudio.pages.dev. The Pages deployment uses
 After exploring a Keychain helper, the operator chose temporary API-key paste for the technical interview demo. The helper prototype was removed before commit or deployment. Keychain integration is superseded, not an unfinished requirement. No profiles, key database, Wrangler BFL secret or local installation is added. Keys remain in page/request memory and disappear on refresh/disconnect. The server receives each key transiently and never stores it. Website operators cannot honestly offer operator-blind keys using a secret/decryption system they control.
 
 Finished clips and job records remain in the cloud library, retrieved using the anonymous browser cookie. They are not dependent on the API key or a browser media cache. Download links make user-owned copies explicit. Clearing cookies loses this browser's access; pending jobs need the key re-entered after refresh. Paid generations, human visual approval and stranger/native-device tests remain deferred.
+
+## Colour-coded camera text
+
+The operator asked to make the camera phrases feel like one prompt rather than separate form inputs. The dialog now uses one shared editor surface with tightly stacked, auto-growing text lines. Shot sizes, Angles and Movements retain labels and inherit their respective tab colours. The applied scene prompt displays the same coloured lines. Native labelled textareas preserve accessible editing, selection-specific phrase state, None, and Done/Cancel semantics.

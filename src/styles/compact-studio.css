@@ -33,8 +33,13 @@
   font-size: 14px;
   line-height: 1.6;
 }
+.camera-sentences > span {
+  display: block;
+}
 .camera-sentences:hover {
-  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 3px;
 }
 .camera-dialog {
   --unit: var(--composer-unit);
@@ -85,27 +90,56 @@
   border-radius: 0;
 }
 .camera-phrases {
-  display: grid;
-  gap: 10px;
-  padding: 12px 20px 16px;
+  margin: 12px 20px 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--sunken);
 }
-.camera-phrases label {
-  display: grid;
-  grid-template-columns: 100px minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
-  color: var(--soft);
-  font-size: 13px;
+.camera-phrases:focus-within {
+  border-color: var(--border-strong);
 }
-.camera-phrases input {
+.camera-phrase-line {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 12px;
+  color: var(--section-color);
+}
+.camera-phrase-label {
+  grid-column: 1;
+  padding-top: 4px;
+  font: 11px/1.6 var(--mono);
+  cursor: text;
+}
+.camera-phrase-line textarea {
+  grid-column: 2;
   min-width: 0;
   width: 100%;
-  background: var(--sunken);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 8px 10px;
+  display: block;
+  padding: 0;
+  margin: 0;
+  resize: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
   font: inherit;
+  font-size: 16px;
+  line-height: 1.65;
+}
+.camera-phrase-line textarea:focus-visible {
+  outline: none;
+}
+.camera-phrase-line:focus-within {
+  background: var(--highlight-subtle);
+}
+.camera-phrase-line:focus-within .camera-phrase-label {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.camera-phrase-line textarea::placeholder {
+  color: var(--muted);
 }
 .camera-dialog-actions {
   display: flex;
@@ -121,9 +155,17 @@
     width: calc(100vw - 16px);
     max-height: calc(100dvh - 16px);
   }
-  .camera-phrases label {
-    grid-template-columns: 1fr;
-    gap: 4px;
+  .camera-phrases {
+    margin: 10px 12px 14px;
+    padding: 10px;
+  }
+  .camera-phrase-line {
+    grid-template-columns: 76px minmax(0, 1fr);
+    column-gap: 8px;
+  }
+  .camera-phrase-label {
+    font-size: 10px;
+    padding-top: 5px;
   }
   .camera-dialog .camera-scene {
     height: 150px;

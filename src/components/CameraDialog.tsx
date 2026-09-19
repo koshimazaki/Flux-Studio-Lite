@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   cameraClauses,
   type CameraSelection,
@@ -6,6 +6,7 @@ import {
 } from "../../shared/camera";
 import CameraPanel from "./CameraPanel";
 import Icon from "./Icon";
+import PromptField from "./PromptField";
 
 export default function CameraDialog({
   selected,
@@ -56,20 +57,37 @@ export default function CameraDialog({
       </header>
       <div className="camera-dialog-body">
         <CameraPanel selected={draft} onSelect={setDraft} />
-        <div className="camera-phrases">
-          {cameraClauses(draft, phrases).map(({ section, term, text }) => (
-            <label key={term.id}>
-              {section.label}
-              <input
-                value={text}
-                maxLength={600}
-                onChange={(e) =>
-                  setPhrases({ ...phrases, [term.id]: e.target.value })
+        {cameraClauses(draft, phrases).length > 0 && (
+          <div
+            className="camera-phrases"
+            role="group"
+            aria-label="Camera prompt"
+          >
+            {cameraClauses(draft, phrases).map(({ section, term, text }) => (
+              <div
+                className="camera-phrase-line"
+                key={term.id}
+                style={
+                  {
+                    "--section-color": `var(${section.color})`,
+                  } as CSSProperties
                 }
-              />
-            </label>
-          ))}
-        </div>
+              >
+                <PromptField
+                  id={`phrase-${section.id}`}
+                  label={section.label}
+                  labelClassName="camera-phrase-label"
+                  value={text}
+                  maxLength={600}
+                  placeholder="Add camera direction…"
+                  onChange={(value) =>
+                    setPhrases({ ...phrases, [term.id]: value })
+                  }
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       <div className="camera-dialog-actions">
         <button className="text-button" onClick={onClose}>
