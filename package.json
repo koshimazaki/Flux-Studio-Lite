@@ -13,7 +13,7 @@
     "dev:cloud": "npm run build && wrangler dev",
     "deploy": "npm run build && npm run check:worker && wrangler deploy",
     "build:pages": "npm run build && npm run check:worker && node scripts/build-pages.mjs",
-    "deploy:pages": "npm run build:pages && wrangler pages deploy .pages --config wrangler.pages.jsonc --project-name fluxstudio --branch main"
+    "deploy:pages": "npm run build:pages && node scripts/deploy-pages.mjs"
   },
   "dependencies": {
     "@fontsource-variable/instrument-sans": "^5.3.0",

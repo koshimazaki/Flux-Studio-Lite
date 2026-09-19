@@ -10,3 +10,4 @@ dist/
 .wrangler/
 
 .pages/
+.pages-project/
