@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { request } from "../useJobs";
 import Icon from "./Icon";
 
@@ -16,16 +16,19 @@ export default function AccountBalance({
 }) {
   const connected = Boolean(apiKey || hasServerKey);
   const [refresh, setRefresh] = useState(0);
+  const owner = useMemo(() => Symbol("connection"), [apiKey, hasServerKey]);
   const [result, setResult] = useState<{
-    owner: string;
+    owner?: symbol;
     balance?: Balance;
     error?: string;
     loading: boolean;
-  }>({ owner: "", loading: false });
-  const owner = apiKey || (hasServerKey ? "server" : "");
+  }>({ loading: false });
   useEffect(() => {
     onVerified(false);
-    if (!connected) return;
+    if (!connected) {
+      setResult({ owner, loading: false });
+      return;
+    }
     const controller = new AbortController();
     setResult({ owner, loading: true });
     request<Balance>("/api/credits", {

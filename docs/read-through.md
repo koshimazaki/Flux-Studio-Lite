@@ -15,7 +15,7 @@ This order follows one user action through the app. Read the tests beside each d
 11. `src/components/FeaturedVideo.tsx`, `Gallery.tsx` and `JobMedia.tsx` — library versus new jobs, decoded-frame reveal, user-triggered library playback, hidden-page pause, explicit playback errors.
 12. `src/scene/camera-paths.ts` — pure geometry; then `create-camera-scene.ts` and `CameraPreview.tsx` for the isolated Three lifecycle.
 13. `src/components/WaitField.tsx` and `src/effects/dither.ts` — bounded decorative canvas, same-field reveal, reduced motion, cleanup.
-14. `src/components/KeyDialog.tsx` — browser-session custody and Forget. No localStorage key.
+14. `src/components/KeyDialog.tsx` — transient page custody and Disconnect; `src/usePageKey.ts` deletes legacy persisted keys. No Web Storage credential.
 15. `src/styles/` — small groups of plain CSS, including all responsive and reduced-motion overrides.
 16. `tests/` — camera maths, validation/pricing, concurrent caps/idempotency, key non-persistence, session ownership, actual MP4 Range delivery and invalid uploads.
 

@@ -54,9 +54,9 @@ All 24 camera terms are exploratory. No reliability score is implied. A successf
 
 ## Key handling
 
-The server key stays in the server environment. A visitor key is held in React state and `sessionStorage`, then sent in an HTTP header for each local request. It is never written to the job file, media or logs. The loopback HTTP connection is local; upstream BFL requests use TLS.
+The server key stays in the server environment. A visitor key is held only in temporary page memory and sent in an HTTP header when needed. The app never writes it to sessionStorage, localStorage, IndexedDB, cookies or caches. Reloading or leaving the page disconnects the key; any legacy Web Storage entry is removed without reading it. It is never written to the job file, media or logs. The loopback HTTP connection is local; upstream BFL requests use TLS.
 
-Forgetting a visitor key clears browser state and `sessionStorage`. The installation then returns to its server connection, if configured. Visitor-key jobs cannot continue in the background without the key; re-enter it to resume. Anonymous session ownership uses a random HttpOnly, SameSite cookie and is not a user account.
+Disconnect clears the active key from page state. The installation then returns to its server connection, if configured. Visitor-key jobs cannot continue without the key; re-enter or autofill it after a reload to resume. Anonymous session ownership uses a random HttpOnly, SameSite cookie and is not a user account.
 
 ## Read the code
 

@@ -101,3 +101,7 @@ This pass supersedes the earlier cloud-deferred notes. The Worker adapter uses D
 Hosted smoke checks: HTTP 200 homepage/health/history, Secure HttpOnly session cookie, CSP present and three library entries. R2 `/api/clips/library-01` returns HTTP 206 with the requested 100 bytes. Static library assets return a full HTTP 200 body; browser playback was verified through completion. The public upscale path inspected the stored MP4, then rejected a deliberately invalid key during the credits precheck; no paid submission was made. The live browser lightbox opens, plays a 960 × 528 clip, closes with Escape and restores focus. No browser console errors were recorded.
 
 Cloudflare initially rejected the configured CPU allowance on the Free plan. Removing that setting allowed deployment using existing plan defaults; no upgrade was made. Live paid generation, a valid-key account balance and complex-input CPU performance remain unverified.
+
+## Key custody follow-up
+
+54 tests pass; production build passes. New tests verify legacy session/local key deletion without reads or writes, without clearing unrelated preferences, and with Web Storage disabled. A browser check entered a deliberately invalid fixture key for the read-only balance call and confirmed reload returns to Connect key. No paid request, real key access, password-manager save, or native Keychain access occurred. The keychain integration choice remains pending; the app currently holds credentials in temporary page memory only.

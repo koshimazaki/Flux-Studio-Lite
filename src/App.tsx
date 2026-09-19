@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Job } from "../shared/types";
+import { usePageKey } from "./usePageKey";
 import { useComposer, composerInput } from "./useComposer";
 import AccountBalance from "./components/AccountBalance";
 import FeaturedVideo from "./components/FeaturedVideo";
@@ -36,14 +37,8 @@ export default function App() {
   } = state;
   const [showPrompt, setShowPrompt] = useState(false),
     [copied, setCopied] = useState(false);
-  const [key, setKey] = useState(() => {
-      try {
-        return sessionStorage.getItem("flux-studio-lite-key") || "";
-      } catch {
-        return "";
-      }
-    }),
-    [showKey, setShowKey] = useState(false),
+  const [key, setKey] = usePageKey();
+  const [showKey, setShowKey] = useState(false),
     [hasServerKey, setHasServerKey] = useState(false),
     [keyVerified, setKeyVerified] = useState(false),
     [submitting, setSubmitting] = useState(false),
@@ -84,16 +79,8 @@ export default function App() {
   function saveKey(value: string) {
     if (value !== key) setKeyVerified(false);
     setKey(value);
-    try {
-      value
-        ? sessionStorage.setItem("flux-studio-lite-key", value)
-        : sessionStorage.removeItem("flux-studio-lite-key");
-    } catch {
-      setError(
-        "Your browser could not retain the key for refresh. It remains in memory for this page.",
-      );
-    }
   }
+
   function chooseUpscale(id: string) {
     set("sourceId", id);
     set("generator", "upscale");

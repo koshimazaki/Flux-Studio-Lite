@@ -73,3 +73,7 @@ The operator authorized a working Cloudflare app with their own key and requeste
 The hosted adapter uses D1 job reservations and R2 media. A bounded MP4Box reader replaces ffprobe in the Worker; browser-supplied dimensions never determine the server estimate. Python and a separate paid inspection service were unnecessary. Workerd tests exposed unsupported `redirect: error`; manual redirect handling now rejects redirects without forwarding keys.
 
 A durable background runner remains deferred because keys are held only in the browser session. The UI asks visitors to keep the tab open until the clip is saved. Paid comparison clips, an exact-input cache, real-device and stranger testing remain deferred. Human visual approval is still separate from implementation checks.
+
+## Key custody correction
+
+The operator explicitly rejected browser/server credential persistence and requested Keychain access on demand. Removed sessionStorage reads/writes, added legacy-key deletion without loading the secret, cleared page credentials on navigation/restoration, and removed the raw key from account-balance identity state. The key form accepts autofill via its submitted value; the app does not request browser credential storage. Native/local Keychain access versus Apple Passwords autofill is awaiting the operator's choice. Temporary page memory is disclosed and is not presented as meeting the stronger requirement that the key never enter the page.

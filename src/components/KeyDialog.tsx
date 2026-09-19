@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Icon from "./Icon";
 export default function KeyDialog({
   value,
@@ -11,8 +11,7 @@ export default function KeyDialog({
   onClose: () => void;
   serverKey: boolean;
 }) {
-  const ref = useRef<HTMLDialogElement>(null),
-    [draft, setDraft] = useState(value);
+  const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     ref.current?.showModal();
   }, []);
@@ -37,13 +36,15 @@ export default function KeyDialog({
       </div>
       <h2>Bring your own key.</h2>
       <p>
-        Sent through this studio to BFL for each request. Kept in this tab’s
-        session only; never saved to the server.
+        Used through this studio to contact BFL. Held only in this open page’s
+        memory; never saved to browser storage or the server. Reloading
+        disconnects it.
       </p>
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          onSave(draft.trim());
+          const key = new FormData(e.currentTarget).get("apiKey");
+          onSave(typeof key === "string" ? key.trim() : "");
           onClose();
         }}
       >
@@ -60,8 +61,8 @@ export default function KeyDialog({
           id="api-key"
           type="password"
           autoComplete="current-password"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          name="apiKey"
+          defaultValue={value}
           placeholder="Enter your API key"
           maxLength={512}
         />
@@ -70,12 +71,11 @@ export default function KeyDialog({
             type="button"
             className="text-button"
             onClick={() => {
-              setDraft("");
               onSave("");
               onClose();
             }}
           >
-            Forget key
+            Disconnect
           </button>
           <button className="primary-button" type="submit">
             Use key <Icon name="arrow" />
@@ -84,7 +84,7 @@ export default function KeyDialog({
       </form>
       <p className="key-footnote">
         {serverKey
-          ? "A local server key is also configured. Forgetting your key returns to the local connection."
+          ? "A local server key is also configured. Disconnecting returns to the local connection."
           : "Library clips need no key. Live runs use your BFL credits."}
       </p>
     </dialog>
