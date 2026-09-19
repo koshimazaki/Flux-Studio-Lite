@@ -10,3 +10,5 @@
 @import "./styles/responsive.css";
 @import "./styles/account-balance.css";
 @import "./styles/camera-tabs.css";
+
+@import "./styles/compact-studio.css";

@@ -93,3 +93,9 @@ The graphite instrument styling adapts the author's graphite instrument design v
 ## Process
 
 See [operator corrections and rejected approaches](docs/process.md), [implementation questions](docs/questions.md), and [verification](docs/verification.md). Agents implemented code under operator direction; the record distinguishes applied changes, limitations and deferred work. This local review pass adds no UI or store framework and makes no additional paid requests.
+
+## FLUX Studio on Pages
+
+`npm run deploy:pages` builds the compact studio and deploys to the `fluxstudio` Cloudflare Pages project, using the existing D1/R2 resources. Apply D1 migrations first with `npx wrangler d1 migrations apply flux-studio-lite --remote`. The original Workers deployment command is retained.
+
+Camera controls open over the composer and apply with Done. Paste a BFL key for the open page only; refresh or Disconnect clears it. Finished clips remain in the anonymous browser library and can be downloaded. No paid test is part of deployment.

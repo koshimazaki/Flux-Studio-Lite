@@ -2,9 +2,7 @@ import {
   cameraClauses,
   type CameraSelection,
   type CameraEdits,
-  type CameraTermId,
 } from "../../shared/camera";
-import type { CSSProperties } from "react";
 import { useLayoutEffect, useRef } from "react";
 import Icon from "./Icon";
 
@@ -28,14 +26,14 @@ export default function PromptInput({
   cameraEnabled,
   camera,
   cameraEdits,
-  onCameraChange,
+  onOpenCamera,
 }: {
   description: string;
   onChange: (description: string) => void;
   cameraEnabled: boolean;
   camera: CameraSelection;
   cameraEdits: CameraEdits;
-  onCameraChange: (id: CameraTermId, text: string) => void;
+  onOpenCamera: () => void;
 }) {
   return (
     <>
@@ -48,29 +46,17 @@ export default function PromptInput({
           maxLength={1200}
           placeholder="Describe a scene…"
         />
-        {cameraEnabled &&
-          cameraClauses(camera, cameraEdits).map(({ section, term, text }) => (
-            <div
-              key={term.id}
-              className="camera-editor"
-              style={
-                { "--section-color": `var(${section.color})` } as CSSProperties
-              }
-            >
-              <span className="camera-editor-mark" aria-hidden="true">
-                <Icon name="turn" size={16} />
-                <Icon name="camera" size={18} />
-              </span>
-              <PromptField
-                id={`camera-${section.id}`}
-                label={`${section.label} prompt`}
-                value={text}
-                onChange={(value) => onCameraChange(term.id, value)}
-                maxLength={600}
-                placeholder="Add camera direction…"
-              />
-            </div>
-          ))}
+        {cameraEnabled && cameraClauses(camera, cameraEdits).length > 0 && (
+          <button
+            className="camera-sentences"
+            onClick={onOpenCamera}
+            aria-label="Edit camera direction"
+          >
+            {cameraClauses(camera, cameraEdits).map(({ term, text }) => (
+              <span key={term.id}>{text} </span>
+            ))}
+          </button>
+        )}
       </div>
       <div className="prompt-suggestions">
         <span>Try a scene</span>

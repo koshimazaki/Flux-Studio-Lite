@@ -34,11 +34,15 @@ export default function KeyDialog({
           <Icon name="close" />
         </button>
       </div>
-      <h2>Bring your own key.</h2>
+      <h2>Connect for this visit.</h2>
       <p>
-        Used through this studio to contact BFL. Held only in this open page’s
-        memory; never saved to browser storage or the server. Reloading
-        disconnects it.
+        Paste your BFL API key to check credits and generate. It stays in this
+        page’s memory and is cleared when you refresh or disconnect. The app
+        never saves it.
+      </p>
+      <p className="key-footnote">
+        Requests pass through our server to BFL. Finished clips remain in this
+        browser’s library after refresh, without reconnecting your key.
       </p>
       <form
         onSubmit={(e) => {
@@ -48,23 +52,17 @@ export default function KeyDialog({
           onClose();
         }}
       >
-        <input
-          name="username"
-          autoComplete="username"
-          value="bfl-api-key"
-          readOnly
-          className="sr-only"
-          tabIndex={-1}
-        />
         <label htmlFor="api-key">BFL API key</label>
         <input
           id="api-key"
           type="password"
-          autoComplete="current-password"
+          autoComplete="off"
           name="apiKey"
           defaultValue={value}
           placeholder="Enter your API key"
           maxLength={512}
+          minLength={8}
+          required
         />
         <div className="dialog-actions">
           <button
@@ -78,7 +76,7 @@ export default function KeyDialog({
             Disconnect
           </button>
           <button className="primary-button" type="submit">
-            Use key <Icon name="arrow" />
+            Connect key <Icon name="arrow" />
           </button>
         </div>
       </form>

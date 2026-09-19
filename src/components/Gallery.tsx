@@ -90,6 +90,15 @@ export default function Gallery({
                   ${Number(job.costActualUsd ?? job.costEstimateUsd).toFixed(2)}
                   {job.costActualUsd === undefined ? " est." : ""}
                 </span>
+                {job.status === "Ready" && job.resultUrl && (
+                  <a
+                    className="download-clip"
+                    href={job.resultUrl}
+                    download={`flux-study-${job.id}.mp4`}
+                  >
+                    Download ↓
+                  </a>
+                )}
                 {job.status === "Ready" && job.generator === "video" ? (
                   <button
                     onClick={() => {
@@ -134,6 +143,13 @@ export default function Gallery({
                     {Number(source.duration.toFixed(1))}s · {source.width} ×{" "}
                     {source.height}
                   </span>
+                  <a
+                    className="download-clip"
+                    href={source.url}
+                    download={`${source.id}.mp4`}
+                  >
+                    Download ↓
+                  </a>
                   <button onClick={() => onUpscale(source.id)}>
                     Upscale <Icon name="expand" size={12} />
                   </button>
@@ -151,8 +167,9 @@ export default function Gallery({
       )}
       {filter === "all" && library.length > 0 && (
         <p className="gallery-footnote">
-          Library clips are existing studio generations. Camera experiments in
-          this session appear above.
+          Your saved clips stay available after refresh in this browser.
+          Download to keep a copy. Library clips are existing studio
+          generations. Camera experiments in this session appear above.
         </p>
       )}
       <VideoLightbox clip={viewing} onClose={() => setViewing(null)} />

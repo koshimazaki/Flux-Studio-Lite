@@ -10,7 +10,7 @@ import {
   estimateUpscaleUsd,
 } from "../shared/presets";
 import { request, useJobs } from "./useJobs";
-import CameraPanel from "./components/CameraPanel";
+import CameraDialog from "./components/CameraDialog";
 import Gallery from "./components/Gallery";
 import KeyDialog from "./components/KeyDialog";
 import Icon from "./components/Icon";
@@ -35,6 +35,7 @@ export default function App() {
     upscaleFactor,
     upscaleCreativity,
   } = state;
+  const [showCamera, setShowCamera] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false),
     [copied, setCopied] = useState(false);
   const [key, setKey] = usePageKey();
@@ -118,13 +119,13 @@ export default function App() {
   return (
     <>
       <header className="topbar">
-        <a href="/" className="wordmark" aria-label="FLUX Studio Lite home">
+        <a href="/" className="wordmark" aria-label="FLUX Studio home">
           <span className="brand-mark">
             <i />
             <i />
             <i />
           </span>
-          flux studio<span className="brand-beta">LITE / 01</span>
+          flux studio<span className="brand-beta">FLUX 3</span>
         </a>
         <div className="topbar-right">
           <AccountBalance
@@ -150,12 +151,25 @@ export default function App() {
           </button>
         </div>
       </header>
+      {showCamera && (
+        <CameraDialog
+          selected={camera}
+          edits={cameraEdits}
+          onClose={() => setShowCamera(false)}
+          onApply={(selection, edits) => {
+            dispatch({
+              type: "update",
+              patch: {
+                camera: selection,
+                cameraEdits: edits,
+                cameraEnabled: true,
+              },
+            });
+            setShowCamera(false);
+          }}
+        />
+      )}
       <main>
-        <section className="intro">
-          <div className="intro-kicker">
-            <span /> STUDIO FOR MOVING IMAGES
-          </div>
-        </section>
         <FeaturedVideo
           job={featuredJob}
           source={sources.find((s) => s.origin === "sample")}
@@ -173,6 +187,16 @@ export default function App() {
                   {generator === "video" ? "Text to video" : "Video upscale"}
                 </span>
               </div>
+              {generator === "video" && (
+                <button
+                  className="camera-open text-button"
+                  onClick={() => setShowCamera(true)}
+                  aria-haspopup="dialog"
+                >
+                  <Icon name="camera" size={15} /> Camera controls{" "}
+                  <Icon name="chevron" size={12} />
+                </button>
+              )}
             </div>
             {generator === "video" ? (
               <PromptInput
@@ -181,9 +205,7 @@ export default function App() {
                 cameraEnabled={cameraEnabled}
                 camera={camera}
                 cameraEdits={cameraEdits}
-                onCameraChange={(id, text) =>
-                  dispatch({ type: "edit-camera", id, text })
-                }
+                onOpenCamera={() => setShowCamera(true)}
               />
             ) : (
               <SourceInput
@@ -250,12 +272,6 @@ export default function App() {
               </div>
             </div>
           </section>
-          {generator === "video" && cameraEnabled && (
-            <CameraPanel
-              selected={camera}
-              onSelect={(value) => set("camera", value)}
-            />
-          )}
           <div className="studio-foot">
             <button
               className="text-button"

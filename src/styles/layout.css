@@ -1,7 +1,6 @@
 .topbar {
-  height: calc(84 * var(--unit));
+  height: calc(80 * var(--unit));
   margin: 0 var(--space-48);
-  border-bottom: var(--space-1) solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -77,3 +77,13 @@ A durable background runner remains deferred because keys are held only in the b
 ## Key custody correction
 
 The operator explicitly rejected browser/server credential persistence and requested Keychain access on demand. Removed sessionStorage reads/writes, added legacy-key deletion without loading the secret, cleared page credentials on navigation/restoration, and removed the raw key from account-balance identity state. The key form accepts autofill via its submitted value; the app does not request browser credential storage. Native/local Keychain access versus Apple Passwords autofill is awaiting the operator's choice. Temporary page memory is disclosed and is not presented as meeting the stronger requirement that the key never enter the page.
+
+## Laptop layout and temporary keys
+
+Removed the moving-images kicker and header rule, set the header to 80 units, reduced the featured-video/composer and gallery gaps, and moved camera presets into a modal opened from the composer header. Selected camera phrases remain compact sentences; their text is editable in the modal. Done applies both presets and edits; Cancel/Escape discard the draft. The existing reducer handles these changes without adding a state-management package.
+
+The operator chose FLUX Studio / fluxstudio.pages.dev. The Pages deployment uses the same Worker implementation and existing D1/R2 resources. Browser library cookies are origin-specific, so the new hostname has its own anonymous browser library; this is not an automatic migration of the old domain's cookie.
+
+After exploring a Keychain helper, the operator chose temporary API-key paste for the technical interview demo. The helper prototype was removed before commit or deployment. Keychain integration is superseded, not an unfinished requirement. No profiles, key database, Wrangler BFL secret or local installation is added. Keys remain in page/request memory and disappear on refresh/disconnect. The server receives each key transiently and never stores it. Website operators cannot honestly offer operator-blind keys using a secret/decryption system they control.
+
+Finished clips and job records remain in the cloud library, retrieved using the anonymous browser cookie. They are not dependent on the API key or a browser media cache. Download links make user-owned copies explicit. Clearing cookies loses this browser's access; pending jobs need the key re-entered after refresh. Paid generations, human visual approval and stranger/native-device tests remain deferred.

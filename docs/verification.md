@@ -105,3 +105,9 @@ Cloudflare initially rejected the configured CPU allowance on the Free plan. Rem
 ## Key custody follow-up
 
 54 tests pass; production build passes. New tests verify legacy session/local key deletion without reads or writes, without clearing unrelated preferences, and with Web Storage disabled. A browser check entered a deliberately invalid fixture key for the read-only balance call and confirmed reload returns to Connect key. No paid request, real key access, password-manager save, or native Keychain access occurred. The keychain integration choice remains pending; the app currently holds credentials in temporary page memory only.
+
+## Compact laptop and Pages pass
+
+- 54 existing tests, TypeScript, Vite production build and Worker typecheck pass. Pages advanced-mode bundle reuses the existing D1/R2 adapter and bounded MP4 metadata reader.
+- Browser at measured 1281 × 801 CSS pixels: composer ends at ~655px and gallery starts at ~708px with an edited camera phrase. Removed kicker/header rule; video starts at ~80px. Camera Done applies selection/phrase changes; Cancel preserves the previous result. At 413 × 801 the dialog fits with scrollable content and no horizontal page overflow.
+- The optional Keychain prototype passed isolated tests but was removed before commit/deploy following the operator's simplification. No native helper, localhost permissions, ticket endpoints, key database or companion download ships. No actual Keychain secret or paid generation was accessed.

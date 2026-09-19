@@ -1,0 +1,160 @@
+.featured-video {
+  margin-bottom: 16px;
+}
+.featured-media {
+  max-height: min(340px, 38vh);
+}
+.gallery {
+  margin-top: 22px;
+}
+.gallery-heading {
+  margin-bottom: 18px;
+}
+.studio-foot {
+  padding-block: 10px;
+}
+.prompt-editor {
+  padding-top: 16px;
+  padding-bottom: 8px;
+}
+.prompt-suggestions {
+  padding-bottom: 14px;
+}
+.camera-open {
+  color: var(--soft);
+}
+.camera-sentences {
+  display: block;
+  margin-top: 6px;
+  padding: 0;
+  text-align: left;
+  color: var(--soft);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.camera-sentences:hover {
+  color: var(--accent);
+}
+.camera-dialog {
+  --unit: var(--composer-unit);
+  width: min(940px, calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100dvh - 40px);
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+}
+.camera-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.camera-dialog::backdrop {
+  background: rgb(0 0 0 / 45%);
+  backdrop-filter: blur(3px);
+}
+.camera-dialog > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.camera-dialog h2 {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0 0 4px;
+}
+.camera-dialog p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0;
+}
+.camera-dialog-body {
+  overflow-y: auto;
+  min-height: 0;
+}
+.camera-dialog .camera-panel {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+.camera-phrases {
+  display: grid;
+  gap: 10px;
+  padding: 12px 20px 16px;
+}
+.camera-phrases label {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  color: var(--soft);
+  font-size: 13px;
+}
+.camera-phrases input {
+  min-width: 0;
+  width: 100%;
+  background: var(--sunken);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font: inherit;
+}
+.camera-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 24px;
+  border-top: 1px solid var(--border);
+  padding: 12px 20px;
+  flex-shrink: 0;
+}
+@media (max-width: 35rem) {
+  .camera-dialog {
+    width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+  .camera-phrases label {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .camera-dialog .camera-scene {
+    height: 150px;
+  }
+  .camera-sentences {
+    font-size: 14px;
+  }
+  .topbar-right {
+    gap: 8px;
+  }
+  .camera-open {
+    font-size: 11px;
+    gap: 4px;
+  }
+}
+
+.download-clip {
+  color: var(--soft);
+  white-space: nowrap;
+  font-size: 11px;
+}
+.download-clip:hover {
+  color: var(--accent);
+}
+.clip-meta > span:first-child {
+  margin-right: auto;
+}
+.lightbox-content header > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -42,6 +42,13 @@ export default function VideoLightbox({
       <div className="lightbox-content">
         <header>
           <span>{clip.label}</span>
+          <a
+            className="download-clip"
+            href={clip.url}
+            download="flux-study.mp4"
+          >
+            Download MP4 ↓
+          </a>
           <button
             className="icon-button"
             aria-label="Close video"
