@@ -1,6 +1,6 @@
 # Cloudflare deployment
 
-Live: [FLUX Studio Lite](https://flux-studio-lite.glitchcandies.workers.dev). Deployed 19 September 2026 from `596606083f9fe86e27d13b5a80834cba32f38f89`; Worker version `9e32512e-5353-4dce-9394-07d1abfdc618`. GitHub was not pushed.
+Live: [FLUX Studio Lite](https://flux-studio-lite.glitchcandies.workers.dev). Initial deployment on 19 September 2026 from `596606083f9fe86e27d13b5a80834cba32f38f89`; Worker version `9e32512e-5353-4dce-9394-07d1abfdc618`. GitHub was not pushed.
 
 The hosted app uses your own BFL key. Connect it in the header: the balance check verifies the connection and shows the remaining account credits as USD. Generation/upscale estimates are separate from that balance. No shared provider key is configured or stored. The key exists temporarily in page/request memory during use; it is not persisted by the app.
 
@@ -46,3 +46,5 @@ Workerd tests exercise real isolated D1/R2 bindings with fake upstream BFL respo
 ## Keychain boundary
 
 The local BFL dashboard can read a macOS generic-password Keychain entry through its Node backend. A hosted webpage cannot directly use that local API. Apple Passwords autofill can fill an ordinary password form in a supported browser, which temporarily exposes the credential to the page. Keeping the raw key entirely out of the webpage instead requires a native/local helper that performs provider requests. The implementation choice is awaiting the operator; no native helper or automatic Keychain lookup is claimed. The existing local BFL generic-password item is not automatically an Apple Passwords website login.
+
+The credential-persistence correction was deployed from `81352b19828b85135b3ec0f8dae0813192397b01` as Worker version `10788fe9-a83c-4bc6-8b08-290ca0e35f2b`. The live connection dialog was checked after reload. No GitHub push.
