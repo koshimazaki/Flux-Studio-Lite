@@ -14,7 +14,7 @@
 .camera-choices .section-eyebrow {
   display: flex;
   justify-content: space-between;
-  font-size: var(--space-8);
+  font-size: var(--text-small-8);
   letter-spacing: var(--space-1);
 }
 .camera-choices .section-eyebrow > span:last-child {
@@ -141,7 +141,7 @@
   color: var(--text);
 }
 .preview-caption .section-eyebrow {
-  font-size: var(--space-7);
+  font-size: var(--text-small-7);
 }
 .preview-caption button {
   pointer-events: auto;
@@ -151,7 +151,7 @@
   bottom: var(--space-12);
   left: var(--space-17);
   font-family: var(--mono);
-  font-size: var(--space-7);
+  font-size: var(--text-small-7);
   color: var(--muted);
 }
 .preview-fallback {
@@ -195,7 +195,7 @@
 }
 .studio-foot > span {
   font-family: var(--mono);
-  font-size: var(--space-8);
+  font-size: var(--text-small-8);
   color: var(--muted);
   display: flex;
   align-items: center;

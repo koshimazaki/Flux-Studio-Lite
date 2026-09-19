@@ -177,18 +177,6 @@ export default function App() {
                   {generator === "video" ? "Text to video" : "Video upscale"}
                 </span>
               </div>
-              {generator === "video" && (
-                <button
-                  className={`parameter camera-toggle ${cameraEnabled ? "enabled" : ""}`}
-                  aria-pressed={cameraEnabled}
-                  onClick={() => set("cameraEnabled", !cameraEnabled)}
-                >
-                  Camera
-                  <span className="switch-track">
-                    <i />
-                  </span>
-                </button>
-              )}
             </div>
             {generator === "video" ? (
               <PromptInput
@@ -223,6 +211,8 @@ export default function App() {
                   onAspectRatioChange={(value) => set("aspectRatio", value)}
                   resolution={resolution}
                   onResolutionChange={(value) => set("resolution", value)}
+                  cameraEnabled={cameraEnabled}
+                  onCameraEnabledChange={(value) => set("cameraEnabled", value)}
                   draft={draft}
                   onDraftChange={(value) => set("draft", value)}
                 />

@@ -146,43 +146,6 @@ main {
   min-width: 0;
   flex-wrap: wrap;
 }
-.parameter {
-  display: flex;
-  align-items: center;
-  gap: var(--space-9);
-  font: var(--space-9) var(--mono);
-  color: var(--muted);
-  padding: var(--space-6) var(--space-8);
-  border: var(--space-1) solid transparent;
-  border-radius: var(--radius-sm);
-  white-space: nowrap;
-}
-.parameter.enabled {
-  color: var(--accent);
-}
-.switch-track {
-  width: var(--space-22);
-  height: var(--space-12);
-  border-radius: var(--radius-xs);
-  border: var(--space-1) solid var(--border-strong);
-  background: var(--bg);
-  padding: var(--space-2);
-  display: flex;
-}
-.switch-track i {
-  height: var(--space-6);
-  width: var(--space-7);
-  border-radius: var(--radius-xs);
-  background: var(--muted);
-  transition: transform var(--motion-control);
-}
-.enabled .switch-track {
-  border-color: var(--accent);
-}
-.enabled .switch-track i {
-  background: var(--accent);
-  transform: translateX(var(--space-9));
-}
 .generate-group {
   display: flex;
   align-items: center;
@@ -202,7 +165,7 @@ main {
   color: var(--readout);
 }
 .cost span {
-  font-size: var(--space-7);
+  font-size: var(--text-small-7);
   letter-spacing: var(--space-1);
   color: var(--muted);
   white-space: nowrap;

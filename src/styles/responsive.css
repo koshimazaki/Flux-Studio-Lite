@@ -54,7 +54,7 @@
     gap: var(--space-5);
   }
   .preset span {
-    font-size: var(--space-8);
+    font-size: var(--text-small-8);
   }
   .camera-choices .section-eyebrow > span:last-child {
     display: none;
@@ -91,7 +91,7 @@
     padding: var(--space-24) 0 var(--space-20);
   }
   .intro-kicker {
-    font-size: var(--space-7);
+    font-size: var(--text-small-7);
     letter-spacing: calc(1.1 * var(--unit));
   }
   main {
@@ -104,7 +104,7 @@
     font-size: var(--space-11);
   }
   .mode-label {
-    font-size: var(--space-6);
+    font-size: var(--text-small-6);
     letter-spacing: calc(0.7 * var(--unit));
   }
   .prompt-editor {
@@ -130,7 +130,7 @@
     display: none;
   }
   .prompt-suggestions button {
-    font-size: var(--space-8);
+    font-size: var(--text-small-8);
     padding: var(--space-5) var(--space-6);
     gap: var(--space-5);
   }
@@ -142,10 +142,6 @@
   .parameters {
     width: 100%;
     gap: var(--space-16);
-  }
-  .parameter {
-    font-size: var(--space-9);
-    padding: var(--space-6) var(--space-7);
   }
   .generate-group {
     width: 100%;
@@ -183,7 +179,7 @@
     font-size: var(--space-9);
   }
   .camera-note {
-    font-size: var(--space-8);
+    font-size: var(--text-small-8);
     margin-top: var(--space-10);
   }
   .preview-wrap {
@@ -196,7 +192,7 @@
     gap: var(--space-8);
   }
   .studio-foot > span {
-    font-size: var(--space-6);
+    font-size: var(--text-small-6);
     gap: var(--space-5);
     line-height: 1.8;
   }
@@ -214,7 +210,7 @@
     font-size: var(--space-20);
   }
   .gallery-filters button {
-    font-size: var(--space-8);
+    font-size: var(--text-small-8);
     padding: var(--space-6) var(--space-7);
   }
   .gallery-grid {
@@ -231,7 +227,7 @@
     font-size: var(--space-9);
   }
   .gallery-footnote {
-    font-size: var(--space-7);
+    font-size: var(--text-small-7);
   }
   .upscale-input {
     gap: var(--space-12);
@@ -245,7 +241,7 @@
     font-size: var(--space-16);
   }
   .source-content > span {
-    font-size: var(--space-7);
+    font-size: var(--text-small-7);
   }
   .source-content select {
     font-size: var(--space-10);
@@ -256,7 +252,7 @@
   footer {
     margin: calc(35 * var(--unit)) var(--space-18) 0;
     padding-top: calc(19 * var(--unit));
-    font-size: var(--space-8);
+    font-size: var(--text-small-8);
   }
   footer span:first-child {
     font-size: var(--space-10);
@@ -287,7 +283,7 @@
 }
 @media (max-width: 35rem) {
   .featured-caption {
-    font-size: var(--space-8);
+    font-size: var(--text-small-8);
   }
   .featured-caption > span:last-child {
     max-width: 45%;
@@ -300,9 +296,6 @@
     min-height: calc(72 * var(--unit));
   }
   .instrument-trigger,
-  .parameter {
-    min-height: var(--space-36);
-  }
   .duration-popover {
     left: 0;
     right: auto;

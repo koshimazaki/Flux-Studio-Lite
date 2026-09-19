@@ -12,12 +12,13 @@
   width: calc(70 * var(--unit));
 }
 .generation-controls__aspect {
-  width: calc(76 * var(--unit));
+  width: calc(92 * var(--unit));
 }
 .generation-controls__resolution {
   width: calc(92 * var(--unit));
 }
-.generation-controls__draft {
+.generation-controls__draft,
+.generation-controls__camera {
   width: var(--space-64);
 }
 .instrument-field {
@@ -34,7 +35,7 @@
   display: block;
   padding: var(--space-6) var(--space-8) 0;
   color: var(--muted);
-  font: var(--space-7) var(--mono);
+  font: var(--text-small-7) var(--mono);
   letter-spacing: 0.065em;
   line-height: 1.2;
   text-transform: uppercase;
@@ -270,7 +271,7 @@
   justify-content: space-between;
   margin: var(--space-4) var(--space-4) 0;
   color: var(--muted);
-  font: var(--space-7) var(--mono);
+  font: var(--text-small-7) var(--mono);
 }
 @media (max-width: 47.5rem) {
   .generation-controls {

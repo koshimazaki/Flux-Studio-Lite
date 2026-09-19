@@ -47,3 +47,9 @@ Agents wrote substantial implementation code; the operator set the scope, suppli
 - **Blindly retrying paid submissions:** an uncertain network response may still represent a charged job. Polling and copying may retry; submission does not.
 
 Cloud deployment, an exact-input demo cache, paid camera comparisons and a stranger test remain next steps. Human visual approval is pending. The dither waiting/reveal effect shipped; it is not a cut feature. No additional paid generation was made in this pass.
+
+## Readability and toolbar follow-up
+
+The operator asked for a small text increase after the 90% scale reduction and for Camera beside Draft. The two smallest text tokens gain 2px and the next gains 1px at the default root size; spacing and main prompt text retain their scale. Camera uses the same dimensions and switch treatment as Draft and remains enabled initially. The aspect-ratio field is slightly wider to fit its enlarged label.
+
+Progressive disclosure for Shot sizes, Angles and Movements is deferred pending the operator’s sketch. The intended direction is one open preset section with visible selection summaries; no layout choice has been implemented yet.

@@ -65,3 +65,11 @@ Build output is approximately 82 KB gzip for the app and 123 KB gzip for the laz
 - MORPHKIT lab validation, engine build and registry check pass. Human visual approval remains pending.
 
 Cloudflare/D1/R2, a paid same-subject findings grid, exact-input cache, real BYO/device tests and a stranger test remain deferred. Architecture notes document HTTPS object input and the trusted-metadata requirement for the future Worker adapter; that adapter is not implemented here. Public factual answers live in `docs/questions.md`; the separate private interview coaching document was not edited from this worktree.
+
+## Readability and Camera switch follow-up
+
+- 32 existing tests and the production build pass. Formatting and whitespace checks pass.
+- Smallest 6/7-unit text gains 2px; 8-unit text gains 1px at the default root size. Main prompt text and 90% composer geometry remain unchanged.
+- Camera now follows Draft in the bottom controls, using the same measured switch dimensions (approximately 56.2 × 24.3px). Camera is enabled on a fresh load; off hides the phrases and camera panel while retaining the scene; on restores the camera controls. Draft remains independent and updates its estimate.
+- Enlarged aspect-ratio label fits after widening that field. Desktop (979 CSS pixels) and narrow (352 CSS pixels) views have no horizontal page overflow. The viewport override did not retain requested dimensions; these are measured widths. An initial 268px rendering was below the existing 320px page minimum and overflowed.
+- No paid generations. The preset disclosure redesign awaits the operator’s sketch.
