@@ -23,10 +23,6 @@
   .topbar {
     margin: 0 var(--space-64);
   }
-  footer {
-    margin-left: var(--space-64);
-    margin-right: var(--space-64);
-  }
 }
 @media (max-width: 50rem) {
   .topbar {
@@ -62,15 +58,6 @@
   .gallery-grid {
     gap: var(--space-14);
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  footer {
-    margin-left: var(--space-24);
-    margin-right: var(--space-24);
-    flex-wrap: wrap;
-  }
-  footer > span:nth-child(2) {
-    order: 3;
-    width: 100%;
   }
 }
 @media (max-width: 35rem) {
@@ -236,14 +223,6 @@
   }
   .upload-button {
     padding: var(--space-6);
-  }
-  footer {
-    margin: calc(35 * var(--unit)) var(--space-18) 0;
-    padding-top: calc(19 * var(--unit));
-    font-size: var(--text-small-8);
-  }
-  footer span:first-child {
-    font-size: var(--space-10);
   }
 }
 @media (prefers-reduced-motion: reduce) {

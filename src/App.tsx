@@ -378,9 +378,6 @@ export default function App() {
           }}
         />
       </main>
-      <footer>
-        <span>Independent FLUX experiment · built on the BFL API</span>
-      </footer>
       {showKey && (
         <KeyDialog
           value={key}

@@ -156,3 +156,9 @@ Cloudflare initially rejected the configured CPU allowance on the Free plan. Rem
 - Browser checked title click with Draft enabled: subject and all camera clauses changed while Draft, 5s and 16:9 stayed intact. Recreate then restored Draft off, 9s, Full HD and 9:16. No generation request was submitted. Unit coverage checks prompt-only restoration against full restoration, including upscale source/mode preservation.
 
 - Final checks: 60 tests pass; frontend production build, Worker typecheck and Pages bundle pass. No paid provider calls.
+
+## Four-column responsive gallery
+
+- Desktop now uses four equal library columns with 16px gaps across a gallery up to 1280px wide, while compact and phone breakpoints retain two and one columns. A 24px heading gap separates the controls from the images. The main viewer remains aligned to the composer and is capped at 340px high.
+- The decorative page footer and its large-screen horizontal rule were removed. Connection and account state remain in the functional header.
+- Ready cards omit the redundant status word and show only cost beside Recreate, Download and Upscale. Prompt titles stay clickable for prompt-only reuse.

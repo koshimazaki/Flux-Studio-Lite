@@ -92,9 +92,23 @@ export default function Gallery({
               </h3>
               <div className="clip-meta">
                 <span>
-                  {job.status === "Ready" ? "Ready" : statusLabel(job.status)} ·
-                  ${Number(job.costActualUsd ?? job.costEstimateUsd).toFixed(2)}
-                  {job.costActualUsd === undefined ? " est." : ""}
+                  {job.status === "Ready" ? (
+                    <>
+                      $
+                      {Number(job.costActualUsd ?? job.costEstimateUsd).toFixed(
+                        2,
+                      )}
+                      {job.costActualUsd === undefined ? " est." : ""}
+                    </>
+                  ) : (
+                    <>
+                      {statusLabel(job.status)} · $
+                      {Number(job.costActualUsd ?? job.costEstimateUsd).toFixed(
+                        2,
+                      )}
+                      {job.costActualUsd === undefined ? " est." : ""}
+                    </>
+                  )}
                 </span>
                 {job.status === "Ready" && job.resultUrl ? (
                   <ClipActions
