@@ -6,7 +6,7 @@ This repository contains the local prototype and a Cloudflare Worker adapter. Bo
 
 ## Cloudflare
 
-See [deployment and hosted behavior](docs/cloudflare.md). Connect your own key to check your balance and generate. Keep the tab open until the result is saved.
+[Open the Cloudflare studio](https://flux-studio-lite.glitchcandies.workers.dev). See [deployment and hosted behavior](docs/cloudflare.md). Connect your own key to check your balance and generate. Keep the tab open until the result is saved.
 
 ## Run locally
 

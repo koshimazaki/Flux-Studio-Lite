@@ -1,5 +1,7 @@
 # Cloudflare deployment
 
+Live: [FLUX Studio Lite](https://flux-studio-lite.glitchcandies.workers.dev). Deployed 19 September 2026 from `596606083f9fe86e27d13b5a80834cba32f38f89`; Worker version `9e32512e-5353-4dce-9394-07d1abfdc618`. GitHub was not pushed.
+
 The hosted app uses your own BFL key. Connect it in the header: the balance check verifies the connection and shows the remaining account credits as USD. Generation/upscale estimates are separate from that balance. No shared provider key is configured or stored.
 
 ## Runtime
