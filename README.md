@@ -1,4 +1,4 @@
-# FLUX Studio Lite
+# FLUX Studio
 
 A compact studio for moving images: describe a scene, combine a shot size, angle and movement, generate a FLUX 3 video, then upscale the result from 1.5× to 3× in Precise or Creative mode. The main video sits above a compact centred composer, with the gallery underneath.
 
