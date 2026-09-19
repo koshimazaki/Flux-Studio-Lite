@@ -69,3 +69,9 @@ Before publishing: atomic spend reservations, deployment secrets, cached demo fi
 - [BFL pricing](https://docs.bfl.ai/quick_start/pricing)
 - [Cloudflare context lifetime](https://developers.cloudflare.com/workers/runtime-apis/context/)
 - [R2 pricing](https://developers.cloudflare.com/r2/pricing/)
+
+## Account balance and camera disclosure
+
+`CameraPanel` keeps disclosure state separate from the composer selection; `CameraPresetGrid` uses native scrolling, responsive columns, keyboard focus and small navigation arrows. `CameraPanelExpanded` retains the previous layout for local comparison via `?camera-layout=expanded`.
+
+`GET /api/credits` resolves the same BYO/server key precedence as generation and calls [BFL’s credits endpoint](https://docs.bfl.ml/api-reference/get-the-users-credits). It validates the numeric response, disables caching and never stores the key or forwards raw provider errors. `AccountBalance` cancels stale requests when the key changes and refreshes on key availability, job-status changes, returning to the page or explicit refresh. USD display uses [100 credits per dollar](https://docs.bfl.ml/quick_start/get_started); the original credit count and check time are available in the tooltip. A checked balance is not a spending reservation or a replacement for the server’s demo cap.

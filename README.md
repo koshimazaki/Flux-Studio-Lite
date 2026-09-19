@@ -26,7 +26,7 @@ The server binds to loopback only. A hosted version needs a dedicated cloud adap
 ## Try it
 
 1. Keep **FLUX 3 · Text to video** selected and edit the scene description.
-2. Choose at most one term in each camera section, or None. Each section colours its own editable prompt phrase. Edits survive switching terms. The diagram explains the combination and does not predict model output.
+2. Open Shot sizes, Angles or Movements and choose at most one term per section, or None. The tabs retain each choice; no section is required. **Compare expanded view** switches to the previous layout without resetting selections. Each section colours its own editable prompt phrase. Edits survive switching terms. The diagram explains the combination and does not predict model output.
 3. Open **View composed prompt** to copy the complete text. The server uses the same composer. Camera off removes only the camera clause.
 4. Check the estimate, then generate. The main video changes from a waiting field to the decoded result; refreshing a `?job=` link selects that same-session job.
 5. Choose **Upscale** on a gallery clip. Camera controls disappear. Set the amount with the bottom slider and choose **Precise** or **Creative**. Output dimensions and estimated cost update together.
@@ -38,6 +38,7 @@ All 24 camera terms are exploratory. No reliability score is implied. A successf
 
 - React, Vite and TypeScript with plain CSS and one lazy-loaded Three.js diagram.
 - Blackstone/Lime and Cyberpunk themes, opaque custom menus and keyboard-operable ruled faders.
+- BFL account balance replaces Local Preview when a key is available. A successful balance check verifies the connection; click the balance to refresh.
 - Three independent camera sections with editable wording. Camera off produces an unmodified scene prompt. See [camera wording and sources](docs/camera-wording.md).
 - FLUX 3 text-to-video: 5–20 seconds, seven aspect ratios, HD / Full HD / QHD / UHD or HD draft, without audio. Duration and resolution update the cost estimate.
 - FLUX Video Upscale: 1.5–3× with Precise or Creative mode from a gallery clip or MP4 upload. No text or camera prompt is sent. Output estimates respect the provider's 13.75 MP limit.

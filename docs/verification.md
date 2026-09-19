@@ -73,3 +73,11 @@ Cloudflare/D1/R2, a paid same-subject findings grid, exact-input cache, real BYO
 - Camera now follows Draft in the bottom controls, using the same measured switch dimensions (approximately 56.2 × 24.3px). Camera is enabled on a fresh load; off hides the phrases and camera panel while retaining the scene; on restores the camera controls. Draft remains independent and updates its estimate.
 - Enlarged aspect-ratio label fits after widening that field. Desktop (979 CSS pixels) and narrow (352 CSS pixels) views have no horizontal page overflow. The viewport override did not retain requested dimensions; these are measured widths. An initial 268px rendering was below the existing 320px page minimum and overflowed.
 - No paid generations. The preset disclosure redesign awaits the operator’s sketch.
+
+## Tabbed camera and balance follow-up
+
+- 40 tests pass, including eight new balance checks: zero credits, malformed balances, safe provider errors, transient network failure, effective-key routing, no persistence and no paid submissions. Production build passes.
+- Browser fixture verified shot/angle selections, clearing movement with None, an edited shot phrase retained across expanded/tabbed comparison, and Home-key tab navigation. The combined preview follows the retained selection.
+- On a measured 423px viewport, the two-column/two-row preset window scrolls to the remaining four terms via its arrow, disables Next at the end, and has no page overflow. Requested viewport dimensions are not reliable in this browser; actual width is reported. Desktop shows all eight terms without overflow.
+- Isolated browser fixture verified balance refresh ($123.45 → $123.35), valid zero ($0.00), rejected key with no verified indicator, and preserved UI state when changing credentials. These are synthetic balances, not a real account check. The fixture cannot submit paid jobs.
+- Live local server exposes the new endpoint; without a configured key it returns HTTP 400. No live account balance was verified because the review preview has no key. No paid generation, push or deployment.

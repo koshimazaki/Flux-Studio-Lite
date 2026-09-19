@@ -84,7 +84,7 @@ export default function KeyDialog({
       </form>
       <p className="key-footnote">
         {serverKey
-          ? "A local server key is also connected. Forgetting your key returns to the local connection."
+          ? "A local server key is also configured. Forgetting your key returns to the local connection."
           : "Library clips need no key. Live runs use your BFL credits."}
       </p>
     </dialog>

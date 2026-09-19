@@ -21,11 +21,12 @@ export async function createApp(options: AppOptions) {
   app.disable("x-powered-by");
   const store = new Store(options.directory);
   await store.load();
+  const bfl = options.bfl ?? new BflClient();
   const service = new JobService(
     store,
     options.publicDirectory,
     options.serverKey,
-    options.bfl,
+    bfl,
   );
   const rateWindows = new Map<string, { starts: number; count: number }>();
 
@@ -89,6 +90,11 @@ export async function createApp(options: AppOptions) {
       sessionLimit: SESSION_LIMIT,
     }),
   );
+  app.get("/api/credits", async (request, response) => {
+    const key = requireKey(request.headers["x-byo-key"] ?? options.serverKey);
+    const credits = await bfl.credits(key);
+    response.json({ credits, checkedAt: new Date().toISOString() });
+  });
   app.get("/api/history", async (_request, response) =>
     response.json(await service.history(response.locals.sessionId)),
   );

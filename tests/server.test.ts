@@ -19,6 +19,11 @@ const input = {
   upscaleFactor: 2,
 };
 class FakeBfl extends BflClient {
+  creditKeys: string[] = [];
+  override async credits(key: string) {
+    this.creditKeys.push(key);
+    return key === "test-server-key" ? 1250 : 0;
+  }
   submissions = 0;
   polls = 0;
   failSubmit = false;
@@ -110,6 +115,33 @@ async function setup() {
 }
 
 describe("local job API", () => {
+  it("checks the effective account key without persisting it or creating paid jobs", async () => {
+    const { base, bfl, directory, store } = await setup();
+    const server = await fetch(`${base}/api/credits`);
+    expect(server.headers.get("cache-control")).toBe("no-store");
+    expect(await server.json()).toEqual({
+      credits: 1250,
+      checkedAt: expect.any(String),
+    });
+    const byo = await fetch(`${base}/api/credits`, {
+      headers: { "x-byo-key": "visitor-balance-key" },
+    });
+    expect(await byo.json()).toEqual({
+      credits: 0,
+      checkedAt: expect.any(String),
+    });
+    const invalid = await fetch(`${base}/api/credits`, {
+      headers: { "x-byo-key": "bad" },
+    });
+    expect(invalid.status).toBe(400);
+    expect(bfl.creditKeys).toEqual(["test-server-key", "visitor-balance-key"]);
+    expect(bfl.submissions).toBe(0);
+    expect(store.data.jobs).toHaveLength(0);
+    await store.save();
+    expect(
+      await readFile(path.join(directory, "jobs.json"), "utf8"),
+    ).not.toContain("visitor-balance-key");
+  });
   it("persists and forwards a composed camera, with canonical idempotency and session ownership", async () => {
     const { post, bfl, base, cookie, store } = await setup();
     const body = {

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Job } from "../shared/types";
 import { useComposer, composerInput } from "./useComposer";
+import AccountBalance from "./components/AccountBalance";
 import FeaturedVideo from "./components/FeaturedVideo";
 import {
   composePrompt,
@@ -44,6 +45,7 @@ export default function App() {
     }),
     [showKey, setShowKey] = useState(false),
     [hasServerKey, setHasServerKey] = useState(false),
+    [keyVerified, setKeyVerified] = useState(false),
     [submitting, setSubmitting] = useState(false),
     [uploading, setUploading] = useState(false);
   const composerRef = useRef<HTMLDivElement>(null);
@@ -80,6 +82,7 @@ export default function App() {
       ? composePrompt(composerInput(state))
       : `${upscaleMode} ${upscaleFactor}× upscale. ${upscaleCreativity === 0 ? "Preserve original detail." : "Reimagine finer detail."}`;
   function saveKey(value: string) {
+    if (value !== key) setKeyVerified(false);
     setKey(value);
     try {
       value
@@ -137,19 +140,25 @@ export default function App() {
           flux studio<span className="brand-beta">LITE / 01</span>
         </a>
         <div className="topbar-right">
-          <span className="local-label">
-            <i />
-            LOCAL PREVIEW
-          </span>
+          <AccountBalance
+            apiKey={key}
+            onVerified={setKeyVerified}
+            hasServerKey={hasServerKey}
+            revision={jobs
+              .map(
+                (job) => `${job.id}:${job.status}:${job.costActualUsd ?? ""}`,
+              )
+              .join("|")}
+          />
           <ThemePicker />
           <button
             className="connection-button"
             onClick={() => setShowKey(true)}
           >
             <Icon name="key" size={15} />
-            {key ? "Your key" : hasServerKey ? "Connected" : "Connect key"}
+            {key ? "Your key" : hasServerKey ? "Server key" : "Connect key"}
             <span
-              className={`connection-dot ${key || hasServerKey ? "connected" : ""}`}
+              className={`connection-dot ${keyVerified ? "connected" : ""}`}
             />
           </button>
         </div>

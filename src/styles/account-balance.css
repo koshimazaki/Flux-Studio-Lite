@@ -1,0 +1,42 @@
+.account-balance {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  color: var(--readout);
+  padding: var(--space-4) 0;
+}
+.account-balance__readout {
+  display: flex;
+  gap: var(--space-7);
+  align-items: baseline;
+}
+.account-balance__readout > span {
+  font: var(--text-small-7) var(--mono);
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.account-balance__readout strong {
+  font: var(--space-12) var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.account-balance--error {
+  color: var(--error-text);
+}
+@media (max-width: 50rem) {
+  .account-balance__readout {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+}
+@media (max-width: 35rem) {
+  .topbar:has(.account-balance) {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: calc(80 * var(--unit));
+    padding-block: var(--space-12);
+    gap: var(--space-12);
+  }
+  .topbar:has(.account-balance) .topbar-right {
+    margin-left: auto;
+  }
+}
