@@ -35,13 +35,15 @@ export default function FeaturedVideo({
             <p>Your next scene begins here.</p>
           </div>
         )}
-        <span className="clip-badge">
-          {job
-            ? job.generator === "video"
-              ? "FLUX 3"
-              : "UPSCALED"
-            : "FROM THE LIBRARY"}
-        </span>
+        {(job || source) && (
+          <span className="clip-badge">
+            {job
+              ? job.generator === "video"
+                ? "FLUX 3"
+                : "UPSCALED"
+              : "FROM THE LIBRARY"}
+          </span>
+        )}
         {url && (
           <button
             className="expand-video icon-button"

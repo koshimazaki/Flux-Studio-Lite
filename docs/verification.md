@@ -135,3 +135,5 @@ Cloudflare initially rejected the configured CPU allowance on the Free plan. Rem
 - At a measured 341px viewport, the lightbox stays within the viewport (328px wide); prompt text wraps within 286px and there is no horizontal overflow. Temporary viewport override reset.
 
 - Final checks: 56 tests pass; production frontend build, Worker typecheck and Pages bundle pass. Empty catalog required an explicit library-item type in the Worker. No paid request was made by this verification pass.
+
+- Hosted follow-up smoke: canonical Pages homepage loads the cabin default and an empty public gallery. The final empty-preview badge guard removes the obsolete Library label when no clip exists. Build and Worker typecheck pass after that guard.
