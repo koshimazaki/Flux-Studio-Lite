@@ -15,7 +15,7 @@ Standard, non-fragmented MP4s with one video track are supported. Uploads: 50 MB
 
 ## Reproduce
 
-Requires Node 22+ and a Cloudflare account with Workers, D1 and R2 enabled.
+Requires Node 22+ and a Cloudflare account with Workers, D1 and R2 enabled. The initial deployment uses the account’s Free plan defaults; no custom CPU allowance or plan upgrade is configured. Complex metadata can hit runtime limits even below the input byte ceiling.
 
 ```sh
 npm ci

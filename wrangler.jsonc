@@ -23,5 +23,4 @@
     { "binding": "MEDIA", "bucket_name": "flux-studio-lite-media" },
   ],
   "observability": { "enabled": true, "head_sampling_rate": 0.1 },
-  "limits": { "cpu_ms": 30000 },
 }
