@@ -1,7 +1,7 @@
 @keyframes panel-enter {
   from {
     opacity: 0;
-    transform: translateY(-5px);
+    transform: translateY(calc(-5 * var(--unit)));
   }
   to {
     opacity: 1;
@@ -13,59 +13,59 @@
     opacity: 0.25;
   }
 }
-@media (min-width: 1550px) {
+@media (min-width: 96.875rem) {
   .intro {
-    padding-top: 85px;
+    padding-top: var(--space-36);
   }
   .gallery {
-    margin-top: 60px;
+    margin-top: calc(60 * var(--unit));
   }
   .topbar {
-    margin: 0 64px;
+    margin: 0 var(--space-64);
   }
   footer {
-    margin-left: 64px;
-    margin-right: 64px;
+    margin-left: var(--space-64);
+    margin-right: var(--space-64);
   }
 }
-@media (max-width: 800px) {
+@media (max-width: 50rem) {
   .topbar {
-    margin: 0 24px;
-    height: 72px;
+    margin: 0 var(--space-24);
+    height: calc(72 * var(--unit));
   }
   .brand-beta,
   .local-label {
     display: none;
   }
   main {
-    padding: 0 20px;
+    padding: 0 var(--space-20);
   }
   .intro {
-    padding-top: 45px;
+    padding-top: var(--space-28);
   }
   .camera-panel {
-    grid-template-columns: 1fr 1fr;
-    margin: 0 8px;
+    grid-template-columns: minmax(0, 1fr);
+    margin: 0 var(--space-8);
   }
   .camera-choices {
-    padding: 18px 12px;
+    padding: var(--space-18) var(--space-12);
   }
   .preset-grid {
-    gap: 5px;
+    gap: var(--space-5);
   }
   .preset span {
-    font-size: 8px;
+    font-size: var(--space-8);
   }
   .camera-choices .section-eyebrow > span:last-child {
     display: none;
   }
   .gallery-grid {
-    gap: 14px;
+    gap: var(--space-14);
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   footer {
-    margin-left: 24px;
-    margin-right: 24px;
+    margin-left: var(--space-24);
+    margin-right: var(--space-24);
     flex-wrap: wrap;
   }
   footer > span:nth-child(2) {
@@ -73,193 +73,193 @@
     width: 100%;
   }
 }
-@media (max-width: 560px) {
+@media (max-width: 35rem) {
   .topbar {
-    height: 65px;
-    margin: 0 18px;
+    height: calc(65 * var(--unit));
+    margin: 0 var(--space-18);
   }
   .wordmark {
-    font-size: 18px;
-    gap: 8px;
+    font-size: var(--space-18);
+    gap: var(--space-8);
   }
   .connection-button {
-    font-size: 10px;
-    padding: 8px 9px;
-    gap: 7px;
+    font-size: var(--space-10);
+    padding: var(--space-8) var(--space-9);
+    gap: var(--space-7);
   }
   .intro {
-    padding: 35px 0 24px;
+    padding: var(--space-24) 0 var(--space-20);
   }
   .intro-kicker {
-    font-size: 7px;
-    letter-spacing: 1.1px;
+    font-size: var(--space-7);
+    letter-spacing: calc(1.1 * var(--unit));
   }
   main {
-    padding: 0 14px;
+    padding: 0 var(--space-14);
   }
   .composer-top {
-    padding: 15px 15px 5px;
+    padding: var(--space-15) var(--space-15) var(--space-5);
   }
   .model-picker {
-    font-size: 11px;
+    font-size: var(--space-11);
   }
   .mode-label {
-    font-size: 6px;
-    letter-spacing: 0.7px;
+    font-size: var(--space-6);
+    letter-spacing: calc(0.7 * var(--unit));
   }
   .prompt-editor {
-    padding: 19px 16px 10px;
+    padding: calc(19 * var(--unit)) var(--space-16) var(--space-10);
   }
   .prompt-editor textarea {
-    font-size: 16px;
+    font-size: var(--space-16);
   }
   .camera-editor {
-    gap: 7px;
+    gap: var(--space-7);
   }
   .camera-editor-mark {
-    gap: 4px;
+    gap: var(--space-4);
   }
   .camera-editor textarea {
-    font-size: 15px;
+    font-size: var(--space-15);
   }
   .prompt-suggestions {
-    padding: 6px 15px 17px;
-    gap: 6px;
+    padding: var(--space-6) var(--space-15) var(--space-17);
+    gap: var(--space-6);
   }
   .prompt-suggestions > span {
     display: none;
   }
   .prompt-suggestions button {
-    font-size: 8px;
-    padding: 5px 6px;
-    gap: 5px;
+    font-size: var(--space-8);
+    padding: var(--space-5) var(--space-6);
+    gap: var(--space-5);
   }
   .composer-toolbar {
     flex-wrap: wrap;
-    padding: 11px 13px;
-    gap: 12px;
+    padding: var(--space-11) var(--space-13);
+    gap: var(--space-12);
   }
   .parameters {
     width: 100%;
-    gap: 16px;
+    gap: var(--space-16);
   }
   .parameter {
-    font-size: 9px;
-    padding: 6px 7px;
+    font-size: var(--space-9);
+    padding: var(--space-6) var(--space-7);
   }
   .generate-group {
     width: 100%;
     justify-content: flex-end;
-    border-top: 1px solid var(--border);
-    padding-top: 11px;
+    border-top: var(--space-1) solid var(--border);
+    padding-top: var(--space-11);
   }
   .generate-button {
-    min-width: 140px;
-    padding: 11px 16px;
+    min-width: calc(140 * var(--unit));
+    padding: var(--space-11) var(--space-16);
   }
   .cost strong {
-    font-size: 12px;
+    font-size: var(--space-12);
   }
   .camera-panel {
     grid-template-columns: 1fr;
-    margin: 0 7px;
+    margin: 0 var(--space-7);
   }
   .camera-choices {
-    padding: 16px 13px 13px;
+    padding: var(--space-16) var(--space-13) var(--space-13);
   }
   .camera-choices .section-eyebrow > span:last-child {
     display: inline;
   }
   .preset-grid {
-    gap: 6px;
-    margin-top: 12px;
+    gap: var(--space-6);
+    margin-top: var(--space-12);
   }
   .preset {
-    min-height: 67px;
-    padding: 8px 1px;
-    gap: 5px;
+    min-height: calc(67 * var(--unit));
+    padding: var(--space-8) var(--space-1);
+    gap: var(--space-5);
   }
   .preset span {
-    font-size: 9px;
+    font-size: var(--space-9);
   }
   .camera-note {
-    font-size: 8px;
-    margin-top: 10px;
+    font-size: var(--space-8);
+    margin-top: var(--space-10);
   }
   .preview-wrap {
     border-left: 0;
-    border-top: 1px solid var(--border);
+    border-top: var(--space-1) solid var(--border);
   }
   .studio-foot {
     align-items: flex-start;
-    padding: 14px 2px;
-    gap: 8px;
+    padding: var(--space-14) var(--space-2);
+    gap: var(--space-8);
   }
   .studio-foot > span {
-    font-size: 6px;
-    gap: 5px;
+    font-size: var(--space-6);
+    gap: var(--space-5);
     line-height: 1.8;
   }
   .text-button {
-    font-size: 9px;
-    gap: 5px;
+    font-size: var(--space-9);
+    gap: var(--space-5);
   }
   .gallery {
-    margin-top: 28px;
+    margin-top: var(--space-28);
   }
   .gallery-heading {
-    margin-bottom: 18px;
+    margin-bottom: var(--space-18);
   }
   .gallery-heading h2 {
-    font-size: 20px;
+    font-size: var(--space-20);
   }
   .gallery-filters button {
-    font-size: 8px;
-    padding: 6px 7px;
+    font-size: var(--space-8);
+    padding: var(--space-6) var(--space-7);
   }
   .gallery-grid {
     grid-template-columns: 1fr;
-    gap: 15px;
+    gap: var(--space-15);
   }
   .clip-media {
     aspect-ratio: 16/9;
   }
   .clip-info h3 {
-    font-size: 13px;
+    font-size: var(--space-13);
   }
   .clip-meta {
-    font-size: 9px;
+    font-size: var(--space-9);
   }
   .gallery-footnote {
-    font-size: 7px;
+    font-size: var(--space-7);
   }
   .upscale-input {
-    gap: 12px;
-    padding: 20px 15px 26px;
+    gap: var(--space-12);
+    padding: var(--space-20) var(--space-15) var(--space-26);
   }
   .source-icon {
-    width: 45px;
-    height: 55px;
+    width: calc(45 * var(--unit));
+    height: calc(55 * var(--unit));
   }
   .source-content label {
-    font-size: 16px;
+    font-size: var(--space-16);
   }
   .source-content > span {
-    font-size: 7px;
+    font-size: var(--space-7);
   }
   .source-content select {
-    font-size: 10px;
+    font-size: var(--space-10);
   }
   .upload-button {
-    padding: 6px;
+    padding: var(--space-6);
   }
   footer {
-    margin: 35px 18px 0;
-    padding-top: 19px;
-    font-size: 8px;
+    margin: calc(35 * var(--unit)) var(--space-18) 0;
+    padding-top: calc(19 * var(--unit));
+    font-size: var(--space-8);
   }
   footer span:first-child {
-    font-size: 10px;
+    font-size: var(--space-10);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -269,5 +269,42 @@
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 50rem) {
+  .camera-preview-column {
+    border-left: 0;
+    border-top: var(--space-1) solid var(--border);
+  }
+  .camera-scene,
+  .preview-fallback {
+    height: calc(230 * var(--unit));
+  }
+  .preview-wrap {
+    border: 0;
+  }
+}
+@media (max-width: 35rem) {
+  .featured-caption {
+    font-size: var(--space-8);
+  }
+  .featured-caption > span:last-child {
+    max-width: 45%;
+    text-align: right;
+  }
+  .prompt-editor textarea {
+    font-size: 1rem;
+  }
+  .preset-row .preset {
+    min-height: calc(72 * var(--unit));
+  }
+  .instrument-trigger,
+  .parameter {
+    min-height: var(--space-36);
+  }
+  .duration-popover {
+    left: 0;
+    right: auto;
   }
 }

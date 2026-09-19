@@ -1,0 +1,142 @@
+import { describe, expect, it } from "vitest";
+import { cameraSections, cameraTerms, emptyCamera } from "../shared/camera";
+import { composePrompt } from "../shared/presets";
+import {
+  composerInput,
+  composerReducer,
+  initialComposer,
+} from "../src/useComposer";
+import { validateInput } from "../server/validation";
+import { jobIdFromUrl, jobUrl } from "../src/job-links";
+import type { Job } from "../shared/types";
+
+describe("section camera contract", () => {
+  it("has a unique catalog with complete user-facing and pose data", () => {
+    expect(new Set(cameraTerms.map((t) => t.id)).size).toBe(24);
+    for (const section of cameraSections)
+      for (const term of section.terms) {
+        expect(
+          term.description && term.example && term.clause && section.anchor,
+        ).toBeTruthy();
+        expect(Object.keys(term.pose).length).toBeGreaterThan(0);
+        expect(term.clause[0]).toMatch(/[A-Z]/);
+      }
+  });
+  it("composes scene, shot size, angle and movement in order", () => {
+    const state = {
+      ...initialComposer,
+      description: "A chair.",
+      camera: {
+        "shot-sizes": "wide",
+        angles: "low-angle",
+        movements: "orbit",
+      } as const,
+    };
+    const valid = validateInput(composerInput(state));
+    expect(composePrompt(valid)).toBe(
+      "A chair.\n\nWide shot with space around the subject.\n\nLow angle looking up at the subject.\n\nSlow orbit around the subject.",
+    );
+    expect(composePrompt({ ...valid, camera: emptyCamera })).toBe("A chair.");
+    expect(composePrompt({ ...valid, cameraEnabled: false })).toBe("A chair.");
+    expect(composePrompt({ ...valid, generator: "upscale" })).toBe("");
+  });
+  it("rejects mixed sections, extra sections, missing sections and malformed edits", () => {
+    const input = composerInput(initialComposer);
+    for (const camera of [
+      null,
+      [],
+      {},
+      { ...emptyCamera, angles: "orbit" },
+      { ...emptyCamera, movements: ["orbit", "pan"] },
+      { ...emptyCamera, lenses: "macro" },
+    ])
+      expect(() => validateInput({ ...input, camera })).toThrow();
+    for (const cameraEdits of [
+      null,
+      [],
+      { orbit: "x".repeat(601) },
+      { orbit: 1 },
+      { pan: "Not selected" },
+    ])
+      expect(() => validateInput({ ...input, cameraEdits })).toThrow();
+  });
+  it("retains per-term edits while submitting only the selected terms", () => {
+    let state = composerReducer(initialComposer, {
+      type: "edit-camera",
+      id: "orbit",
+      text: "Custom orbit.",
+    });
+    state = composerReducer(state, {
+      type: "update",
+      patch: { camera: { ...emptyCamera, movements: "pan" } },
+    });
+    expect(composePrompt(composerInput(state))).not.toContain("Custom orbit.");
+    expect(composerInput(state).cameraEdits).not.toHaveProperty("orbit");
+    state = composerReducer(state, {
+      type: "update",
+      patch: { camera: initialComposer.camera },
+    });
+    expect(composePrompt(composerInput(state))).toContain("Custom orbit.");
+    state = composerReducer(state, {
+      type: "edit-camera",
+      id: "orbit",
+      text: "",
+    });
+    expect(composePrompt(validateInput(composerInput(state)))).toBe(
+      state.description,
+    );
+  });
+  it("restores a saved default clause instead of an unrelated current edit", () => {
+    const state = {
+      ...initialComposer,
+      cameraEdits: { orbit: "Unrelated edit." },
+    };
+    const restored = composerReducer(state, {
+      type: "restore",
+      job: { ...composerInput(initialComposer), cameraEdits: {} } as Job,
+    });
+    expect(composePrompt(composerInput(restored))).toContain(
+      "Slow orbit around the subject.",
+    );
+    expect(composePrompt(composerInput(restored))).not.toContain(
+      "Unrelated edit.",
+    );
+  });
+  it("restores settings and empty historical edits without leaking the old source", () => {
+    const restored = composerReducer(
+      { ...initialComposer, sourceId: "stale" },
+      {
+        type: "restore",
+        job: {
+          ...composerInput(initialComposer),
+          camera: undefined,
+          cameraEdits: undefined,
+          presetId: "low",
+          cameraText: "",
+          resolution: "fhd",
+          draft: true,
+        } as Job,
+      },
+    );
+    expect(restored.camera.angles).toBe("low-angle");
+    expect(restored.sourceId).toBe("");
+    expect(restored.resolution).toBe("fhd");
+    expect(composerInput(restored).resolution).toBe("hd");
+    expect(composePrompt(composerInput(restored))).toBe(restored.description);
+    expect(
+      composerReducer(restored, { type: "update", patch: { draft: false } })
+        .resolution,
+    ).toBe("fhd");
+  });
+});
+
+describe("job links", () => {
+  it("reads safe IDs and preserves other URL state when selecting a job", () => {
+    expect(jobIdFromUrl("http://localhost/?job=abc-123")).toBe("abc-123");
+    expect(jobIdFromUrl("http://localhost/?job=../../private")).toBeNull();
+    expect(jobIdFromUrl("http://localhost/")).toBeNull();
+    expect(jobUrl("http://localhost/studio?theme=dark#video", "abc-123")).toBe(
+      "/studio?theme=dark&job=abc-123#video",
+    );
+  });
+});

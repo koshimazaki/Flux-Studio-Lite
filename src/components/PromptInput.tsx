@@ -1,3 +1,10 @@
+import {
+  cameraClauses,
+  type CameraSelection,
+  type CameraEdits,
+  type CameraTermId,
+} from "../../shared/camera";
+import type { CSSProperties } from "react";
 import { useLayoutEffect, useRef } from "react";
 import Icon from "./Icon";
 
@@ -19,14 +26,16 @@ export default function PromptInput({
   description,
   onChange,
   cameraEnabled,
-  cameraText,
+  camera,
+  cameraEdits,
   onCameraChange,
 }: {
   description: string;
   onChange: (description: string) => void;
   cameraEnabled: boolean;
-  cameraText: string;
-  onCameraChange: (text: string) => void;
+  camera: CameraSelection;
+  cameraEdits: CameraEdits;
+  onCameraChange: (id: CameraTermId, text: string) => void;
 }) {
   return (
     <>
@@ -39,22 +48,29 @@ export default function PromptInput({
           maxLength={1200}
           placeholder="Describe a scene…"
         />
-        {cameraEnabled && (
-          <div className="camera-editor">
-            <span className="camera-editor-mark" aria-hidden="true">
-              <Icon name="turn" size={16} />
-              <Icon name="camera" size={18} />
-            </span>
-            <PromptField
-              id="camera-prompt"
-              label="Camera prompt"
-              value={cameraText}
-              onChange={onCameraChange}
-              maxLength={600}
-              placeholder="Add camera direction…"
-            />
-          </div>
-        )}
+        {cameraEnabled &&
+          cameraClauses(camera, cameraEdits).map(({ section, term, text }) => (
+            <div
+              key={term.id}
+              className="camera-editor"
+              style={
+                { "--section-color": `var(${section.color})` } as CSSProperties
+              }
+            >
+              <span className="camera-editor-mark" aria-hidden="true">
+                <Icon name="turn" size={16} />
+                <Icon name="camera" size={18} />
+              </span>
+              <PromptField
+                id={`camera-${section.id}`}
+                label={`${section.label} prompt`}
+                value={text}
+                onChange={(value) => onCameraChange(term.id, value)}
+                maxLength={600}
+                placeholder="Add camera direction…"
+              />
+            </div>
+          ))}
       </div>
       <div className="prompt-suggestions">
         <span>Try a scene</span>

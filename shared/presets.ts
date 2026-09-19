@@ -1,83 +1,32 @@
-import type { GenerateInput, PresetId, Source, VideoResolution } from "./types";
-
-export interface Preset {
-  id: PresetId;
-  label: string;
-  shortLabel: string;
-  clause: string;
-  wording: "documented" | "variant";
-}
-export const CAMERA_GUIDE_URL =
-  "https://docs.bfl.ai/guides/prompting_video_camera_terms";
-
-export const presets: Preset[] = [
-  {
-    id: "orbit_l",
-    wording: "variant",
-    label: "Orbit left",
-    shortLabel: "Orbit left",
-    clause: "slow orbit around the subject, moving left.",
-  },
-  {
-    id: "orbit_r",
-    wording: "variant",
-    label: "Orbit right",
-    shortLabel: "Orbit right",
-    clause: "slow orbit around the subject, moving right.",
-  },
-  {
-    id: "orbit_360",
-    wording: "variant",
-    label: "Full orbit",
-    shortLabel: "Full orbit",
-    clause: "slow orbit around the subject, completing a full circle.",
-  },
-  {
-    id: "dolly_in",
-    wording: "documented",
-    label: "Dolly in",
-    shortLabel: "Dolly in",
-    clause: "dolly in toward the subject.",
-  },
-  {
-    id: "dolly_out",
-    wording: "variant",
-    label: "Dolly out",
-    shortLabel: "Dolly out",
-    clause: "Dolly out from the subject.",
-  },
-  {
-    id: "crane_up",
-    wording: "documented",
-    label: "Crane up",
-    shortLabel: "Crane up",
-    clause: "Crane boom shot rising above the subject.",
-  },
-  {
-    id: "low",
-    wording: "documented",
-    label: "Low angle",
-    shortLabel: "Low angle",
-    clause: "low angle on the subject.",
-  },
-  {
-    id: "top",
-    wording: "documented",
-    label: "Top-down",
-    shortLabel: "Top-down",
-    clause: "Bird's eye top-down view of the subject.",
-  },
-];
+import { cameraClauses } from "./camera";
+import { presets } from "./legacy-camera";
+export { presets } from "./legacy-camera";
+import type { GenerateInput, Source, VideoResolution } from "./types";
 
 export function composePrompt(
   input: Pick<
     GenerateInput,
-    "generator" | "description" | "cameraEnabled" | "presetId" | "cameraText"
+    | "generator"
+    | "description"
+    | "cameraEnabled"
+    | "presetId"
+    | "cameraText"
+    | "camera"
+    | "cameraEdits"
   >,
 ): string {
   const description = input.description.trim();
   if (input.generator === "upscale") return "";
   if (!input.cameraEnabled) return description;
+  if (input.camera)
+    return [
+      description,
+      ...cameraClauses(input.camera, input.cameraEdits).map(({ text }) =>
+        text.trim(),
+      ),
+    ]
+      .filter(Boolean)
+      .join("\n\n");
   const preset = presets.find((item) => item.id === input.presetId);
   const cameraText =
     input.cameraText === undefined ? preset?.clause : input.cameraText;

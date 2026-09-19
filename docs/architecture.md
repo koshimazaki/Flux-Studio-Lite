@@ -12,7 +12,7 @@ React composer → same-origin local API → BFL submit / poll
 
 The live contracts are native `fetch` calls to `/v1/flux-3-video` and `/v1/flux-tools/video-upscale-v1`. Return `cost` values are credits, converted to USD by dividing by 100. Estimates and confirmed charges have separate fields. BFL's optional progress is not replaced with a fabricated percentage.
 
-The prompt is a single visual editing surface with a scene textarea and an accent-coloured camera textarea. Keeping the fields separate preserves colouring, native editing, paste and selection without a rich-text dependency. Per-preset edits stay in React state; disabling the camera omits only that field. `composePrompt` uses the exact edited camera text, including an intentionally empty value, identically in preview and submission. The diagram still illustrates the named preset; it does not parse custom text.
+The prompt is a single visual editing surface with a scene textarea and up to three section-coloured camera textareas. Keeping the fields separate preserves colouring, native editing, paste and selection without a rich-text dependency. Per-term edits stay in a small React reducer; disabling the camera omits only that field. `composePrompt` uses the ordered edited camera text, including an intentionally empty value, identically in preview and submission. The diagram still illustrates the named combination; it does not parse custom text.
 
 Upscale accepts a finite factor from 1.5 to 3 and `upscaleCreativity` of 0 (Precise) or 1 (Creative). The provider receives both settings. Precise costs $0.07 per output MP-second; Creative costs $0.10. Shared estimates cap output at 13.75 MP and preserve aspect ratio; displayed dimensions are approximate because the provider controls final rounding. The server reserves the selected mode's cost using inspected source metadata. Earlier requests without the mode default to Precise; retry restores both controls.
 
@@ -32,11 +32,15 @@ The server sweeps its own-key jobs every five seconds, even after the browser cl
 
 ## Deliberate library choices
 
-- **React local state:** one screen does not need a global store. Job polling lives in one hook, shared business rules outside React.
+- **React reducer:** composer settings, per-term edits and retry restoration live in `useComposer`; one screen does not need a global store. Job polling lives in one hook, shared business rules outside React.
 - **Raw Three.js:** one isolated, finite procedural scene. No controls, assets, rigging, shadows or React renderer dependency. Geometry/materials, animation and listeners are disposed. R3F would become useful as the scene grows.
 - **CSS / native animation:** short panel transitions and a 1.6-second camera path do not need Anime.js. The decorative canvas uses 30 fps, pauses offscreen/hidden and respects reduced motion.
 - **Plain CSS:** token groups plus small component styles, no utility framework or component kit. Vite splits Three into a lazy chunk. Fonts have no runtime third-party requests.
 - **Express locally:** readable same-origin endpoints, secure ownership boundary, established byte-range responses. Node and ffprobe are local adapters, not Cloudflare-compatible code.
+
+`shared/camera.ts` defines the section order, term IDs, clauses and pose parameters. Validation checks section membership and bounded edits; glyphs and the Three preview read the same data. Old job IDs have a separate compatibility adapter. Finished states come from one shared predicate. The selected job URL is read on load and remains protected by the existing session boundary.
+
+`tokens.css` owns colours, spacing, radii, animation timing and scene materials. The composer uses a 90% unit scale while mobile textareas remain at least 1rem; CSS zoom is not used. `FeaturedVideo` owns the selected job's waiting/reveal/video state, so the gallery avoids creating a second player for it.
 
 ## Cloudflare phase — planned, not implemented
 
@@ -51,6 +55,10 @@ The server sweeps its own-key jobs every five seconds, even after the browser cl
 | Loopback origin check          | Exact deployment origin, HTTPS, CSP and rate limiting           |
 
 A durable runner is a conscious revision to the old poll-on-read plan: relying on an open tab cannot guarantee retrieval of expiring output URLs. A short `waitUntil` is not an unbounded job worker. BYO still requires an explicit foreground-resume contract unless its custody model changes.
+
+The upscale API accepts an HTTPS URL as well as base64. In the cloud adapter, upload/stream to owned R2 storage and pass a short-lived provider-readable HTTPS URL in `input_video`; do not relay a 50 MB base64 payload through a Worker. Retain source ownership checks and constrain the generated URL to the configured storage origin. A local loopback URL cannot be fetched by BFL, so the current Node adapter still sends local bytes.
+
+Workers cannot execute ffprobe. The cloud adapter must obtain trusted dimensions/duration from supported metadata or a bounded inspection service before reserving upscale spend. Browser-supplied metadata alone is not a safe billing authority. R2 egress is free; storage and operations are separate charges.
 
 Before publishing: atomic spend reservations, deployment secrets, cached demo fingerprints, stored-media authorisation, retryable copy leases, output size limits, Range/HEAD/conditional requests, real mobile playback, build and secret/history audits. Generate no additional paid findings batch implicitly.
 

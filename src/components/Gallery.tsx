@@ -1,24 +1,22 @@
+import { isTerminal } from "../../shared/types";
 import { useEffect, useRef, useState } from "react";
 import type { Job, Source } from "../../shared/types";
 import Icon from "./Icon";
 import JobMedia, { statusLabel } from "./JobMedia";
-const closed = new Set([
-  "Ready",
-  "Error",
-  "expired",
-  "Request Moderated",
-  "Content Moderated",
-]);
 export default function Gallery({
   jobs,
   sources,
   onUpscale,
   onRetry,
+  onSelect,
+  selectedJobId,
 }: {
   jobs: Job[];
   sources: Source[];
   onUpscale: (id: string) => void;
   onRetry: (job: Job) => void;
+  onSelect: (id: string) => void;
+  selectedJobId?: string;
 }) {
   const [filter, setFilter] = useState<"all" | "session">("all");
   const generated = new Set(jobs.map((j) => j.resultUrl).filter(Boolean));
@@ -58,13 +56,32 @@ export default function Gallery({
         {jobs.map((job) => (
           <article className="clip-card" key={job.id}>
             <div className="clip-media">
-              <JobMedia job={job} />
+              {job.id === selectedJobId ? (
+                <div className="job-message">
+                  <span className="section-eyebrow">SHOWING ABOVE</span>
+                  <button
+                    className="text-button"
+                    onClick={() => onSelect(job.id)}
+                  >
+                    View main video <Icon name="arrow" size={12} />
+                  </button>
+                </div>
+              ) : (
+                <JobMedia job={job} />
+              )}
               <span className="clip-badge">
                 {job.generator === "upscale" ? "UPSCALED" : "FLUX 3"}
               </span>
             </div>
             <div className="clip-info">
-              <h3>{job.description || "Untitled study"}</h3>
+              <h3>
+                <button
+                  className="clip-title-button"
+                  onClick={() => onSelect(job.id)}
+                >
+                  {job.description || "Untitled study"}
+                </button>
+              </h3>
               <div className="clip-meta">
                 <span>
                   {job.status === "Ready" ? "Ready" : statusLabel(job.status)} ·
@@ -83,7 +100,7 @@ export default function Gallery({
                   >
                     Upscale <Icon name="expand" size={12} />
                   </button>
-                ) : closed.has(job.status) && job.status !== "Ready" ? (
+                ) : isTerminal(job.status) && job.status !== "Ready" ? (
                   <button onClick={() => onRetry(job)}>
                     Try again <Icon name="refresh" size={12} />
                   </button>
@@ -136,7 +153,7 @@ export default function Gallery({
     </section>
   );
 }
-function Clip({
+export function Clip({
   url,
   poster,
   label,

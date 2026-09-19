@@ -1,3 +1,5 @@
+import { isTerminal } from "../shared/types";
+import { jobIdFromUrl, jobUrl } from "./job-links";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Job, Source, GenerateInput } from "../shared/types";
 export async function request<T>(
@@ -12,32 +14,44 @@ export async function request<T>(
     );
   return data;
 }
-const terminal = new Set([
-  "Ready",
-  "Error",
-  "expired",
-  "Request Moderated",
-  "Content Moderated",
-]);
 export function useJobs(key: string) {
   const [jobs, setJobs] = useState<Job[]>([]),
     [sources, setSources] = useState<Source[]>([]),
     [error, setError] = useState("");
+  const [selectedId, setSelectedId] = useState(() =>
+    jobIdFromUrl(location.href),
+  );
+  const selectedRef = useRef(selectedId);
+  selectedRef.current = selectedId;
+  const keyRef = useRef(key);
+  keyRef.current = key;
   const needsKey =
     !key &&
-    jobs.some((job) => job.keyMode === "byo" && !terminal.has(job.status));
+    jobs.some((job) => job.keyMode === "byo" && !isTerminal(job.status));
   const jobsRef = useRef(jobs);
   jobsRef.current = jobs;
   const refresh = useCallback(async () => {
     const data = await request<{ jobs: Job[]; sources: Source[] }>(
       "/api/history",
     );
+    const linkedId = selectedRef.current;
+    if (linkedId && !data.jobs.some((job) => job.id === linkedId)) {
+      try {
+        const linked = await request<{ job: Job }>(
+          `/api/jobs/${encodeURIComponent(linkedId)}`,
+          { headers: keyRef.current ? { "x-byo-key": keyRef.current } : {} },
+        );
+        data.jobs.push(linked.job);
+      } catch {
+        setError(
+          "That job is unavailable in this browser session. Showing your latest clip.",
+        );
+        setSelectedId(null);
+      }
+    }
     setJobs(data.jobs);
     setSources(data.sources);
   }, []);
-  useEffect(() => {
-    refresh().catch((e) => setError(e.message));
-  }, [refresh]);
   useEffect(() => {
     let cancelled = false,
       inFlight = false,
@@ -48,7 +62,7 @@ export function useJobs(key: string) {
       inFlight = true;
       if (!document.hidden) {
         for (const job of jobsRef.current.filter(
-          (j) => !terminal.has(j.status),
+          (j) => !isTerminal(j.status),
         )) {
           try {
             const result = await request<{ job: Job; needsKey?: boolean }>(
@@ -89,6 +103,26 @@ export function useJobs(key: string) {
       document.removeEventListener("visibilitychange", visibility);
     };
   }, [key, refresh]);
+  useEffect(() => {
+    const navigate = () => {
+      setSelectedId(jobIdFromUrl(location.href));
+    };
+    window.addEventListener("popstate", navigate);
+    return () => window.removeEventListener("popstate", navigate);
+  }, []);
+  useEffect(() => {
+    void refresh().catch((e) => setError(e.message));
+  }, [selectedId, refresh]);
+  function selectJob(id: string) {
+    setSelectedId(id);
+    history.replaceState(null, "", jobUrl(location.href, id));
+    document.getElementById("main-video")?.scrollIntoView({
+      block: "start",
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
+    });
+  }
   async function generate(input: GenerateInput) {
     setError("");
     const { job } = await request<{ job: Job }>("/api/jobs", {
@@ -101,8 +135,18 @@ export function useJobs(key: string) {
       body: JSON.stringify(input),
     });
     setJobs((current) => [job, ...current.filter((j) => j.id !== job.id)]);
-    history.replaceState(null, "", `?job=${encodeURIComponent(job.id)}`);
+    selectJob(job.id);
     return job;
   }
-  return { jobs, sources, error, setError, needsKey, refresh, generate };
+  return {
+    jobs,
+    sources,
+    error,
+    setError,
+    needsKey,
+    refresh,
+    generate,
+    selectJob,
+    featuredJob: jobs.find((job) => job.id === selectedId) ?? jobs[0],
+  };
 }

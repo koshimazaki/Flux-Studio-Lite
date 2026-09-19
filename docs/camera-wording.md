@@ -1,21 +1,11 @@
-# Camera wording and UI references
+# Camera wording and examples
 
-The [BFL camera prompting guide](https://docs.bfl.ai/guides/prompting_video_camera_terms) publishes example prompt strings alongside video URLs. These are available examples, not complete API request records or a reliability benchmark. Checked 19 September 2026.
+The [BFL camera guide](https://docs.bfl.ai/guides/prompting_video_camera_terms) is the terminology source. The studio exposes three of its fourteen sections: **Shot sizes**, **Angles**, and **Movements**, with eight terms per section. Each heading links to the matching guide section. Checked 19 September 2026.
 
-The demo reuses the short camera terms in the guide, then attaches them to the user's subject. It does not transplant the example's entire scene into a different scene description.
+`shared/camera.ts` is the current registry: labels, descriptions, prompt clauses, studio-authored examples and pose parameters. Every section has an optional None choice. The prompt contains the scene followed by shot size, angle and movement. Edits belong to individual terms; switching away and back restores them. Empty edits remain empty. Default clauses use sentence case.
 
-| Preset             | Relationship to the guide                                                                                                                 |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Orbit left / right | Uses the published generic orbit wording; direction is our editable addition.                                                             |
-| Full orbit         | Uses the same generic term; completing a revolution is our editable addition. The guide's lens-axis roll example is a different movement. |
-| Dolly in           | Uses the documented movement term.                                                                                                        |
-| Dolly out          | Our reverse-direction variant; no exact published match was found.                                                                        |
-| Crane up           | Uses the guide's rising-crane phrase.                                                                                                     |
-| Low angle          | Uses the documented angle phrase.                                                                                                         |
-| Top-down           | Uses the documented overhead-view phrase.                                                                                                 |
+The inline examples are written for this studio and labelled accordingly. BFL's own examples are linked, not copied wholesale, and BFL-hosted videos are not embedded. All playable media loads from this app's origin. No reliability claim follows from a term appearing in the guide.
 
-The selected preset identifies its wording as documented or a direction variant. Everything in the camera text field is editable and sent as shown. The 3D scene previews the named preset, not the meaning of rewritten text. The text-to-video guide and related overview/reference pages were also checked; unlisted exact prompts were not inferred from videos.
+The diagram composes distance/target, elevation/azimuth/roll, and movement. Lazy Susan turns the subject with a stationary camera. Pan and tilt change aim without translation; trucking changes camera position. Extreme low angles stop above the ground. These are illustrative poses, not measured lens models or a prediction of generated footage. Editing prose does not change the illustration.
 
-## Interface system
-
-The interface uses compact instrument controls: graphite surfaces, ruled native-range inputs, small machined borders and restrained colour signals. Blackstone/Lime keeps one accent family across controls and readouts. Cyberpunk uses coral controls with cyan readouts. Layout, application state, menu keyboard handling and the range treatment are implemented in this repository.
+`shared/legacy-camera.ts` is a compatibility table for the initial eight IDs. It is not a second active picker. Saved prompts retain their exact historical clause; retry maps the choice to the closest current term and carries the old wording into an edit. Old directional/reverse variants may therefore differ from the current diagram.

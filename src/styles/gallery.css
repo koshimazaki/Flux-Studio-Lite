@@ -1,77 +1,77 @@
 .upscale-input {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 25px 25px 33px;
-  min-height: 143px;
+  gap: var(--space-20);
+  padding: var(--space-25) var(--space-25) calc(33 * var(--unit));
+  min-height: calc(143 * var(--unit));
 }
 .source-icon {
-  width: 65px;
-  height: 65px;
+  width: calc(65 * var(--unit));
+  height: calc(65 * var(--unit));
   display: grid;
   place-items: center;
-  border: 1px dashed var(--border-strong);
-  border-radius: 8px;
+  border: var(--space-1) dashed var(--border-strong);
+  border-radius: var(--radius-panel);
   color: var(--accent);
-  background: #ffffff03;
+  background: var(--surface-wash);
 }
 .source-content {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: var(--space-9);
 }
 .source-content > span {
   font-family: var(--mono);
-  font-size: 8px;
+  font-size: var(--space-8);
   color: var(--muted);
 }
 .upload-button {
-  border: 1px solid var(--border-strong);
+  border: var(--space-1) solid var(--border-strong);
 }
 .gallery {
-  margin: 45px auto 0;
-  max-width: 1060px;
+  margin: calc(45 * var(--unit)) auto 0;
+  max-width: 66.25rem;
 }
 .gallery-heading {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: var(--space-24);
 }
 .gallery-heading .section-eyebrow {
-  font-size: 8px;
-  letter-spacing: 1.2px;
+  font-size: var(--space-8);
+  letter-spacing: calc(1.2 * var(--unit));
 }
 .gallery-heading h2 {
   display: flex;
-  gap: 11px;
-  font-size: 22px;
+  gap: var(--space-11);
+  font-size: var(--space-22);
   font-weight: 450;
-  letter-spacing: -0.6px;
-  margin: 9px 0 0;
+  letter-spacing: calc(-0.6 * var(--unit));
+  margin: var(--space-9) 0 0;
 }
 .gallery-heading h2 span {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--space-10);
   color: var(--muted);
   letter-spacing: 0;
-  padding-top: 3px;
+  padding-top: var(--space-3);
 }
 .gallery-filters {
   display: flex;
-  gap: 3px;
-  padding: 3px;
+  gap: var(--space-3);
+  padding: var(--space-3);
   background: var(--sunken);
-  border: 1px solid var(--border);
-  border-radius: 5px;
+  border: var(--space-1) solid var(--border);
+  border-radius: var(--radius-md);
 }
 .gallery-filters button {
-  font-size: 10px;
+  font-size: var(--space-10);
   color: var(--soft);
-  padding: 6px 11px;
-  border-radius: 3px;
+  padding: var(--space-6) var(--space-11);
+  border-radius: var(--radius-sm);
 }
 .gallery-filters button.active {
   color: var(--text);
@@ -80,18 +80,18 @@
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  gap: var(--space-20);
 }
 .clip-card {
   min-width: 0;
-  animation: panel-enter 0.3s ease-out;
+  animation: panel-enter var(--motion-reveal) ease-out;
 }
 .clip-media {
   position: relative;
   aspect-ratio: 16/10;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 7px;
+  border: var(--space-1) solid var(--border);
+  border-radius: var(--radius-panel);
   overflow: hidden;
 }
 .clip-media video {
@@ -103,15 +103,15 @@
 }
 .clip-badge {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  background: #101316ed;
-  border: 1px solid #d2e2bf22;
-  border-radius: 3px;
-  padding: 4px 6px;
+  top: var(--space-12);
+  left: var(--space-12);
+  background: var(--badge-bg);
+  border: var(--space-1) solid var(--badge-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4) var(--space-6);
   font-family: var(--mono);
-  font-size: 7px;
-  letter-spacing: 0.8px;
+  font-size: var(--space-7);
+  letter-spacing: calc(0.8 * var(--unit));
   color: var(--text);
   pointer-events: none;
 }
@@ -120,36 +120,36 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  border: 1px solid #eff4e36b;
-  background: #171a1ed9;
-  border-radius: 50%;
-  height: 44px;
-  width: 44px;
+  border: var(--space-1) solid var(--play-border);
+  background: var(--play-bg);
+  border-radius: var(--radius-round);
+  height: calc(44 * var(--unit));
+  width: calc(44 * var(--unit));
   display: grid;
   place-items: center;
   color: var(--text);
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(var(--space-5));
   opacity: 0.8;
   transition:
-    background 0.2s,
-    opacity 0.2s;
+    background var(--motion-enter),
+    opacity var(--motion-enter);
 }
 .clip-play:hover {
   background: var(--raised);
   opacity: 1;
 }
 .clip-play svg {
-  margin-left: 2px;
+  margin-left: var(--space-2);
 }
 .clip-info {
-  padding: 13px 1px;
+  padding: var(--space-13) var(--space-1);
 }
 .clip-info h3 {
-  font-size: 12px;
+  font-size: var(--space-12);
   line-height: 1.5;
-  letter-spacing: -0.1px;
+  letter-spacing: calc(-0.1 * var(--unit));
   font-weight: 450;
-  margin: 0 0 7px;
+  margin: 0 0 var(--space-7);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -157,32 +157,32 @@
 }
 .clip-meta {
   display: flex;
-  gap: 6px;
+  gap: var(--space-6);
   align-items: center;
   justify-content: space-between;
   font-family: var(--mono);
-  font-size: 8px;
+  font-size: var(--space-8);
   color: var(--muted);
 }
 .clip-meta button {
   display: flex;
-  gap: 5px;
+  gap: var(--space-5);
   align-items: center;
-  font-size: 9px;
+  font-size: var(--space-9);
   color: var(--accent);
-  padding: 3px 0;
+  padding: var(--space-3) 0;
 }
 .gallery-footnote {
   font-family: var(--mono);
   color: var(--muted);
-  font-size: 8px;
+  font-size: var(--space-8);
   line-height: 1.7;
-  margin: 10px 0 0;
+  margin: var(--space-10) 0 0;
 }
 .gallery-empty {
-  min-height: 175px;
-  border: 1px dashed var(--border);
-  border-radius: 8px;
+  min-height: calc(175 * var(--unit));
+  border: var(--space-1) dashed var(--border);
+  border-radius: var(--radius-panel);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -191,15 +191,15 @@
   background: var(--sunken);
 }
 .gallery-empty h3 {
-  font-size: 14px;
+  font-size: var(--space-14);
   color: var(--accent);
   font-weight: 400;
-  margin: 15px 0 0;
+  margin: var(--space-15) 0 0;
 }
 .gallery-empty p {
-  font-size: 11px;
+  font-size: var(--space-11);
   color: var(--muted);
-  margin: 8px 0;
+  margin: var(--space-8) 0;
 }
 .job-placeholder {
   height: 100%;
@@ -211,37 +211,81 @@
   inset: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-8);
   align-items: center;
   justify-content: center;
-  background: #10131699;
-  padding: 28px;
+  background: var(--status-bg);
+  padding: var(--space-28);
   text-align: center;
 }
 .job-message strong {
-  font-size: 13px;
+  font-size: var(--space-13);
   font-weight: 400;
 }
 .job-message p {
-  font-size: 10px;
+  font-size: var(--space-10);
   color: var(--soft);
   line-height: 1.5;
   margin: 0;
 }
 .status-dot {
-  height: 5px;
-  width: 5px;
+  height: var(--space-5);
+  width: var(--space-5);
   background: var(--accent);
-  border-radius: 50%;
-  margin: 5px;
+  border-radius: var(--radius-round);
+  margin: var(--space-5);
 }
 .pulse {
-  animation: pulse 2s ease-in-out infinite;
+  animation: pulse var(--motion-pulse) ease-in-out infinite;
 }
 .elapsed {
   font-family: var(--mono);
-  font-size: 8px;
+  font-size: var(--space-8);
   line-height: 1.7;
   color: var(--muted);
-  margin-top: 5px;
+  margin-top: var(--space-5);
+}
+
+.featured-video {
+  max-width: 52.875rem;
+  margin: 0 auto var(--space-22);
+  scroll-margin-top: var(--space-24);
+}
+.featured-media {
+  width: 100%;
+  position: relative;
+  aspect-ratio: 16 / 9;
+  max-height: calc(380 * var(--unit));
+  border: var(--space-1) solid var(--border-strong);
+  border-radius: var(--radius-panel);
+  background: var(--sunken);
+  overflow: hidden;
+}
+.featured-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.featured-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  padding-top: var(--space-10);
+  font: var(--space-9) var(--mono);
+  color: var(--muted);
+}
+.featured-caption > span:first-child {
+  color: var(--soft);
+}
+.clip-title-button {
+  padding: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+.clip-title-button:hover {
+  color: var(--accent);
 }

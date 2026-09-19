@@ -1,16 +1,10 @@
+import type { CameraSelection, CameraEdits } from "./camera";
+import type { PresetId } from "./legacy-camera";
 export type Generator = "video" | "upscale";
 export type AspectRatio =
   "21:9" | "2:1" | "16:9" | "4:3" | "1:1" | "3:4" | "9:16";
 export type VideoResolution = "hd" | "fhd" | "qhd" | "uhd";
-export type PresetId =
-  | "orbit_l"
-  | "orbit_r"
-  | "orbit_360"
-  | "dolly_in"
-  | "dolly_out"
-  | "crane_up"
-  | "low"
-  | "top";
+export type { PresetId } from "./legacy-camera";
 export type JobStatus =
   | "submitting"
   | "Pending"
@@ -26,7 +20,10 @@ export type JobStatus =
 export interface GenerateInput {
   generator: Generator;
   description: string;
-  presetId: PresetId;
+  /** Legacy job compatibility. New requests use camera. */
+  presetId?: PresetId;
+  camera?: CameraSelection;
+  cameraEdits?: CameraEdits;
   cameraEnabled: boolean;
   cameraText?: string;
   duration: number;

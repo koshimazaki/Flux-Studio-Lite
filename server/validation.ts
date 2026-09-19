@@ -1,3 +1,4 @@
+import { validateCamera } from "./validate-camera";
 import { presets } from "../shared/presets";
 import type {
   AspectRatio,
@@ -32,7 +33,11 @@ export function validateInput(value: unknown): GenerateInput {
     (typeof body.cameraText !== "string" || body.cameraText.length > 600)
   )
     throw new AppError(400, "Keep camera text under 600 characters.");
-  if (!presets.some((item) => item.id === body.presetId))
+  const camera =
+    body.camera === undefined
+      ? undefined
+      : validateCamera(body.camera, body.cameraEdits);
+  if (!camera && !presets.some((item) => item.id === body.presetId))
     throw new AppError(400, "Choose a supported camera view.");
   if (
     typeof body.cameraEnabled !== "boolean" ||
@@ -83,9 +88,11 @@ export function validateInput(value: unknown): GenerateInput {
   return {
     generator: body.generator,
     description: body.description.trim(),
-    presetId: body.presetId as GenerateInput["presetId"],
+    ...(camera ?? {
+      presetId: body.presetId as GenerateInput["presetId"],
+      cameraText: body.cameraText as string | undefined,
+    }),
     cameraEnabled: body.generator === "video" && body.cameraEnabled,
-    cameraText: body.cameraText as string | undefined,
     duration: body.duration,
     resolution: draft ? "hd" : (body.resolution as VideoResolution),
     aspectRatio: aspectRatio as AspectRatio,

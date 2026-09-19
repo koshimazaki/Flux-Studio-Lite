@@ -38,7 +38,11 @@ export default function Icon({
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      style={style}
+      style={{
+        width: `calc(${size} * var(--unit))`,
+        height: `calc(${size} * var(--unit))`,
+        ...style,
+      }}
     >
       <path d={paths[name] || paths.camera} />
     </svg>

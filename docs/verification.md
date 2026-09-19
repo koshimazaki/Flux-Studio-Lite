@@ -1,6 +1,6 @@
 # Verification — 19 September 2026
 
-## Passed
+## Initial build (before this review pass)
 
 - Production TypeScript/Vite build.
 - 24 tests across camera paths, domain validation/pricing, local jobs and media delivery.
@@ -48,7 +48,20 @@
 - The two live calls used the local server connection and a test session. The visible browser has its own anonymous history; their MP4s remain under `.local/media/`.
 - No Cloudflare deployment, load test, Safari/iOS device test or independent stranger test yet.
 - No scored camera findings, exact-input generation cache or free-camera picker.
-- Browser screenshots were inspected in the task; portable screenshot files still need to be captured for a complete visual evidence pack.
+- Initial-pass screenshots were only inspected in the task. This review pass adds local desktop and portrait capture files; see the current-pass notes below.
 - The operator's first four interaction refinements are applied. Aesthetic approval is pending.
 
 Build output is approximately 82 KB gzip for the app and 123 KB gzip for the lazy Three.js scene. Three reference clips total about 3.3 MB; posters load first and video playback begins on a user gesture.
+
+## Local review pass — 19 September 2026
+
+- 32 automated tests pass, with a clean TypeScript/Vite production build and formatting check. Baseline was 24 tests. `App.tsx` is 369 lines; all source modules remain below 500 lines.
+- New geometry coverage checks all 729 combinations (including None) at five points: finite poses, no ground penetration, full orbit closure, pan/tilt versus trucking, and stationary-camera subject rotation. These are illustration tests, not model-following measurements.
+- New domain/API coverage verifies section membership, malformed/oversized edits, ordered composition, empty edits, old-job restoration, retained draft resolution, persisted/forwarded camera selections and canonical idempotency with reordered input keys. Session ownership remains enforced.
+- Browser checks: all three selections appear as separate colours in the prompt; edited movement text survives switching; None removes that section; Camera off removes camera phrases and canvas; themes update the 3D camera; Upscale hides camera controls. Creative 3× for the library source shows 2880 × 1584 and $4.37. Draft locks to HD then restores Full HD.
+- Browser generation check used an isolated mock provider with a real bundled MP4 and the real job API. Observed queued/waiting field, Ready, decoded video (`readyState=4`, width 960), overlay removed, one main job player, successful job-link reload, and a clear fallback for an unavailable job. No paid call was made. A first fixture used relative file paths, causing playback failure; the fixture was corrected to match production's absolute paths, then the flow passed.
+- Wide layout measured 1045 CSS pixels of content with no page overflow; composer and main video both measured approximately 846px. Prompt text measured 16.2px, exactly 90% of the previous 18px. Narrow layout measured 500 CSS pixels with no page overflow; textareas retained 16px and the three tile rows scrolled independently. The browser viewport override did not hold the requested 390px, so this pass makes no new 390px-device claim.
+- Portable local evidence is kept outside Git in `.dr-morph-review/desktop-main.png`, `desktop-camera.png` and `portrait-camera.png`. The desktop result uses a mock-returned library clip, not a newly generated finding. No console errors were recorded in the isolated result test.
+- MORPHKIT lab validation, engine build and registry check pass. Human visual approval remains pending.
+
+Cloudflare/D1/R2, a paid same-subject findings grid, exact-input cache, real BYO/device tests and a stranger test remain deferred. Architecture notes document HTTPS object input and the trusted-metadata requirement for the future Worker adapter; that adapter is not implemented here. Public factual answers live in `docs/questions.md`; the separate private interview coaching document was not edited from this worktree.

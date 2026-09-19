@@ -2,29 +2,29 @@
   display: flex;
   align-items: stretch;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-6);
   min-width: 0;
 }
 .generation-controls__model {
-  width: 150px;
+  width: calc(150 * var(--unit));
 }
 .generation-controls__duration {
-  width: 70px;
+  width: calc(70 * var(--unit));
 }
 .generation-controls__aspect {
-  width: 76px;
+  width: calc(76 * var(--unit));
 }
 .generation-controls__resolution {
-  width: 92px;
+  width: calc(92 * var(--unit));
 }
 .generation-controls__draft {
-  width: 64px;
+  width: var(--space-64);
 }
 .instrument-field {
   position: relative;
   min-width: 0;
-  border: 1px solid var(--border);
-  border-radius: 3px;
+  border: var(--space-1) solid var(--border);
+  border-radius: var(--radius-sm);
   background: var(--surface);
 }
 .instrument-field:focus-within {
@@ -32,9 +32,9 @@
 }
 .instrument-label {
   display: block;
-  padding: 6px 8px 0;
+  padding: var(--space-6) var(--space-8) 0;
   color: var(--muted);
-  font: 7px var(--mono);
+  font: var(--space-7) var(--mono);
   letter-spacing: 0.065em;
   line-height: 1.2;
   text-transform: uppercase;
@@ -43,14 +43,14 @@
 .instrument-trigger {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-6);
   width: 100%;
-  min-height: 27px;
+  min-height: calc(27 * var(--unit));
   border: 0;
-  padding: 3px 8px 6px;
+  padding: var(--space-3) var(--space-8) var(--space-6);
   background: transparent;
   color: var(--text);
-  font: 10px var(--mono);
+  font: var(--space-10) var(--mono);
   text-align: left;
 }
 .instrument-trigger:hover {
@@ -62,8 +62,8 @@
   color: var(--muted);
 }
 .instrument-trigger:focus-visible {
-  outline: 1px solid var(--accent);
-  outline-offset: 2px;
+  outline: var(--space-1) solid var(--accent);
+  outline-offset: var(--space-2);
 }
 .instrument-trigger:disabled {
   cursor: not-allowed;
@@ -83,18 +83,19 @@
 }
 .instrument-popover {
   position: absolute;
-  top: calc(100% + 7px);
+  top: calc(100% + var(--space-7));
   z-index: 40;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 4px;
+  border: var(--space-1) solid var(--border);
+  border-radius: var(--radius-control);
+  padding: var(--space-4);
   background: var(--raised);
   color: var(--text);
-  box-shadow: 0 10px 28px color-mix(in srgb, var(--accent-ink) 24%, transparent);
+  box-shadow: 0 var(--space-10) var(--space-28)
+    color-mix(in srgb, var(--accent-ink) 24%, transparent);
 }
 .select-menu__options {
   left: 0;
-  min-width: 220px;
+  min-width: calc(220 * var(--unit));
 }
 .select-menu--compact .select-menu__options {
   min-width: 100%;
@@ -102,21 +103,21 @@
 .select-menu__option {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: var(--space-9);
   width: 100%;
-  min-height: 34px;
+  min-height: calc(34 * var(--unit));
   border: 0;
-  border-radius: 2px;
-  padding: 7px 8px;
+  border-radius: var(--radius-xs);
+  padding: var(--space-7) var(--space-8);
   color: var(--text);
   background: transparent;
-  font-size: 11px;
+  font-size: var(--space-11);
   text-align: left;
   white-space: nowrap;
 }
 .select-menu--compact .select-menu__option {
-  gap: 5px;
-  font: 10px var(--mono);
+  gap: var(--space-5);
+  font: var(--space-10) var(--mono);
 }
 .select-menu__option:hover,
 .select-menu__option:focus {
@@ -129,152 +130,155 @@
 }
 .select-menu__check {
   display: inline-flex;
-  width: 12px;
+  width: var(--space-12);
   margin-left: auto;
 }
 .draft-trigger {
   justify-content: space-between;
-  gap: 5px;
+  gap: var(--space-5);
 }
 .draft-trigger__track {
-  width: 18px;
-  height: 10px;
-  padding: 2px;
-  border-radius: 2px;
+  width: var(--space-18);
+  height: var(--space-10);
+  padding: var(--space-2);
+  border-radius: var(--radius-xs);
   background: var(--border);
 }
 .draft-trigger__track i {
   display: block;
-  width: 6px;
-  height: 6px;
-  border-radius: 1px;
+  width: var(--space-6);
+  height: var(--space-6);
+  border-radius: var(--radius-xs);
   background: var(--muted);
 }
 .draft-trigger[aria-checked="true"] .draft-trigger__track {
   background: var(--accent);
 }
 .draft-trigger[aria-checked="true"] .draft-trigger__track i {
-  transform: translateX(8px);
+  transform: translateX(var(--space-8));
   background: var(--accent-ink);
 }
 .duration-popover {
   right: 0;
-  width: 240px;
-  max-width: calc(100vw - 24px);
-  padding: 16px;
+  width: calc(240 * var(--unit));
+  max-width: calc(100vw - var(--space-24));
+  padding: var(--space-16);
 }
 .tick-fader {
   width: 100%;
   min-width: 0;
 }
 .tick-fader--compact {
-  max-width: 190px;
+  max-width: calc(190 * var(--unit));
 }
 .tick-fader__heading {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 5px;
+  gap: var(--space-12);
+  margin-bottom: var(--space-5);
 }
 .tick-fader__heading label {
   color: var(--muted);
-  font: 9px var(--mono);
+  font: var(--space-9) var(--mono);
   letter-spacing: 0.045em;
   text-transform: uppercase;
 }
 .tick-fader__heading output {
   color: var(--readout);
-  font: 11px var(--mono);
+  font: var(--space-11) var(--mono);
   font-variant-numeric: tabular-nums;
 }
 .tick-fader input[type="range"] {
   appearance: none;
   display: block;
   width: 100%;
-  height: 22px;
+  height: var(--space-22);
   margin: 0;
   background: transparent;
   cursor: pointer;
 }
 .tick-fader input[type="range"]:focus-visible {
-  outline: 1px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 2px;
+  outline: var(--space-1) solid var(--accent);
+  outline-offset: var(--space-2);
+  border-radius: var(--radius-xs);
 }
 .tick-fader input::-webkit-slider-runnable-track {
-  height: 3px;
-  border-radius: 2px;
+  height: var(--space-3);
+  border-radius: var(--radius-xs);
   background: linear-gradient(
     to right,
     var(--accent) var(--fader-fill),
     var(--border) var(--fader-fill)
   );
-  box-shadow: inset 0 1px 1px
+  box-shadow: inset 0 var(--space-1) var(--space-1)
     color-mix(in srgb, var(--accent-ink) 30%, transparent);
 }
 .tick-fader input::-webkit-slider-thumb {
   appearance: none;
-  width: 13px;
-  height: 13px;
-  margin-top: -5px;
-  border: 1px solid var(--muted);
-  border-radius: 50%;
+  width: var(--space-13);
+  height: var(--space-13);
+  margin-top: calc(-5 * var(--unit));
+  border: var(--space-1) solid var(--muted);
+  border-radius: var(--radius-round);
   background: var(--sunken);
   box-shadow:
-    inset 0 1px 1px color-mix(in srgb, var(--text) 22%, transparent),
-    0 1px 2px color-mix(in srgb, var(--accent-ink) 30%, transparent);
+    inset 0 var(--space-1) var(--space-1)
+      color-mix(in srgb, var(--text) 22%, transparent),
+    0 var(--space-1) var(--space-2)
+      color-mix(in srgb, var(--accent-ink) 30%, transparent);
 }
 .tick-fader input::-moz-range-track {
-  height: 3px;
-  border-radius: 2px;
+  height: var(--space-3);
+  border-radius: var(--radius-xs);
   background: var(--border);
-  box-shadow: inset 0 1px 1px
+  box-shadow: inset 0 var(--space-1) var(--space-1)
     color-mix(in srgb, var(--accent-ink) 30%, transparent);
 }
 .tick-fader input::-moz-range-progress {
-  height: 3px;
-  border-radius: 2px;
+  height: var(--space-3);
+  border-radius: var(--radius-xs);
   background: var(--accent);
 }
 .tick-fader input::-moz-range-thumb {
-  width: 11px;
-  height: 11px;
-  border: 1px solid var(--muted);
-  border-radius: 50%;
+  width: var(--space-11);
+  height: var(--space-11);
+  border: var(--space-1) solid var(--muted);
+  border-radius: var(--radius-round);
   background: var(--sunken);
-  box-shadow: inset 0 1px 1px color-mix(in srgb, var(--text) 22%, transparent);
+  box-shadow: inset 0 var(--space-1) var(--space-1)
+    color-mix(in srgb, var(--text) 22%, transparent);
 }
 .tick-fader__ruler {
   position: relative;
-  height: 10px;
-  margin: 0 6px 0;
+  height: var(--space-10);
+  margin: 0 var(--space-6) 0;
 }
 .tick-fader__ruler i {
   position: absolute;
   top: 0;
-  width: 1px;
-  height: 6px;
+  width: var(--space-1);
+  height: var(--space-6);
   background: var(--machined);
 }
 .tick-fader__ruler i.major {
-  height: 10px;
+  height: var(--space-10);
   background: var(--muted);
 }
 .tick-fader__limits {
   display: flex;
   justify-content: space-between;
-  margin: 4px 4px 0;
+  margin: var(--space-4) var(--space-4) 0;
   color: var(--muted);
-  font: 7px var(--mono);
+  font: var(--space-7) var(--mono);
 }
-@media (max-width: 760px) {
+@media (max-width: 47.5rem) {
   .generation-controls {
-    row-gap: 8px;
+    row-gap: var(--space-8);
   }
 }
 @media (prefers-reduced-motion: no-preference) {
   .draft-trigger__track i {
-    transition: transform 0.12s ease;
+    transition: transform var(--motion-fast) ease;
   }
 }

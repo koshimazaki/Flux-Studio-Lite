@@ -1,7 +1,7 @@
 .topbar {
-  height: 84px;
-  margin: 0 48px;
-  border-bottom: 1px solid var(--border);
+  height: calc(84 * var(--unit));
+  margin: 0 var(--space-48);
+  border-bottom: var(--space-1) solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -9,74 +9,74 @@
 .wordmark {
   display: flex;
   align-items: center;
-  gap: 11px;
-  font-size: 20px;
-  letter-spacing: -0.7px;
+  gap: var(--space-11);
+  font-size: var(--space-20);
+  letter-spacing: calc(-0.7 * var(--unit));
   font-weight: 500;
 }
 .brand-mark {
   display: flex;
   align-items: center;
-  gap: 3px;
-  height: 23px;
-  width: 23px;
+  gap: var(--space-3);
+  height: var(--space-23);
+  width: var(--space-23);
 }
 .brand-mark i {
   background: var(--text);
-  width: 5px;
-  height: 21px;
+  width: var(--space-5);
+  height: var(--space-21);
   transform: skewY(-22deg);
 }
 .brand-mark i:nth-child(2) {
-  height: 15px;
+  height: var(--space-15);
 }
 .brand-mark i:nth-child(3) {
-  height: 9px;
+  height: var(--space-9);
 }
 .brand-beta {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: var(--space-9);
   color: var(--muted);
-  letter-spacing: 1px;
-  margin: 3px 0 0 15px;
+  letter-spacing: var(--space-1);
+  margin: var(--space-3) 0 0 var(--space-15);
 }
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: var(--space-18);
 }
 .local-label {
   font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 1px;
+  font-size: var(--space-9);
+  letter-spacing: var(--space-1);
   color: var(--muted);
   display: flex;
-  gap: 8px;
+  gap: var(--space-8);
   align-items: center;
 }
 .local-label i {
-  height: 5px;
-  width: 5px;
-  border-radius: 100%;
+  height: var(--space-5);
+  width: var(--space-5);
+  border-radius: var(--radius-round);
   background: var(--accent);
 }
 .connection-button {
   display: flex;
-  gap: 10px;
+  gap: var(--space-10);
   align-items: center;
-  font-size: 12px;
-  border: 1px solid var(--border);
-  padding: 9px 12px;
-  border-radius: 6px;
+  font-size: var(--space-12);
+  border: var(--space-1) solid var(--border);
+  padding: var(--space-9) var(--space-12);
+  border-radius: var(--radius-md);
   background: var(--surface);
 }
 .connection-button:hover {
   background: var(--raised);
 }
 .connection-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
+  width: var(--space-5);
+  height: var(--space-5);
+  border-radius: var(--radius-round);
   background: var(--muted);
 }
 .connection-dot.connected {

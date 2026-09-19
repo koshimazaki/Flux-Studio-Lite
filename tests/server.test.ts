@@ -110,6 +110,48 @@ async function setup() {
 }
 
 describe("local job API", () => {
+  it("persists and forwards a composed camera, with canonical idempotency and session ownership", async () => {
+    const { post, bfl, base, cookie, store } = await setup();
+    const body = {
+      ...input,
+      presetId: undefined,
+      camera: { "shot-sizes": "close-up", angles: "dutch", movements: "pan" },
+      cameraEdits: { pan: "Pan gently.", dutch: "" },
+    };
+    const response = await post("section-request", body);
+    expect(response.status).toBe(202);
+    const { job } = await response.json();
+    expect(job.camera).toEqual(body.camera);
+    expect(job.prompt).toBe(
+      "A ceramic vessel.\n\nClose-up of the subject.\n\nPan gently.",
+    );
+    expect(bfl.requests[0].body.prompt).toBe(job.prompt);
+    expect(store.data.jobs[0].cameraEdits).toEqual({
+      dutch: "",
+      pan: "Pan gently.",
+    });
+    const repeated = await post("section-request", {
+      ...body,
+      camera: { movements: "pan", angles: "dutch", "shot-sizes": "close-up" },
+      cameraEdits: { dutch: "", pan: "Pan gently." },
+    });
+    expect(repeated.status).toBe(202);
+    expect(bfl.submissions).toBe(1);
+    expect(
+      (
+        await post("section-request", {
+          ...body,
+          cameraEdits: { pan: "Changed" },
+        })
+      ).status,
+    ).toBe(409);
+    expect(
+      (await fetch(`${base}/api/jobs/${job.id}`, { headers: { cookie } }))
+        .status,
+    ).toBe(200);
+    expect((await fetch(`${base}/api/jobs/${job.id}`)).status).toBe(404);
+  });
+
   it("deduplicates submits, converts credits, strips private provider fields, and reserves concurrent costs", async () => {
     const { post, bfl, store, base, cookie } = await setup();
     const [first, repeat] = await Promise.all([

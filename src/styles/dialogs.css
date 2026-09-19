@@ -1,35 +1,35 @@
 footer {
-  margin: 56px 48px 0;
-  padding: 23px 0 26px;
+  margin: var(--space-56) var(--space-48) 0;
+  padding: var(--space-23) 0 var(--space-26);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  border-top: 1px solid var(--border);
+  gap: var(--space-12);
+  border-top: var(--space-1) solid var(--border);
   color: var(--muted);
-  font-size: 9px;
+  font-size: var(--space-9);
 }
 footer a {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: var(--space-7);
 }
 footer span:first-child {
-  font-size: 9px;
+  font-size: var(--space-9);
   color: var(--muted);
 }
 .key-dialog {
-  width: min(450px, calc(100vw - 32px));
+  width: min(calc(450 * var(--unit)), calc(100vw - var(--space-32)));
   color: var(--text);
   background: var(--surface);
-  border: 1px solid var(--border-strong);
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 30px 90px #0009;
+  border: var(--space-1) solid var(--border-strong);
+  padding: var(--space-25);
+  border-radius: var(--radius-dialog);
+  box-shadow: 0 var(--space-30) calc(90 * var(--unit)) var(--shadow-dialog);
 }
 .key-dialog::backdrop {
-  background: #000a;
-  backdrop-filter: blur(5px);
+  background: var(--backdrop);
+  backdrop-filter: blur(var(--space-5));
 }
 .dialog-heading {
   display: flex;
@@ -37,47 +37,47 @@ footer span:first-child {
   justify-content: space-between;
 }
 .key-dialog h2 {
-  font-size: 27px;
+  font-size: calc(27 * var(--unit));
   font-weight: 450;
-  letter-spacing: -0.7px;
-  margin: 17px 0 10px;
+  letter-spacing: calc(-0.7 * var(--unit));
+  margin: var(--space-17) 0 var(--space-10);
 }
 .key-dialog p {
-  font-size: 12px;
+  font-size: var(--space-12);
   line-height: 1.7;
   color: var(--soft);
 }
 .key-dialog form > label {
   display: block;
-  font-size: 10px;
+  font-size: var(--space-10);
   color: var(--soft);
-  margin: 23px 0 9px;
+  margin: var(--space-23) 0 var(--space-9);
 }
 .key-dialog input[type="password"] {
   display: block;
   width: 100%;
   background: var(--sunken);
-  border: 1px solid var(--border-strong);
+  border: var(--space-1) solid var(--border-strong);
   color: var(--text);
-  padding: 12px;
-  border-radius: 5px;
+  padding: var(--space-12);
+  border-radius: var(--radius-md);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--space-12);
 }
 .dialog-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 18px;
+  margin-top: var(--space-18);
 }
 .key-dialog .key-footnote {
-  font-size: 10px;
+  font-size: var(--space-10);
   color: var(--muted);
-  border-top: 1px solid var(--border);
-  padding-top: 17px;
-  margin-top: 23px;
+  border-top: var(--space-1) solid var(--border);
+  padding-top: var(--space-17);
+  margin-top: var(--space-23);
 }
 .key-dialog .primary-button {
-  padding: 10px 14px;
-  font-size: 11px;
+  padding: var(--space-10) var(--space-14);
+  font-size: var(--space-11);
 }
