@@ -32,6 +32,7 @@ export default function App() {
     aspectRatio,
     resolution,
     sourceId,
+    upscalePrompt,
     upscaleFactor,
     upscaleCreativity,
   } = state;
@@ -76,7 +77,7 @@ export default function App() {
   const composed =
     generator === "video"
       ? composePrompt(composerInput(state))
-      : `${upscaleMode} ${upscaleFactor}× upscale. ${upscaleCreativity === 0 ? "Preserve original detail." : "Reimagine finer detail."}`;
+      : `${upscaleMode} ${upscaleFactor}× upscale. ${upscaleCreativity === 0 ? "Preserve original detail." : "Reimagine finer detail."}${upscalePrompt.trim() ? `\n\n${upscalePrompt.trim()}` : ""}`;
   function saveKey(value: string) {
     if (value !== key) setKeyVerified(false);
     setKey(value);
@@ -212,6 +213,8 @@ export default function App() {
                 apiKey={key}
                 sources={sources}
                 sourceId={sourceId}
+                prompt={upscalePrompt}
+                onPromptChange={(value) => set("upscalePrompt", value)}
                 factor={upscaleFactor}
                 onSelect={(id) => set("sourceId", id)}
                 refresh={refresh}

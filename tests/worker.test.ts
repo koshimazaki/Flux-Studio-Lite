@@ -172,11 +172,13 @@ describe("Cloudflare adapter in workerd with isolated D1/R2 and fake BFL", () =>
       ...input,
       generator: "upscale",
       sourceId: "library-01",
+      upscalePrompt: "  Fine linen texture.  ",
     });
     expect(response.status).toBe(202);
     expect(await response.json()).toMatchObject({
       job: { costEstimateUsd: 1.36, status: "Pending" },
     });
+    expect(lastSubmission.prompt).toBe("Fine linen texture.");
     const url = String(lastSubmission.input_video);
     expect(url).toMatch(/^https:\/\/studio.test\/api\/input\//);
     const media = await mf.dispatchFetch(url, {

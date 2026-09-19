@@ -40,6 +40,28 @@ describe("section camera contract", () => {
     expect(composePrompt({ ...valid, cameraEnabled: false })).toBe("A chair.");
     expect(composePrompt({ ...valid, generator: "upscale" })).toBe("");
   });
+  it("keeps optional upscale text separate, validates it and restores it", () => {
+    const state = {
+      ...initialComposer,
+      generator: "upscale" as const,
+      sourceId: "library-01",
+      upscalePrompt: "  Fine fabric texture.  ",
+    };
+    const valid = validateInput(composerInput(state));
+    expect(composePrompt(valid)).toBe("Fine fabric texture.");
+    expect(valid.cameraEnabled).toBe(false);
+    expect(
+      composerReducer(initialComposer, { type: "restore", job: valid as Job })
+        .upscalePrompt,
+    ).toBe("Fine fabric texture.");
+    expect(composePrompt({ ...valid, upscalePrompt: "" })).toBe("");
+    expect(composePrompt({ ...valid, upscalePrompt: undefined })).toBe("");
+    expect(
+      composePrompt(composerInput({ ...state, generator: "video" })),
+    ).not.toContain("Fine fabric texture.");
+    for (const upscalePrompt of [42, null, "x".repeat(1201)])
+      expect(() => validateInput({ ...valid, upscalePrompt })).toThrow();
+  });
   it("rejects mixed sections, extra sections, missing sections and malformed edits", () => {
     const input = composerInput(initialComposer);
     for (const camera of [

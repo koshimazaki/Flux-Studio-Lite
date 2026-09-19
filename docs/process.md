@@ -91,3 +91,9 @@ Finished clips and job records remain in the cloud library, retrieved using the 
 ## Colour-coded camera text
 
 The operator asked to make the camera phrases feel like one prompt rather than separate form inputs. The dialog now uses one shared editor surface with tightly stacked, auto-growing text lines. Shot sizes, Angles and Movements retain labels and inherit their respective tab colours. The applied scene prompt displays the same coloured lines. Native labelled textareas preserve accessible editing, selection-specific phrase state, None, and Done/Cancel semantics.
+
+## Generation feedback and upscale prompt
+
+The operator renamed the featured caption to “Your latest generation” and requested a geometric waiting animation. A separate Canvas 2D component shows eight cube pieces turning in layers, using the active theme. This avoids a WebGL context per gallery card and adds no dependency. The existing reveal transition remains.
+
+The operator also requested an optional text prompt beside the upscale source clip. It grows vertically and wraps below the source on narrow screens. Upscale text stays separate from the video scene, is restored with a saved job, and reaches BFL in both local and hosted adapters. An empty prompt retains neutral upscaling.

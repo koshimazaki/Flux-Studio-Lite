@@ -13,6 +13,7 @@ export type ComposerState = Omit<GenerateInput, "presetId" | "cameraText"> & {
   camera: CameraSelection;
   cameraEdits: CameraEdits;
   sourceId: string;
+  upscalePrompt: string;
 };
 export const initialComposer: ComposerState = {
   generator: "video",
@@ -25,6 +26,7 @@ export const initialComposer: ComposerState = {
   aspectRatio: "16:9",
   resolution: "hd",
   sourceId: "",
+  upscalePrompt: "",
   upscaleFactor: 2,
   upscaleCreativity: 0,
 };
@@ -83,6 +85,7 @@ export function composerReducer(
     aspectRatio: job.aspectRatio ?? "16:9",
     resolution: job.resolution,
     sourceId: job.sourceId ?? "",
+    upscalePrompt: job.upscalePrompt ?? "",
     upscaleFactor: job.upscaleFactor,
     upscaleCreativity: job.upscaleCreativity ?? 0,
   };

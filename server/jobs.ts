@@ -201,6 +201,7 @@ export class JobService {
             input_video: (await readFile(source.file)).toString("base64"),
             upscale_factor: input.upscaleFactor,
             creativity: input.upscaleCreativity,
+            ...(job.prompt ? { prompt: job.prompt } : {}),
             safety_tolerance: 2,
             user: sessionId,
           }

@@ -120,3 +120,9 @@ Cloudflare initially rejected the configured CPU allowance on the Free plan. Rem
 - At a measured 413px viewport there is no page overflow. Longer shot/angle phrases grow to two lines without internal clipping; movement stays one line. No paid calls.
 
 - Published at https://c27c2a68.fluxstudio.pages.dev (canonical fluxstudio.pages.dev), source d7347aed2cd6bd5d268f2d1fc8df1d162ea49018. Live dialog verified shared Camera prompt group, borderless native textarea and theme-derived movement colour.
+
+## Generation feedback and upscale prompt
+
+- 55 tests pass, including separate upscale text, validation, restoration and prompt forwarding in both the Express and workerd adapters. Existing empty-prompt behavior remains covered. Pages build and Worker typecheck pass. No paid provider calls.
+- Private browser fixture verified animated cube poses, theme colour changes, the renamed caption, waiting-to-decoded-video reveal and removal of the animation on errors. The animation's reduced-motion and visibility handling were inspected in source; OS reduced-motion was not toggled.
+- Browser verified source selection with the optional prompt beside it, typed text appearing in the composed upscale settings, and wrapping below the source at a measured 341px viewport with no horizontal overflow. The temporary viewport override was reset.

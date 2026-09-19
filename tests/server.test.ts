@@ -355,6 +355,7 @@ describe("local job API", () => {
       sourceId: source.id,
       upscaleFactor: 3,
       upscaleCreativity: 1,
+      upscalePrompt: "  Fine ceramic texture.  ",
     };
     const response = await post("creative-upscale", request);
     expect(response.status).toBe(202);
@@ -365,7 +366,8 @@ describe("local job API", () => {
       generator: "upscale",
       body: { upscale_factor: 3, creativity: 1 },
     });
-    expect(bfl.requests[0].body.prompt).toBeUndefined();
+    expect(bfl.requests[0].body.prompt).toBe("Fine ceramic texture.");
+    expect(job.prompt).toBe("Fine ceramic texture.");
     expect(bfl.requests[0].body.input_video).toEqual(expect.any(String));
     const overBudget = await post("precise-upscale", {
       ...request,

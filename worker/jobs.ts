@@ -124,6 +124,7 @@ export async function submit(
           input_video: inputVideo,
           upscale_factor: input.upscaleFactor,
           creativity: input.upscaleCreativity,
+          ...(job.prompt ? { prompt: job.prompt } : {}),
           safety_tolerance: 2,
           user: session,
         }

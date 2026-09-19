@@ -33,6 +33,11 @@ export function validateInput(value: unknown): GenerateInput {
     (typeof body.cameraText !== "string" || body.cameraText.length > 600)
   )
     throw new AppError(400, "Keep camera text under 600 characters.");
+  if (
+    body.upscalePrompt !== undefined &&
+    (typeof body.upscalePrompt !== "string" || body.upscalePrompt.length > 1200)
+  )
+    throw new AppError(400, "Keep the upscale prompt under 1,200 characters.");
   const camera =
     body.camera === undefined
       ? undefined
@@ -99,6 +104,9 @@ export function validateInput(value: unknown): GenerateInput {
     draft,
     sourceId:
       body.generator === "upscale" ? (body.sourceId as string) : undefined,
+    ...(body.upscalePrompt === undefined
+      ? {}
+      : { upscalePrompt: (body.upscalePrompt as string).trim() }),
     upscaleFactor: body.upscaleFactor,
     upscaleCreativity,
   };

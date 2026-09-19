@@ -3,12 +3,15 @@ import type { Source } from "../../shared/types";
 import { estimateUpscaleOutput } from "../../shared/presets";
 import { request } from "../useJobs";
 import Icon from "./Icon";
+import PromptField from "./PromptField";
 import SelectMenu from "./SelectMenu";
 export default function SourceInput({
   apiKey,
   sources,
   sourceId,
   factor,
+  prompt,
+  onPromptChange,
   onSelect,
   refresh,
   onError,
@@ -18,6 +21,8 @@ export default function SourceInput({
   sources: Source[];
   sourceId: string;
   factor: number;
+  prompt: string;
+  onPromptChange: (text: string) => void;
   onSelect: (id: string) => void;
   refresh: () => Promise<void>;
   onError: (error: string) => void;
@@ -93,39 +98,52 @@ export default function SourceInput({
   }
   return (
     <div className="upscale-input">
-      <div className="source-icon">
-        <Icon name="expand" size={30} />
+      <div className="upscale-source">
+        <div className="source-icon">
+          <Icon name="expand" size={30} />
+        </div>
+        <div className="source-content">
+          <h2>Give a clip a closer look.</h2>
+          <SelectMenu
+            id="source"
+            label="Source clip"
+            value={sourceId}
+            onChange={onSelect}
+            options={[
+              { value: "", label: "Choose a clip from your gallery" },
+              ...sources.map((s) => ({
+                value: s.id,
+                label: s.label,
+                icon: <Icon name="play" size={12} />,
+              })),
+            ]}
+          />
+          <span>
+            {source
+              ? `${source.width} × ${source.height} → ≈ ${output!.width} × ${output!.height}${output!.capped ? " (size limit)" : ""} · ${Number(source.duration.toFixed(1))}s`
+              : "Up to 20 seconds · MP4 · 50 MB"}
+          </span>
+        </div>
+        <button
+          className="icon-button upload-button"
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          aria-label="Upload video"
+        >
+          <Icon name="upload" />
+        </button>
       </div>
-      <div className="source-content">
-        <h2>Give a clip a closer look.</h2>
-        <SelectMenu
-          id="source"
-          label="Source clip"
-          value={sourceId}
-          onChange={onSelect}
-          options={[
-            { value: "", label: "Choose a clip from your gallery" },
-            ...sources.map((s) => ({
-              value: s.id,
-              label: s.label,
-              icon: <Icon name="play" size={12} />,
-            })),
-          ]}
+      <div className="upscale-prompt">
+        <PromptField
+          id="upscale-prompt"
+          label="Prompt · optional"
+          labelClassName="upscale-prompt-label"
+          value={prompt}
+          onChange={onPromptChange}
+          maxLength={1200}
+          placeholder="Describe the details to bring into focus…"
         />
-        <span>
-          {source
-            ? `${source.width} × ${source.height} → ≈ ${output!.width} × ${output!.height}${output!.capped ? " (size limit)" : ""} · ${Number(source.duration.toFixed(1))}s`
-            : "Up to 20 seconds · MP4 · 50 MB"}
-        </span>
       </div>
-      <button
-        className="icon-button upload-button"
-        onClick={() => fileRef.current?.click()}
-        disabled={uploading}
-        aria-label="Upload video"
-      >
-        <Icon name="upload" />
-      </button>
       <input
         ref={fileRef}
         type="file"

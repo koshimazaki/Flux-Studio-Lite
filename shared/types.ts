@@ -31,6 +31,7 @@ export interface GenerateInput {
   aspectRatio: AspectRatio;
   draft: boolean;
   sourceId?: string;
+  upscalePrompt?: string;
   upscaleFactor: number;
   upscaleCreativity: 0 | 1;
 }

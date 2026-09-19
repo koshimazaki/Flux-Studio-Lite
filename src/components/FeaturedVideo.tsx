@@ -67,7 +67,9 @@ export default function FeaturedVideo({
           </button>
         ) : (
           <span>
-            {job ? "Your latest selection" : "Make something of your own below"}
+            {job
+              ? "Your latest generation"
+              : "Make something of your own below"}
           </span>
         )}
       </div>

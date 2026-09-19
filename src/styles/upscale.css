@@ -79,3 +79,51 @@
     padding: var(--space-7) var(--space-9);
   }
 }
+
+.upscale-input {
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.upscale-source {
+  display: flex;
+  align-items: center;
+  gap: var(--space-14);
+  flex: 1 1 280px;
+  min-width: 0;
+}
+.upscale-source .source-icon {
+  flex-shrink: 0;
+  width: var(--space-40);
+  height: var(--space-40);
+}
+.upscale-prompt {
+  flex: 1 1 240px;
+  min-width: 0;
+  padding: var(--space-12) var(--space-14);
+  border: var(--space-1) solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+.upscale-prompt-label {
+  display: block;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: var(--text-small-8);
+  margin-bottom: var(--space-8);
+}
+.upscale-prompt textarea {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  padding: 0;
+  resize: none;
+  color: var(--text);
+  background: transparent;
+  font: inherit;
+  font-size: var(--space-13);
+  line-height: 1.5;
+}
+.upscale-prompt textarea::placeholder {
+  color: var(--soft);
+}

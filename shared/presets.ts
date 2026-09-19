@@ -13,10 +13,11 @@ export function composePrompt(
     | "cameraText"
     | "camera"
     | "cameraEdits"
+    | "upscalePrompt"
   >,
 ): string {
   const description = input.description.trim();
-  if (input.generator === "upscale") return "";
+  if (input.generator === "upscale") return input.upscalePrompt?.trim() ?? "";
   if (!input.cameraEnabled) return description;
   if (input.camera)
     return [

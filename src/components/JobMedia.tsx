@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Job } from "../../shared/types";
 import { isTerminal } from "../../shared/types";
+import GenerationSculpture from "./GenerationSculpture";
 import { WaitField } from "./WaitField";
 
 export const statusLabel = (status: string) =>
@@ -67,7 +68,7 @@ export default function JobMedia({ job }: { job: Job }) {
       )}
       {(waiting || job.status !== "Ready" || mediaError) && (
         <div className="job-message" role="status">
-          <span className={waiting ? "status-dot pulse" : "status-dot"} />
+          {waiting ? <GenerationSculpture /> : <span className="status-dot" />}
           <strong>
             {mediaError ? "Video could not load" : statusLabel(job.status)}
           </strong>
