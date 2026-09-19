@@ -115,3 +115,5 @@ The large foreground cube was too prominent. Activity moved into the Generate bu
 The public documentation now uses the current Pages address and describes the implemented storage and prompt contracts. Temporary local credentials and hosted D1/R2 behavior remain explicit.
 
 The operator caught a yellow loader persisting after switching themes. The canvas had cached the colour at the start of a CSS transition. It now resolves the displayed colour on every painted frame, keeping the loader and edge aligned with the active theme.
+
+The scene-suggestion row was removed to shorten the composer. Clip actions now form one right-aligned group beside Ready and cost, with consistent spacing.

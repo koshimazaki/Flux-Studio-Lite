@@ -17,9 +17,6 @@
   padding-top: 16px;
   padding-bottom: 8px;
 }
-.prompt-suggestions {
-  padding-bottom: 14px;
-}
 .camera-open {
   color: var(--soft);
 }
@@ -210,7 +207,11 @@
   flex-wrap: wrap;
 }
 .clip-actions {
-  display: contents;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 .clip-meta {
   column-gap: 10px;

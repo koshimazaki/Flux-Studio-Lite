@@ -146,3 +146,5 @@ Cloudflare initially rejected the configured CPU allowance on the Free plan. Rem
 - Public setup links and stale feature descriptions were updated for the current Pages product. No paid provider calls were made.
 
 - Theme QA found a stale canvas colour during the button CSS transition. Resolving colour on painted frames fixes it; both loader and border were checked in Lime and Cyberpunk. Edge rotation is eight seconds.
+
+- Removed the entire scene-suggestion row and its unused styles. Clip actions use one right-aligned group beside status/cost; the default cabin prompt remains.

@@ -122,18 +122,6 @@
   .camera-editor textarea {
     font-size: var(--space-15);
   }
-  .prompt-suggestions {
-    padding: var(--space-6) var(--space-15) var(--space-17);
-    gap: var(--space-6);
-  }
-  .prompt-suggestions > span {
-    display: none;
-  }
-  .prompt-suggestions button {
-    font-size: var(--text-small-8);
-    padding: var(--space-5) var(--space-6);
-    gap: var(--space-5);
-  }
   .composer-toolbar {
     flex-wrap: wrap;
     padding: var(--space-11) var(--space-13);
