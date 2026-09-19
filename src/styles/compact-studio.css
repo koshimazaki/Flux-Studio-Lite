@@ -30,10 +30,10 @@
   margin-bottom: 16px;
 }
 .featured-media {
-  max-height: min(340px, 38vh);
+  max-height: 380px;
 }
 .gallery {
-  margin-top: 16px;
+  margin-top: 32px;
 }
 .gallery-heading {
   margin-bottom: 16px;
@@ -259,12 +259,6 @@
 }
 
 @media (min-width: 56rem) {
-  .featured-video {
-    width: min(100%, calc(clamp(180px, 24vh, 340px) * 16 / 9));
-  }
-  .featured-media {
-    max-height: none;
-  }
   .gallery .clip-media {
     aspect-ratio: 2 / 1;
   }

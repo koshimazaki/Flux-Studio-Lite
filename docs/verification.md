@@ -151,7 +151,7 @@ Cloudflare initially rejected the configured CPU allowance on the Free plan. Rem
 
 ## Laptop rhythm and prompt reuse
 
-- At 1280 × 800 CSS pixels, the fixture's main preview is 341 × 192, gallery thumbnails are 340 × 170, and the first-row actions end at approximately 799px with a short scene and all three edited camera phrases. Prompt text remains 16.2px; the mobile scene editor remains 16px. Long prompts naturally require scrolling.
+- The initial 341 × 192 preview experiment fitted the first-row actions at approximately 799px, but was rejected after visual review. The final main viewer returns to the composer width with a 380px height cap and a 32px gap before the gallery; the gallery may extend below the viewport. At 1280 × 800 the final main viewer measures 846 × 380 and matches the composer width; the gallery starts at approximately 734px, with 340 × 170 thumbnails beginning near 781px. No horizontal overflow. Prompt text remains 16.2px; the mobile scene editor remains 16px. Long prompts naturally require scrolling.
 - At 413 × 800, header controls fit without overlap and there is no horizontal document overflow. Enlarged video playback and full prompt remain available. Temporary viewport override reset after checks.
 - Browser checked title click with Draft enabled: subject and all camera clauses changed while Draft, 5s and 16:9 stayed intact. Recreate then restored Draft off, 9s, Full HD and 9:16. No generation request was submitted. Unit coverage checks prompt-only restoration against full restoration, including upscale source/mode preservation.
 
