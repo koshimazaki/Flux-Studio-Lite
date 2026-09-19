@@ -81,3 +81,9 @@ Cloudflare/D1/R2, a paid same-subject findings grid, exact-input cache, real BYO
 - On a measured 423px viewport, the two-column/two-row preset window scrolls to the remaining four terms via its arrow, disables Next at the end, and has no page overflow. Requested viewport dimensions are not reliable in this browser; actual width is reported. Desktop shows all eight terms without overflow.
 - Isolated browser fixture verified balance refresh ($123.45 → $123.35), valid zero ($0.00), rejected key with no verified indicator, and preserved UI state when changing credentials. These are synthetic balances, not a real account check. The fixture cannot submit paid jobs.
 - Live local server exposes the new endpoint; without a configured key it returns HTTP 400. No live account balance was verified because the review preview has no key. No paid generation, push or deployment.
+
+## Compact icon follow-up
+
+- Production build and 40 existing tests pass; no new tests were added for this presentation-only change.
+- Browser checked that choosing Close-up updates the tab icon and accessible name, switching to Angles retains it, and None restores the dash and removes only the shot phrase.
+- At the measured desktop size, tab height changed from approximately 55px to 38px and the initial camera panel from 297px to 256px. At 423 CSS pixels, tab labels fit and the page has no horizontal overflow.

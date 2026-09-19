@@ -19,29 +19,34 @@
 }
 .camera-tabs [role="tab"] {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-6);
   min-width: 0;
-  padding: var(--space-14) var(--space-12);
+  padding: var(--space-10) var(--space-12);
   color: var(--muted);
   text-align: left;
 }
-.camera-tabs [role="tab"] > span {
+.camera-tabs [role="tab"] > span:first-child {
   font: var(--space-10) var(--mono);
 }
-.camera-tabs strong {
-  font-size: var(--space-11);
-  font-weight: 400;
-  max-width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+.camera-tab-choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: calc(28 * var(--unit));
+  height: calc(21 * var(--unit));
+  color: var(--muted);
+}
+.camera-tab-choice svg {
+  width: 100%;
+  height: 100%;
 }
 .camera-tabs .has-choice {
   color: var(--section-color);
 }
-.camera-tabs [aria-selected="true"] > span {
+.camera-tabs [aria-selected="true"] > span:first-child {
   color: var(--text);
 }
 .camera-tabs [role="tab"]:hover {
@@ -50,13 +55,16 @@
 .camera-tab-panel {
   padding: var(--space-12) var(--space-14) var(--space-15);
 }
-.camera-grid-heading {
+.camera-grid-footer {
   display: flex;
   align-items: center;
   gap: var(--space-10);
-  margin-bottom: var(--space-10);
+  margin-top: var(--space-10);
 }
-.camera-grid-heading > span {
+.camera-grid-footer > a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-5);
   font: var(--space-9) var(--mono);
   color: var(--muted);
 }
@@ -144,12 +152,14 @@
     grid-auto-columns: calc((100% - var(--space-7)) / 2);
   }
   .camera-tabs [role="tab"] {
-    padding: var(--space-12) var(--space-8);
+    padding: var(--space-10) var(--space-6);
+    gap: var(--space-4);
   }
-  .camera-tabs [role="tab"] > span {
+  .camera-tabs [role="tab"] > span:first-child {
     font-size: var(--space-9);
   }
-  .camera-tabs strong {
-    font-size: var(--space-10);
+  .camera-tab-choice {
+    width: var(--space-20);
+    height: var(--space-15);
   }
 }

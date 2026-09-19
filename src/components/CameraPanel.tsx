@@ -7,6 +7,7 @@ import {
 } from "../../shared/camera";
 import CameraPanelExpanded from "./CameraPanelExpanded";
 import CameraPresetGrid from "./CameraPresetGrid";
+import CameraGlyph from "./CameraGlyph";
 import Icon from "./Icon";
 const CameraPreview = lazy(() => import("../scene/CameraPreview"));
 
@@ -74,6 +75,8 @@ export default function CameraPanel({
                     aria-controls={
                       activeIndex === index ? `panel-${item.id}` : undefined
                     }
+                    aria-label={`${item.label}: ${choice?.label ?? "None"}`}
+                    title={`${item.label}: ${choice?.label ?? "None"}`}
                     aria-selected={activeIndex === index}
                     tabIndex={activeIndex === index ? 0 : -1}
                     style={
@@ -101,9 +104,16 @@ export default function CameraPanel({
                     }}
                   >
                     <span>{item.label}</span>
-                    <strong className={choice ? "has-choice" : ""}>
-                      {choice?.label ?? "None"}
-                    </strong>
+                    <span
+                      className={`camera-tab-choice ${choice ? "has-choice" : ""}`}
+                      aria-hidden="true"
+                    >
+                      {choice ? (
+                        <CameraGlyph section={item} term={choice} />
+                      ) : (
+                        "—"
+                      )}
+                    </span>
                   </button>
                 );
               })}
@@ -126,16 +136,6 @@ export default function CameraPanel({
                   setReplay((value) => value + 1);
                 }}
               />
-              <p className="camera-note">
-                <a
-                  href={`${CAMERA_GUIDE_URL}#${section.anchor}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {section.label} in the BFL guide{" "}
-                  <Icon name="arrow" size={10} />
-                </a>
-              </p>
             </div>
           </div>
           <div className="camera-preview-column">

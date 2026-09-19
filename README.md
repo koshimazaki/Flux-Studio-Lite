@@ -26,7 +26,7 @@ The server binds to loopback only. A hosted version needs a dedicated cloud adap
 ## Try it
 
 1. Keep **FLUX 3 · Text to video** selected and edit the scene description.
-2. Open Shot sizes, Angles or Movements and choose at most one term per section, or None. The tabs retain each choice; no section is required. **Compare expanded view** switches to the previous layout without resetting selections. Each section colours its own editable prompt phrase. Edits survive switching terms. The diagram explains the combination and does not predict model output.
+2. Open Shot sizes, Angles or Movements and choose at most one term per section, or None. The tabs retain each choice as a small icon, with its name on hover; no section is required. **Compare expanded view** switches to the previous layout without resetting selections. Each section colours its own editable prompt phrase. Edits survive switching terms. The diagram explains the combination and does not predict model output.
 3. Open **View composed prompt** to copy the complete text. The server uses the same composer. Camera off removes only the camera clause.
 4. Check the estimate, then generate. The main video changes from a waiting field to the decoded result; refreshing a `?job=` link selects that same-session job.
 5. Choose **Upscale** on a gallery clip. Camera controls disappear. Set the amount with the bottom slider and choose **Precise** or **Creative**. Output dimensions and estimated cost update together.

@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import type { CameraSection, CameraTermId } from "../../shared/camera";
+import {
+  CAMERA_GUIDE_URL,
+  type CameraSection,
+  type CameraTermId,
+} from "../../shared/camera";
 import CameraGlyph from "./CameraGlyph";
 import Icon from "./Icon";
 
@@ -42,8 +46,48 @@ export default function CameraPresetGrid({
   }
   return (
     <>
-      <div className="camera-grid-heading">
-        <span>Choose one · optional</span>
+      <div
+        className="camera-preset-grid"
+        ref={grid}
+        role="group"
+        aria-label={section.label}
+      >
+        {section.terms.map((term) => (
+          <button
+            key={term.id}
+            className={`preset ${selected === term.id ? "selected" : ""}`}
+            aria-pressed={selected === term.id}
+            title={term.description}
+            onFocus={(event) => {
+              const item = event.currentTarget;
+              const viewport = grid.current!;
+              if (
+                item.offsetLeft < viewport.scrollLeft ||
+                item.offsetLeft + item.offsetWidth >
+                  viewport.scrollLeft + viewport.clientWidth
+              )
+                viewport.scrollTo({
+                  left: item.offsetLeft,
+                  behavior: "instant",
+                });
+            }}
+            onClick={() => onSelect(term.id)}
+          >
+            <CameraGlyph section={section} term={term} />
+            <span>{term.label}</span>
+            <i className="selection-dot" />
+          </button>
+        ))}
+      </div>
+      <div className="camera-grid-footer">
+        <a
+          href={`${CAMERA_GUIDE_URL}#${section.anchor}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${section.label} in the BFL guide`}
+        >
+          BFL guide <Icon name="arrow" size={10} />
+        </a>
         <button
           className={`camera-none ${selected === null ? "selected" : ""}`}
           aria-pressed={selected === null}
@@ -77,39 +121,6 @@ export default function CameraPresetGrid({
             />
           </button>
         </div>
-      </div>
-      <div
-        className="camera-preset-grid"
-        ref={grid}
-        role="group"
-        aria-label={section.label}
-      >
-        {section.terms.map((term) => (
-          <button
-            key={term.id}
-            className={`preset ${selected === term.id ? "selected" : ""}`}
-            aria-pressed={selected === term.id}
-            title={term.description}
-            onFocus={(event) => {
-              const item = event.currentTarget;
-              const viewport = grid.current!;
-              if (
-                item.offsetLeft < viewport.scrollLeft ||
-                item.offsetLeft + item.offsetWidth >
-                  viewport.scrollLeft + viewport.clientWidth
-              )
-                viewport.scrollTo({
-                  left: item.offsetLeft,
-                  behavior: "instant",
-                });
-            }}
-            onClick={() => onSelect(term.id)}
-          >
-            <CameraGlyph section={section} term={term} />
-            <span>{term.label}</span>
-            <i className="selection-dot" />
-          </button>
-        ))}
       </div>
     </>
   );
