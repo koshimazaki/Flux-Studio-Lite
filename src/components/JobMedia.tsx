@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Job } from "../../shared/types";
 import { isTerminal } from "../../shared/types";
-import GenerationSculpture from "./GenerationSculpture";
 import { WaitField } from "./WaitField";
 
 export const statusLabel = (status: string) =>
@@ -68,14 +67,21 @@ export default function JobMedia({ job }: { job: Job }) {
       )}
       {(waiting || job.status !== "Ready" || mediaError) && (
         <div className="job-message" role="status">
-          {waiting ? <GenerationSculpture /> : <span className="status-dot" />}
-          <strong>
-            {mediaError ? "Video could not load" : statusLabel(job.status)}
-          </strong>
+          {!waiting && <span className="status-dot" />}
+          {!waiting && (
+            <strong>
+              {mediaError ? "Video could not load" : statusLabel(job.status)}
+            </strong>
+          )}
           <p>
             {mediaError
               ? "Your saved clip is still available. Try loading it again."
-              : job.error || "Your scene is taking shape."}
+              : job.error ||
+                (job.status === "copying"
+                  ? "Your clip is almost ready."
+                  : job.generator === "upscale"
+                    ? "Bringing out the finer details."
+                    : "Your scene is taking shape.")}
           </p>
           {waiting && (
             <span className="elapsed">

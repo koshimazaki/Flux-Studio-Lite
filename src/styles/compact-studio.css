@@ -192,7 +192,8 @@
   color: var(--accent);
 }
 .clip-meta > span:first-child {
-  margin-right: auto;
+  white-space: nowrap;
+  margin-right: 0;
 }
 .lightbox-content header > span {
   flex: 1;
@@ -202,13 +203,19 @@
   white-space: nowrap;
 }
 
+.gallery-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));
+}
 .clip-meta {
   flex-wrap: wrap;
 }
 .clip-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
+  display: contents;
+}
+.clip-meta {
+  column-gap: 10px;
+  row-gap: 6px;
+}
+.clip-meta button {
+  white-space: nowrap;
 }

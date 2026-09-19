@@ -1,6 +1,6 @@
 # Cloudflare deployment
 
-Live: [FLUX Studio](https://fluxstudio.pages.dev). Camera-text follow-up deployed on 19 September 2026 from `d7347aed2cd6bd5d268f2d1fc8df1d162ea49018`. [Pinned deployment](https://c27c2a68.fluxstudio.pages.dev). GitHub was not pushed.
+Live: [FLUX Studio](https://fluxstudio.pages.dev).
 
 The hosted app uses your own BFL key. Connect it in the header: the balance check verifies the connection and shows the remaining account credits as USD. Generation/upscale estimates are separate from that balance. No shared provider key is configured or stored. The key exists temporarily in page/request memory during use; it is not persisted by the app.
 
@@ -43,14 +43,10 @@ Workerd tests exercise real isolated D1/R2 bindings with fake upstream BFL respo
 
 ## Temporary-key decision
 
-The operator explicitly chose paste for this interview demo. Keychain integration is superseded: no native helper, local installation, key database, or shared Wrangler BFL secret is included. The app retains the key only in page/request memory. Refresh and Disconnect clear it. The backend receives it transiently and must not be described as unable to access it.
+The app uses temporary key entry. There is no native helper, local installation, key database, or shared Wrangler BFL secret is included. The app retains the key only in page/request memory. Refresh and Disconnect clear it. The backend receives it transiently and must not be described as unable to access it.
 
 Finished videos and job records remain in D1/R2 under the anonymous browser cookie, independent of the key. Download links create user-owned copies. Clearing the cookie loses access; a new hostname has a separate browser library. Pending jobs need the key again after refresh.
 
 ## Pages deployment details
 
 Run `npm run deploy:pages`. `scripts/build-pages.mjs` builds `.pages/_worker.js` and writes the standard configuration into ignored `.pages-project/`; Pages rejects custom configuration paths and `account_id` in its config. The deployment script supplies the account through the CLI environment. Local Pages smoke check: `npx wrangler pages dev ../.pages --cwd .pages-project --port 4322` after `npm run build:pages`.
-
-Wrangler 4.135.0 initially redirected `pages project create` to Workers in this agent session, producing `https://fluxstudio.glitchcandies.workers.dev` (version `6fae0e73-fb65-4171-a702-ef3384e12674`, source `3ca04b2`). The requested Pages project was then explicitly created with `--force`, which opts out of that delegation; established Pages projects deploy normally. The extra Worker remains as a fallback. The original `flux-studio-lite.glitchcandies.workers.dev` deployment is unchanged.
-
-Canonical Pages DNS initially lagged in the local resolver, then resolved normally. HTTPS, API health/history, three library sources, video delivery and R2 range responses were checked. No account key or paid generation was used.

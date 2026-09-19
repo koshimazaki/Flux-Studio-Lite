@@ -84,7 +84,7 @@ Removed the moving-images kicker and header rule, set the header to 80 units, re
 
 The operator chose FLUX Studio / fluxstudio.pages.dev. The Pages deployment uses the same Worker implementation and existing D1/R2 resources. Browser library cookies are origin-specific, so the new hostname has its own anonymous browser library; this is not an automatic migration of the old domain's cookie.
 
-After exploring a Keychain helper, the operator chose temporary API-key paste for the technical interview demo. The helper prototype was removed before commit or deployment. Keychain integration is superseded, not an unfinished requirement. No profiles, key database, Wrangler BFL secret or local installation is added. Keys remain in page/request memory and disappear on refresh/disconnect. The server receives each key transiently and never stores it. Website operators cannot honestly offer operator-blind keys using a secret/decryption system they control.
+After exploring a Keychain helper, the operator chose temporary API-key paste. The helper prototype was removed before commit or deployment. Keychain integration is superseded, not an unfinished requirement. No profiles, key database, Wrangler BFL secret or local installation is added. Keys remain in page/request memory and disappear on refresh/disconnect. The server receives each key transiently and never stores it. Website operators cannot honestly offer operator-blind keys using a secret/decryption system they control.
 
 Finished clips and job records remain in the cloud library, retrieved using the anonymous browser cookie. They are not dependent on the API key or a browser media cache. Download links make user-owned copies explicit. Clearing cookies loses this browser's access; pending jobs need the key re-entered after refresh. Paid generations, human visual approval and stranger/native-device tests remain deferred.
 
@@ -105,3 +105,13 @@ The operator kept the camera editor but requested an inline coloured sentence in
 The old three public clips were image-to-video examples with no bundled original inputs. After this was explained, the operator asked to remove them and curate new reproducible examples later. Their public assets and catalog entries are removed; a single MP4 is retained as a test-only fixture. Existing private R2 objects were not deleted.
 
 The enlarged viewer now places the complete saved prompt below the video and offers Copy prompt and Download MP4. Job identifiers remain internal: selected clip state lives in tab history, old links migrate to a clean address, and reload restores the selected setup without overwriting ongoing edits during polling.
+
+## Subtle feedback and compact clip actions
+
+The operator asked to keep Ready, cost, Recreate, Download and Upscale on one row. The gallery now shares one flexible metadata row, retaining readable text and wrapping only when space requires it.
+
+The large foreground cube was too prominent. Activity moved into the Generate button, alongside a gentle outline, while the existing main shader remains. The first nine-particle version was rejected by the operator because its marks were too small and unclear. A larger voxel cube with nine blocks per face was also rejected as heavy and too low beside the text. The final version uses a centred 20px pixel-ring loader with eight crisp squares; the outer halo is removed. This keeps the familiar spinner silhouette without a dense solid object. The operator then requested a moving edge glow, so a restrained CSS highlight travels around the border with a faint diffuse glow. After visual review, the operator kept this treatment and requested a slower eight-second rotation. The video area no longer repeats Generating; it keeps descriptive text while the button owns the status. Sending, queued, generating/upscaling and saving states follow the actual job; missing visitor keys offer Resume. No fabricated progress percentage is shown.
+
+The public documentation now uses the current Pages address and describes the implemented storage and prompt contracts. Temporary local credentials and hosted D1/R2 behavior remain explicit.
+
+The operator caught a yellow loader persisting after switching themes. The canvas had cached the colour at the start of a CSS transition. It now resolves the displayed colour on every painted frame, keeping the loader and edge aligned with the active theme.

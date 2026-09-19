@@ -194,3 +194,63 @@ main {
 .generate-button:active {
   transform: translateY(calc(0.5 * var(--unit)));
 }
+
+.generate-button {
+  position: relative;
+  isolation: isolate;
+  min-width: 148px;
+  justify-content: space-between;
+}
+.generate-button-icon {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.generation-indicator {
+  display: block;
+  width: 20px;
+  height: 20px;
+  color: inherit;
+}
+.generate-button.is-generating,
+.generate-button.is-generating:hover {
+  opacity: 1;
+  cursor: progress;
+  background: var(--accent-ghost);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+@property --generation-edge-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.generate-button.is-generating::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: conic-gradient(
+    from var(--generation-edge-angle),
+    transparent 0deg 190deg,
+    var(--accent-ghost) 240deg,
+    var(--accent) 280deg,
+    transparent 320deg
+  );
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: generation-edge 8s linear infinite;
+}
+@keyframes generation-edge {
+  to {
+    --generation-edge-angle: 360deg;
+  }
+}

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { isTerminal } from "../shared/types";
+import GenerateButton from "./components/GenerateButton";
 import type { Job } from "../shared/types";
 import { usePageKey } from "./usePageKey";
 import { useComposer, composerInput } from "./useComposer";
@@ -268,22 +270,21 @@ export default function App() {
                   </strong>
                   <span>EST. / RUN</span>
                 </div>
-                <button
-                  className="generate-button"
-                  onClick={() => void submit()}
+                <GenerateButton
+                  generator={generator}
+                  submitting={submitting}
+                  activeJob={jobs.find(
+                    (job) =>
+                      job.generator === generator && !isTerminal(job.status),
+                  )}
+                  hasKey={Boolean(key)}
                   disabled={
-                    submitting ||
                     uploading ||
                     (generator === "video" ? !description.trim() : !sourceId)
                   }
-                >
-                  {submitting
-                    ? "Sending…"
-                    : generator === "video"
-                      ? "Generate"
-                      : "Upscale"}
-                  <Icon name="arrow" size={18} />
-                </button>
+                  onSubmit={() => void submit()}
+                  onResume={() => setShowKey(true)}
+                />
               </div>
             </div>
           </section>

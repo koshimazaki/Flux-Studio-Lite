@@ -64,7 +64,7 @@ Build output is approximately 82 KB gzip for the app and 123 KB gzip for the laz
 - Portable local evidence is kept outside Git in `.dr-morph-review/desktop-main.png`, `desktop-camera.png` and `portrait-camera.png`. The desktop result uses a mock-returned library clip, not a newly generated finding. No console errors were recorded in the isolated result test.
 - MORPHKIT lab validation, engine build and registry check pass. Human visual approval remains pending.
 
-Cloudflare/D1/R2, a paid same-subject findings grid, exact-input cache, real BYO/device tests and a stranger test remain deferred. Architecture notes document HTTPS object input and the trusted-metadata requirement for the future Worker adapter; that adapter is not implemented here. Public factual answers live in `docs/questions.md`; the separate private interview coaching document was not edited from this worktree.
+Cloudflare/D1/R2, a paid same-subject findings grid, exact-input cache, real BYO/device tests and a stranger test remain deferred. Architecture notes document HTTPS object input and the trusted-metadata requirement for the future Worker adapter; that adapter is not implemented here. This entry records the earlier local-only milestone; later sections cover the implemented hosted adapter.
 
 ## Readability and Camera switch follow-up
 
@@ -137,3 +137,12 @@ Cloudflare initially rejected the configured CPU allowance on the Free plan. Rem
 - Final checks: 56 tests pass; production frontend build, Worker typecheck and Pages bundle pass. Empty catalog required an explicit library-item type in the Worker. No paid request was made by this verification pass.
 
 - Hosted follow-up smoke: canonical Pages homepage loads the cabin default and an empty public gallery. The final empty-preview badge guard removes the obsolete Library label when no clip exists. Build and Worker typecheck pass after that guard.
+
+## Subtle button feedback and single-row clip actions
+
+- 58 tests pass, including button lifecycle through queued/generating/copying/terminal states and credential resume without a duplicate submission. Pages production build and Worker typecheck pass.
+- The operator rejected the initial tiny particles and then the larger voxel cube. The final 20px pixel ring uses eight 3px squares, tracks the label colour through CSS theme transitions, and has the same measured vertical centre as the text. The heavy outer halo is replaced by a faint glow and an animated 1px border highlight. The main video no longer repeats the button status. Static reduced-motion and visibility cleanup remain implemented; OS accessibility settings were not changed.
+- Browser fixture with no API calls checked Saving, Ready, missing-key Resume and restored generation states. Desktop metadata fits Ready/cost/Recreate/Download/Upscale on one row; adaptive columns preserve space at narrower widths. At a measured 881px viewport, metadata rows are 18px tall in two columns. Narrow layouts can wrap if a row still exceeds available width. Temporary viewport override reset.
+- Public setup links and stale feature descriptions were updated for the current Pages product. No paid provider calls were made.
+
+- Theme QA found a stale canvas colour during the button CSS transition. Resolving colour on painted frames fixes it; both loader and border were checked in Lime and Cyberpunk. Edge rotation is eight seconds.
