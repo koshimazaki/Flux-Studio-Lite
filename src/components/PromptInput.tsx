@@ -7,16 +7,19 @@ import PromptField from "./PromptField";
 import Icon from "./Icon";
 
 export const DEFAULT_PROMPT =
-  "A sculptural chrome chair in a quiet concrete gallery. Soft afternoon light falls across the floor.";
+  "A solitary red cabin on a rocky island. Early morning mist, still water and a soft overcast sky.";
 const ideas = [
-  { label: "Quiet architecture", text: DEFAULT_PROMPT },
+  {
+    label: "Quiet architecture",
+    text: "A sculptural chrome chair in a quiet concrete gallery. Soft afternoon light falls across the floor.",
+  },
   {
     label: "Studio object",
     text: "A matte ivory ceramic vessel on a pale stone plinth. Warm studio light, delicate shadows, a seamless background.",
   },
   {
     label: "A world outside",
-    text: "A solitary red cabin on a rocky island. Early morning mist, still water and a soft overcast sky.",
+    text: DEFAULT_PROMPT,
   },
 ];
 

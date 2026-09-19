@@ -50,6 +50,7 @@ export default function FeaturedVideo({
               setViewing({
                 url,
                 label: job?.description || source?.label || "Video",
+                prompt: job?.prompt,
               })
             }
           >

@@ -2,6 +2,7 @@ import { isTerminal } from "../../shared/types";
 import { useState } from "react";
 import type { Job, Source } from "../../shared/types";
 import Clip from "./Clip";
+import ClipActions from "./ClipActions";
 import VideoLightbox, { type ViewingClip } from "./VideoLightbox";
 import Icon from "./Icon";
 import JobMedia, { statusLabel } from "./JobMedia";
@@ -65,6 +66,7 @@ export default function Gallery({
                     setViewing({
                       url: job.resultUrl!,
                       label: job.description || "Untitled study",
+                      prompt: job.prompt,
                     })
                   }
                 />
@@ -90,28 +92,23 @@ export default function Gallery({
                   ${Number(job.costActualUsd ?? job.costEstimateUsd).toFixed(2)}
                   {job.costActualUsd === undefined ? " est." : ""}
                 </span>
-                {job.status === "Ready" && job.resultUrl && (
-                  <a
-                    className="download-clip"
-                    href={job.resultUrl}
-                    download={`flux-study-${job.id}.mp4`}
-                  >
-                    Download ↓
-                  </a>
-                )}
-                {job.status === "Ready" && job.generator === "video" ? (
-                  <button
-                    onClick={() => {
-                      const source = sources.find(
-                        (s) => s.url === job.resultUrl || s.id === job.id,
-                      );
-                      if (source) onUpscale(source.id);
-                    }}
-                    title="Use this clip in Upscale"
-                  >
-                    Upscale <Icon name="expand" size={12} />
-                  </button>
-                ) : isTerminal(job.status) && job.status !== "Ready" ? (
+                {job.status === "Ready" && job.resultUrl ? (
+                  <ClipActions
+                    url={job.resultUrl}
+                    filename={`flux-study-${job.id}.mp4`}
+                    onRecreate={() => onRetry(job)}
+                    onUpscale={
+                      job.generator === "video"
+                        ? () => {
+                            const source = sources.find(
+                              (s) => s.url === job.resultUrl || s.id === job.id,
+                            );
+                            if (source) onUpscale(source.id);
+                          }
+                        : undefined
+                    }
+                  />
+                ) : isTerminal(job.status) ? (
                   <button onClick={() => onRetry(job)}>
                     Try again <Icon name="refresh" size={12} />
                   </button>
@@ -143,16 +140,11 @@ export default function Gallery({
                     {Number(source.duration.toFixed(1))}s · {source.width} ×{" "}
                     {source.height}
                   </span>
-                  <a
-                    className="download-clip"
-                    href={source.url}
-                    download={`${source.id}.mp4`}
-                  >
-                    Download ↓
-                  </a>
-                  <button onClick={() => onUpscale(source.id)}>
-                    Upscale <Icon name="expand" size={12} />
-                  </button>
+                  <ClipActions
+                    url={source.url}
+                    filename={`${source.id}.mp4`}
+                    onUpscale={() => onUpscale(source.id)}
+                  />
                 </div>
               </div>
             </article>
@@ -166,10 +158,10 @@ export default function Gallery({
         </div>
       )}
       {filter === "all" && library.length > 0 && (
-        <p className="gallery-footnote">
+        <p className="gallery-footnote" id="library-recreate-note">
           Your saved clips stay available after refresh in this browser.
           Download to keep a copy. Library clips are existing studio
-          generations. Camera experiments in this session appear above.
+          generations. Recreate loads a clip’s saved prompt and settings.
         </p>
       )}
       <VideoLightbox clip={viewing} onClose={() => setViewing(null)} />

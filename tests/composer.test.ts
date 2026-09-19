@@ -7,7 +7,12 @@ import {
   initialComposer,
 } from "../src/useComposer";
 import { validateInput } from "../server/validation";
-import { jobIdFromUrl, jobUrl } from "../src/job-links";
+import {
+  jobIdFromUrl,
+  selectedJob,
+  jobHistoryState,
+  cleanJobUrl,
+} from "../src/job-links";
 import type { Job } from "../shared/types";
 
 describe("section camera contract", () => {
@@ -157,8 +162,27 @@ describe("job links", () => {
     expect(jobIdFromUrl("http://localhost/?job=abc-123")).toBe("abc-123");
     expect(jobIdFromUrl("http://localhost/?job=../../private")).toBeNull();
     expect(jobIdFromUrl("http://localhost/")).toBeNull();
-    expect(jobUrl("http://localhost/studio?theme=dark#video", "abc-123")).toBe(
-      "/studio?theme=dark&job=abc-123#video",
+    expect(
+      cleanJobUrl("http://localhost/studio?theme=dark&job=abc-123#video"),
+    ).toBe("/studio?theme=dark#video");
+  });
+  it("restores the selected clip from tab history and accepts old links", () => {
+    const state = jobHistoryState({ theme: "dark" }, "clip-42");
+    expect(state).toEqual({ theme: "dark", studioJobId: "clip-42" });
+    expect(selectedJob("https://studio.test/", state)).toBe("clip-42");
+    expect(selectedJob("https://studio.test/?job=legacy", state)).toBe(
+      "legacy",
     );
+    for (const state of [
+      null,
+      [],
+      "clip-42",
+      { studioJobId: "../secret" },
+      { studioJobId: 42 },
+    ])
+      expect(selectedJob("https://studio.test/", state)).toBeNull();
+    expect(
+      selectedJob("https://studio.test/", jobHistoryState(state, null)),
+    ).toBeNull();
   });
 });

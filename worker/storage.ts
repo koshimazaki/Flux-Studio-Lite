@@ -20,10 +20,12 @@ export interface SourceRow {
   object_key: string;
   bytes: number;
 }
-export const samples: Source[] = library.map((s) => ({
-  ...s,
-  origin: "sample",
-}));
+export const samples: Source[] = (library as Omit<Source, "origin">[]).map(
+  (s) => ({
+    ...s,
+    origin: "sample",
+  }),
+);
 export async function ownedJob(env: Env, id: string, session: string) {
   const row = await env.DB.prepare(
     "SELECT * FROM jobs WHERE id=? AND session=?",

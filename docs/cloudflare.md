@@ -8,7 +8,7 @@ The hosted app uses your own BFL key. Connect it in the header: the balance chec
 
 - Pages static frontend + advanced-mode Worker: same-origin API with the existing D1/R2 bindings.
 - D1: session-owned jobs, unique submission IDs, copy leases, source metadata and temporary input links.
-- R2: private uploaded/generated MP4s, plus the three project-owned library sources.
+- R2: private uploaded/generated MP4s. The public library is currently empty pending a new curated set.
 - MP4Box: bounded range inspection of stored videos for trustworthy upscale dimensions, duration and estimates. No Python or ffprobe in the Worker.
 
 Keep the tab open and visible until a generated clip is saved. Refreshing, navigating away or closing the tab clears its in-memory key; re-enter it to resume polling. No credential is read from or written to browser storage. An uncaptured provider link may expire after approximately one hour. The adapter does not claim durable unattended completion or cross-device accounts.
@@ -28,13 +28,11 @@ npx wrangler d1 migrations apply flux-studio-lite --local
 npx wrangler dev
 ```
 
-For another account, edit the account ID in `scripts/deploy-pages.mjs` and database/bucket bindings in `wrangler.pages.json`. The original Workers target still uses `wrangler.jsonc`. Create the corresponding D1 database and R2 bucket, apply `migrations/` remotely and seed each `public/media/library-0N.mp4` into `library/library-0N.mp4` in the private media bucket. Library posters/videos also ship as static assets.
+For another account, edit the account ID in `scripts/deploy-pages.mjs` and database/bucket bindings in `wrangler.pages.json`. The original Workers target still uses `wrangler.jsonc`. Create the corresponding D1 database and R2 bucket, apply `migrations/` remotely before deployment. The catalog is currently empty; seed media only when adding future curated entries with their original inputs. Retired R2 objects have not been deleted, but the current app no longer exposes their sample routes.
 
 ```sh
 npx wrangler d1 migrations apply flux-studio-lite --remote
-npx wrangler r2 object put flux-studio-lite-media/library/library-01.mp4 --file public/media/library-01.mp4 --content-type video/mp4 --remote
-# Repeat the seed command for library-02 and library-03.
-npm run deploy
+# Seed only future curated clips with recorded prompts and settings.
 ```
 
 Do not provision a BFL secret: each visitor supplies their own key. Do not log request headers or provider bodies. The Worker only forwards keys to allowed BFL API hosts and refuses redirects. Input-video capability links expire after two hours. Normal clip playback requires the owning browser's HttpOnly cookie.

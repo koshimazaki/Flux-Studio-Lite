@@ -97,3 +97,11 @@ The operator asked to make the camera phrases feel like one prompt rather than s
 The operator renamed the featured caption to “Your latest generation” and requested a geometric waiting animation. A separate Canvas 2D component shows eight cube pieces turning in layers, using the active theme. This avoids a WebGL context per gallery card and adds no dependency. The existing reveal transition remains.
 
 The operator also requested an optional text prompt beside the upscale source clip. It grows vertically and wraps below the source on narrow screens. Upscale text stays separate from the video scene, is restored with a saved job, and reaches BFL in both local and hosted adapters. An empty prompt retains neutral upscaling.
+
+## Compact recall and clean navigation follow-up
+
+The operator kept the camera editor but requested an inline coloured sentence in the applied composer and a cabin starting example. Recreate was added before Download/Upscale; selecting a clip title also restores its full setup and smoothly scrolls to the main viewer. Neither action submits a generation.
+
+The old three public clips were image-to-video examples with no bundled original inputs. After this was explained, the operator asked to remove them and curate new reproducible examples later. Their public assets and catalog entries are removed; a single MP4 is retained as a test-only fixture. Existing private R2 objects were not deleted.
+
+The enlarged viewer now places the complete saved prompt below the video and offers Copy prompt and Download MP4. Job identifiers remain internal: selected clip state lives in tab history, old links migrate to a clean address, and reload restores the selected setup without overwriting ongoing edits during polling.

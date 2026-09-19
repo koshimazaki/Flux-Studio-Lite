@@ -56,7 +56,19 @@ export default function App() {
     generate,
     featuredJob,
     selectJob,
+    selectedId,
   } = useJobs(key);
+  const restoredSelection = useRef<string | null>(null);
+  useEffect(() => {
+    if (
+      selectedId &&
+      featuredJob?.id === selectedId &&
+      restoredSelection.current !== selectedId
+    ) {
+      restoredSelection.current = selectedId;
+      dispatch({ type: "restore", job: featuredJob });
+    }
+  }, [selectedId, featuredJob, dispatch]);
   useEffect(() => {
     request<{ hasServerKey: boolean }>("/api/health")
       .then((h) => setHasServerKey(h.hasServerKey))
@@ -115,7 +127,7 @@ export default function App() {
   }
   function retry(job: Job) {
     dispatch({ type: "restore", job });
-    composerRef.current?.scrollIntoView({ block: "center" });
+    selectJob(job.id);
   }
   return (
     <>
@@ -352,7 +364,10 @@ export default function App() {
           sources={sources}
           onUpscale={chooseUpscale}
           onRetry={retry}
-          onSelect={selectJob}
+          onSelect={(id) => {
+            const job = jobs.find((item) => item.id === id);
+            if (job) retry(job);
+          }}
         />
       </main>
       <footer>

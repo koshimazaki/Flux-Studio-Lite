@@ -4,7 +4,7 @@ import { inspectMp4, checkUpscaleLimits } from "../shared/mp4";
 import { estimateUpscaleUsd } from "../shared/presets";
 describe("portable MP4 metadata", () => {
   it("reads actual library geometry and calculates an upscale estimate without ffprobe", async () => {
-    const file = await readFile("public/media/library-01.mp4");
+    const file = await readFile("tests/fixtures/metadata.mp4");
     let readBytes = 0;
     const metadata = await inspectMp4(file.length, async (offset, length) => {
       readBytes += length;
@@ -35,7 +35,7 @@ describe("portable MP4 metadata", () => {
 });
 
 it("skips a large media box to find metadata at the end", async () => {
-  const file = await readFile("public/media/library-01.mp4");
+  const file = await readFile("tests/fixtures/metadata.mp4");
   const boxes: { type: string; bytes: Buffer }[] = [];
   for (let offset = 0; offset < file.length;) {
     const size = file.readUInt32BE(offset);

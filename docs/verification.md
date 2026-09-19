@@ -126,3 +126,12 @@ Cloudflare initially rejected the configured CPU allowance on the Free plan. Rem
 - 55 tests pass, including separate upscale text, validation, restoration and prompt forwarding in both the Express and workerd adapters. Existing empty-prompt behavior remains covered. Pages build and Worker typecheck pass. No paid provider calls.
 - Private browser fixture verified animated cube poses, theme colour changes, the renamed caption, waiting-to-decoded-video reveal and removal of the animation on errors. The animation's reduced-motion and visibility handling were inspected in source; OS reduced-motion was not toggled.
 - Browser verified source selection with the optional prompt beside it, typed text appearing in the composed upscale settings, and wrapping below the source at a measured 341px viewport with no horizontal overflow. The temporary viewport override was reset.
+
+## Compact recall and clean navigation
+
+- Isolated browser fixture: Recreate and title selection restore the scene, all three edited camera clauses, 9-second duration, Full HD and 9:16; upscale recreation restores its source, 2.5×, Creative and optional text. These actions did not submit requests.
+- The three camera clauses share a flowing coloured line. Enlarged main/gallery playback displays the complete saved video/upscale prompt below the media. Copy was verified by replacing a temporary field and pasting back every submitted camera clause. Escape closes the viewer and restores focus.
+- Clean-address selection and reload were checked: the chosen video and setup survive through tab history with no job query in the address. Unit coverage validates legacy links, tab-state IDs and invalid values.
+- At a measured 341px viewport, the lightbox stays within the viewport (328px wide); prompt text wraps within 286px and there is no horizontal overflow. Temporary viewport override reset.
+
+- Final checks: 56 tests pass; production frontend build, Worker typecheck and Pages bundle pass. Empty catalog required an explicit library-item type in the Worker. No paid request was made by this verification pass.

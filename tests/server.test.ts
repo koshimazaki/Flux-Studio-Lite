@@ -309,7 +309,7 @@ describe("local job API", () => {
   it("copies completed media before Ready and exposes a usable source for upscaling", async () => {
     const { post, bfl, base, cookie, store } = await setup();
     bfl.media = new Uint8Array(
-      await readFile(path.resolve("public/media/library-01.mp4")),
+      await readFile(path.resolve("tests/fixtures/metadata.mp4")),
     );
     bfl.ready = true;
     const { job } = await (await post("copy-request")).json();
@@ -344,7 +344,7 @@ describe("local job API", () => {
       method: "POST",
       headers: { cookie, "Content-Type": "video/mp4" },
       body: new Uint8Array(
-        await readFile(path.resolve("public/media/library-01.mp4")),
+        await readFile(path.resolve("tests/fixtures/metadata.mp4")),
       ),
     });
     expect(uploaded.status).toBe(201);

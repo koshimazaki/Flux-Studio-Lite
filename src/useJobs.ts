@@ -1,5 +1,5 @@
 import { isTerminal } from "../shared/types";
-import { jobIdFromUrl, jobUrl } from "./job-links";
+import { selectedJob, cleanJobUrl, jobHistoryState } from "./job-links";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Job, Source, GenerateInput } from "../shared/types";
 export async function request<T>(
@@ -19,7 +19,7 @@ export function useJobs(key: string) {
     [sources, setSources] = useState<Source[]>([]),
     [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(() =>
-    jobIdFromUrl(location.href),
+    selectedJob(location.href, history.state),
   );
   const selectedRef = useRef(selectedId);
   selectedRef.current = selectedId;
@@ -47,6 +47,11 @@ export function useJobs(key: string) {
           "That job is unavailable in this browser session. Showing your latest clip.",
         );
         setSelectedId(null);
+        history.replaceState(
+          jobHistoryState(history.state, null),
+          "",
+          cleanJobUrl(location.href),
+        );
       }
     }
     setJobs(data.jobs);
@@ -105,8 +110,14 @@ export function useJobs(key: string) {
   }, [key, refresh]);
   useEffect(() => {
     const navigate = () => {
-      setSelectedId(jobIdFromUrl(location.href));
+      setSelectedId(selectedJob(location.href, history.state));
     };
+    // Migrate old ?job links without losing the selected clip on reload.
+    history.replaceState(
+      jobHistoryState(history.state, selectedRef.current),
+      "",
+      cleanJobUrl(location.href),
+    );
     window.addEventListener("popstate", navigate);
     return () => window.removeEventListener("popstate", navigate);
   }, []);
@@ -115,7 +126,11 @@ export function useJobs(key: string) {
   }, [selectedId, refresh]);
   function selectJob(id: string) {
     setSelectedId(id);
-    history.replaceState(null, "", jobUrl(location.href, id));
+    history.replaceState(
+      jobHistoryState(history.state, id),
+      "",
+      cleanJobUrl(location.href),
+    );
     document.getElementById("main-video")?.scrollIntoView({
       block: "start",
       behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -147,6 +162,7 @@ export function useJobs(key: string) {
     refresh,
     generate,
     selectJob,
+    selectedId,
     featuredJob: jobs.find((job) => job.id === selectedId) ?? jobs[0],
   };
 }

@@ -34,7 +34,8 @@
   line-height: 1.6;
 }
 .camera-sentences > span {
-  display: block;
+  display: inline;
+  white-space: normal;
 }
 .camera-sentences:hover {
   text-decoration: underline;
@@ -199,4 +200,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.clip-meta {
+  flex-wrap: wrap;
+}
+.clip-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
 }

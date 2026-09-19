@@ -17,7 +17,7 @@ npm ci
 npm run dev
 ```
 
-Open `http://127.0.0.1:4317`. The three bundled library clips play without a key. For live generation, enter a BFL key in the connection dialogue or supply `BFL_API_KEY` in the server environment.
+Open `http://127.0.0.1:4317`. The public gallery starts empty while a new set of reproducible examples is curated. For live generation, enter a BFL key in the connection dialogue or supply `BFL_API_KEY` in the server environment.
 
 ```sh
 npm test
@@ -50,7 +50,7 @@ All 24 camera terms are exploratory. No reliability score is implied. A successf
 - Background recovery for server-key jobs; visitor-key polling requires the key on each request.
 - Local copies of generated videos, byte-range playback and decoded-frame-gated reveal.
 - A $5 UTC-day server-key budget and three requests per session per day. Failed or uncertain submissions conservatively retain their reservation.
-- Three prior studio clips labelled **Library**, with [media provenance](public/media/provenance.json).
+- Recreate restores a generated clip’s prompt and settings without submitting it. Enlarged playback shows the full saved prompt with Copy and Download actions.
 
 ## Key handling
 
@@ -84,7 +84,7 @@ Make camera language visible before spending on video generation, then keep the 
 
 ## Findings
 
-One real text-to-video run and one precise upscale completed during the initial local build. They verified integration and preserved the recognisable subject; they do not establish reliability for the camera catalog. Library clips are previous studio generations. A controlled same-subject movement grid remains to be run.
+One real text-to-video run and one precise upscale completed during the initial local build. They verified integration and preserved the recognisable subject; they do not establish reliability for the camera catalog. The previous illustrative library clips have been retired. A controlled same-subject movement grid remains to be run.
 
 ## Lineage
 

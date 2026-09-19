@@ -53,7 +53,7 @@ beforeAll(async () => {
     platform: "browser",
     target: "es2022",
   });
-  const clip = await readFile("public/media/library-01.mp4");
+  const clip = await readFile("tests/fixtures/metadata.mp4");
   mf = new Miniflare(
     convertV4MiniflareOptions({
       modules: true,
@@ -99,8 +99,29 @@ beforeAll(async () => {
   const bindings = await mf.getBindings<{
     MEDIA: { put: (key: string, body: Uint8Array) => Promise<unknown> };
   }>();
-  await bindings.MEDIA.put("library/library-01.mp4", clip);
+  await bindings.MEDIA.put("test/metadata.mp4", clip);
   cookie = (await call("/api/health")).headers.get("set-cookie")!.split(";")[0];
+  const session = cookie.slice("camera_session=".length);
+  await db
+    .prepare(
+      "INSERT INTO sources (id,session,data,object_key,bytes) VALUES (?,?,?,?,?)",
+    )
+    .bind(
+      "fixture-source",
+      session,
+      JSON.stringify({
+        id: "fixture-source",
+        label: "Metadata fixture",
+        url: "/api/clips/fixture-source",
+        width: 960,
+        height: 528,
+        duration: 10.041667,
+        origin: "upload",
+      }),
+      "test/metadata.mp4",
+      clip.length,
+    )
+    .run();
 }, 30000);
 afterAll(async () => {
   await mf?.dispose();
@@ -171,7 +192,7 @@ describe("Cloudflare adapter in workerd with isolated D1/R2 and fake BFL", () =>
     const response = await post("worker-upscale-test", {
       ...input,
       generator: "upscale",
-      sourceId: "library-01",
+      sourceId: "fixture-source",
       upscalePrompt: "  Fine linen texture.  ",
     });
     expect(response.status).toBe(202);
@@ -199,7 +220,7 @@ describe("Cloudflare adapter in workerd with isolated D1/R2 and fake BFL", () =>
     failSubmit = false;
   });
   it("checks uploaded bytes rather than browser-supplied metadata", async () => {
-    const bytes = await readFile("public/media/library-01.mp4");
+    const bytes = await readFile("tests/fixtures/metadata.mp4");
     const response = await call(
       "/api/uploads?filename=test.mp4&width=1&height=1&duration=1",
       {
