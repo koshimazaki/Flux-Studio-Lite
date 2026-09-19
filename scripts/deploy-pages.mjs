@@ -16,5 +16,12 @@ execFileSync(
     "--commit-hash",
     head,
   ],
-  { cwd: ".pages-project", stdio: "inherit" },
+  {
+    cwd: ".pages-project",
+    stdio: "inherit",
+    env: {
+      ...process.env,
+      CLOUDFLARE_ACCOUNT_ID: "da207e184a404c2be5debcd3368d3e74",
+    },
+  },
 );
