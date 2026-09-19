@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { request } from "../useJobs";
 import Icon from "./Icon";
 
@@ -23,14 +23,19 @@ export default function AccountBalance({
     error?: string;
     loading: boolean;
   }>({ loading: false });
+  const lastOwner = useRef<symbol | null>(null);
   useEffect(() => {
-    onVerified(false);
+    // Only a changed connection is unverified. A re-check after a generation
+    // keeps the last known balance on screen instead of flickering.
+    const reconnected = lastOwner.current !== owner;
+    lastOwner.current = owner;
+    if (reconnected) onVerified(false);
     if (!connected) {
       setResult({ owner, loading: false });
       return;
     }
     const controller = new AbortController();
-    setResult({ owner, loading: true });
+    if (reconnected) setResult({ owner, loading: true });
     request<Balance>("/api/credits", {
       headers: apiKey ? { "x-byo-key": apiKey } : {},
       signal: controller.signal,

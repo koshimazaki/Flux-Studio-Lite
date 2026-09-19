@@ -155,9 +155,8 @@ export default function App() {
             onVerified={setKeyVerified}
             hasServerKey={hasServerKey}
             revision={jobs
-              .map(
-                (job) => `${job.id}:${job.status}:${job.costActualUsd ?? ""}`,
-              )
+              .filter((job) => isTerminal(job.status))
+              .map((job) => `${job.id}:${job.costActualUsd ?? ""}`)
               .join("|")}
           />
           <ThemePicker />

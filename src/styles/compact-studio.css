@@ -3,7 +3,7 @@ main {
 }
 .featured-video,
 .studio {
-  width: min(100%, clamp(52.875rem, 55vw, 86rem));
+  width: min(100%, clamp(52.875rem, 50vw, 86rem));
   max-width: none;
 }
 .featured-video,
@@ -40,21 +40,23 @@ main {
   padding-block: 12px;
 }
 .composer-toolbar {
-  padding-block: 12px;
+  padding-block: 11px;
 }
 .featured-video {
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
+/* Bounded by viewport height so a laptop still reaches the end of the first
+   gallery row without scrolling: header to that row stays within ~1000px. */
 .featured-media {
-  max-height: clamp(340px, min(calc(78px + 15.3vw), 36dvh), 560px);
+  max-height: clamp(216px, min(calc(40px + 15vw), 32dvh), 500px);
 }
 .gallery {
-  margin-top: 32px;
+  margin-top: 14px;
   width: min(100%, clamp(68.5rem, 82vw, 126rem));
   max-width: none;
 }
 .gallery-heading {
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   align-items: center;
 }
 .gallery-heading h2 {
@@ -67,10 +69,10 @@ main {
   margin-bottom: 8px;
 }
 .studio-foot {
-  padding-block: 8px;
+  padding-block: 6px;
 }
 .prompt-editor {
-  padding-block: 16px;
+  padding-block: 13px;
 }
 .camera-open {
   color: var(--soft);

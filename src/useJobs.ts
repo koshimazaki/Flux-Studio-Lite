@@ -30,6 +30,7 @@ export function useJobs(key: string) {
     jobs.some((job) => job.keyMode === "byo" && !isTerminal(job.status));
   const jobsRef = useRef(jobs);
   jobsRef.current = jobs;
+  const pollError = useRef("");
   const refresh = useCallback(async () => {
     const data = await request<{ jobs: Job[]; sources: Source[] }>(
       "/api/history",
@@ -81,12 +82,21 @@ export function useJobs(key: string) {
             setJobs((current) =>
               current.map((j) => (j.id === result.job.id ? result.job : j)),
             );
+            // A poll that recovers retracts its own banner. Errors raised
+            // elsewhere stay until their own owner clears them.
+            if (pollError.current) {
+              const recovered = pollError.current;
+              pollError.current = "";
+              setError((current) => (current === recovered ? "" : current));
+            }
             if (result.job.status === "Ready") await refresh();
           } catch (e) {
-            if (!cancelled)
-              setError(
-                e instanceof Error ? e.message : "Could not refresh the job.",
-              );
+            if (!cancelled) {
+              const message =
+                e instanceof Error ? e.message : "Could not refresh the job.";
+              pollError.current = message;
+              setError(message);
+            }
           }
         }
       }

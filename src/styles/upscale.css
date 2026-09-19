@@ -7,10 +7,6 @@
 .upscale-amount {
   width: calc(174 * var(--unit));
 }
-.upscale-amount .tick-fader__ruler,
-.upscale-amount .tick-fader__limits {
-  display: none;
-}
 .upscale-mode {
   border: 0;
   padding: 0;

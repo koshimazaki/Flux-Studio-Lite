@@ -11,7 +11,7 @@ import {
 import CameraGlyph from "./CameraGlyph";
 import Icon from "./Icon";
 const CameraPreview = lazy(() => import("../scene/CameraPreview"));
-export default function CameraPanel({
+export default function CameraPanelExpanded({
   selected,
   onSelect,
 }: {
