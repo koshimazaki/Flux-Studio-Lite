@@ -33,23 +33,6 @@
   width: var(--space-9);
   height: var(--space-16);
 }
-.source-content h2 {
-  font-size: var(--space-18);
-  font-weight: 450;
-  margin: 0 0 var(--space-3);
-  letter-spacing: calc(-0.2 * var(--unit));
-}
-.source-content .select-menu {
-  max-width: calc(330 * var(--unit));
-  background: var(--sunken);
-}
-.source-content .instrument-trigger {
-  font-size: var(--space-11);
-  min-height: var(--space-32);
-}
-.source-content .select-menu__options {
-  min-width: 100%;
-}
 @media (max-width: 35rem) {
   .topbar-right {
     gap: var(--space-8);
@@ -58,15 +41,5 @@
     padding: var(--space-7);
     gap: var(--space-4);
     min-height: var(--space-32);
-  }
-  .source-content h2 {
-    font-size: var(--space-16);
-  }
-  .source-content .select-menu__options {
-    min-width: 0;
-    max-width: calc(100vw - calc(90 * var(--unit)));
-  }
-  .source-content .select-menu__option > span {
-    white-space: normal;
   }
 }

@@ -204,26 +204,6 @@
   .gallery-footnote {
     font-size: var(--text-small-7);
   }
-  .upscale-input {
-    gap: var(--space-12);
-    padding: var(--space-20) var(--space-15) var(--space-26);
-  }
-  .source-icon {
-    width: calc(45 * var(--unit));
-    height: calc(55 * var(--unit));
-  }
-  .source-content label {
-    font-size: var(--space-16);
-  }
-  .source-content > span {
-    font-size: var(--text-small-7);
-  }
-  .source-content select {
-    font-size: var(--space-10);
-  }
-  .upload-button {
-    padding: var(--space-6);
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   *,

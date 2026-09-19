@@ -201,10 +201,7 @@ export default function App() {
           <section className="composer" aria-label="Video composer">
             <div className="composer-top">
               <div className="mode-badge" aria-live="polite">
-                <Icon
-                  name={generator === "video" ? "camera" : "expand"}
-                  size={17}
-                />
+                {generator === "video" && <Icon name="camera" size={17} />}
                 <span>
                   {generator === "video" ? "Text to video" : "Video upscale"}
                 </span>

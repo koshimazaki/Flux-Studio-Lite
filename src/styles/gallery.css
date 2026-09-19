@@ -1,35 +1,3 @@
-.upscale-input {
-  display: flex;
-  align-items: center;
-  gap: var(--space-20);
-  padding: var(--space-25) var(--space-25) calc(33 * var(--unit));
-  min-height: calc(143 * var(--unit));
-}
-.source-icon {
-  width: calc(65 * var(--unit));
-  height: calc(65 * var(--unit));
-  display: grid;
-  place-items: center;
-  border: var(--space-1) dashed var(--border-strong);
-  border-radius: var(--radius-panel);
-  color: var(--accent);
-  background: var(--surface-wash);
-}
-.source-content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-9);
-}
-.source-content > span {
-  font-family: var(--mono);
-  font-size: var(--text-small-8);
-  color: var(--muted);
-}
-.upload-button {
-  border: var(--space-1) solid var(--border-strong);
-}
 .gallery {
   margin: calc(45 * var(--unit)) auto 0;
   max-width: 66.25rem;

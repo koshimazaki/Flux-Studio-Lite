@@ -45,7 +45,7 @@ All 24 camera terms are exploratory. No reliability score is implied. A successf
 - BFL account balance replaces Local Preview when a key is available. A successful balance check verifies the connection; click the balance to refresh.
 - Three independent camera sections with editable wording. Camera off produces an unmodified scene prompt. See [camera wording and sources](docs/camera-wording.md).
 - FLUX 3 text-to-video: 5–20 seconds, seven aspect ratios, HD / Full HD / QHD / UHD or HD draft, without audio. Duration and resolution update the cost estimate.
-- FLUX Video Upscale: 1.5–3× with Precise or Creative mode from a gallery clip or MP4 upload. An optional upscale prompt is supported; video camera clauses are excluded. Output estimates respect the provider's 13.75 MP limit.
+- FLUX Video Upscale: 1.5–3× with Precise or Creative mode from a gallery clip or an MP4 dropped or chosen from disk. An optional auto-growing upscale prompt is supported; video camera clauses are excluded. Output estimates respect the provider's 13.75 MP limit.
 - Persist-before-submit jobs, request idempotency, session ownership and bounded API inputs.
 - Background recovery for server-key jobs; visitor-key polling requires the key on each request.
 - Local copies of generated videos, byte-range playback and decoded-frame-gated reveal.
@@ -92,7 +92,7 @@ The graphite instrument styling adapts the author's graphite instrument design v
 
 ## Process
 
-See [design decisions](docs/process.md) and [verification](docs/verification.md). Agents implemented code under operator direction; the record distinguishes applied changes, limitations and deferred work. This local review pass adds no UI or store framework and makes no additional paid requests.
+See [design decisions](docs/process.md) and [verification](docs/verification.md). They distinguish shipped behavior, limitations and deferred work. The implementation adds no UI or store framework, and its review checks make no paid requests.
 
 ## FLUX Studio on Pages
 

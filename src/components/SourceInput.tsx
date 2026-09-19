@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, type DragEvent } from "react";
 import type { Source } from "../../shared/types";
 import { estimateUpscaleOutput } from "../../shared/presets";
 import { request } from "../useJobs";
@@ -30,6 +30,7 @@ export default function SourceInput({
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const source = sources.find((item) => item.id === sourceId);
   const output = source ? estimateUpscaleOutput(source, factor) : null;
   async function upload(file: File) {
@@ -96,14 +97,16 @@ export default function SourceInput({
       if (fileRef.current) fileRef.current.value = "";
     }
   }
+  function drop(event: DragEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    setDragging(false);
+    const file = event.dataTransfer.files[0];
+    if (file) void upload(file);
+  }
   return (
     <div className="upscale-input">
-      <div className="upscale-source">
-        <div className="source-icon">
-          <Icon name="expand" size={30} />
-        </div>
-        <div className="source-content">
-          <h2>Give a clip a closer look.</h2>
+      <div className="upscale-source-panel">
+        <div className="upscale-source-select">
           <SelectMenu
             id="source"
             label="Source clip"
@@ -125,12 +128,31 @@ export default function SourceInput({
           </span>
         </div>
         <button
-          className="icon-button upload-button"
+          type="button"
+          className="upload-dropzone"
+          data-dragging={dragging || undefined}
           onClick={() => fileRef.current?.click()}
+          onDragEnter={(event) => {
+            event.preventDefault();
+            setDragging(true);
+          }}
+          onDragOver={(event) => {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "copy";
+            setDragging(true);
+          }}
+          onDragLeave={(event) => {
+            const next = event.relatedTarget;
+            if (!(next instanceof Node) || !event.currentTarget.contains(next))
+              setDragging(false);
+          }}
+          onDrop={drop}
           disabled={uploading}
-          aria-label="Upload video"
+          aria-label="Drop an MP4 here or choose a video from your computer"
         >
-          <Icon name="upload" />
+          <Icon name="upload" size={25} />
+          <strong>{uploading ? "Uploading…" : "Drop MP4"}</strong>
+          <span>{uploading ? "Reading clip" : "or choose file"}</span>
         </button>
       </div>
       <div className="upscale-prompt">

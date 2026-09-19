@@ -7,6 +7,10 @@
 .upscale-amount {
   width: calc(174 * var(--unit));
 }
+.upscale-amount .tick-fader__ruler,
+.upscale-amount .tick-fader__limits {
+  display: none;
+}
 .upscale-mode {
   border: 0;
   padding: 0;
@@ -49,12 +53,6 @@
   outline: var(--space-2) solid var(--accent);
   outline-offset: var(--space-2);
 }
-.upscale-mode p {
-  margin: var(--space-7) 0 0;
-  color: var(--muted);
-  font-size: var(--space-9);
-  text-align: center;
-}
 @media (max-width: 43.75rem) {
   .composer-toolbar:has(.upscale-controls) {
     flex-wrap: wrap;
@@ -81,28 +79,103 @@
 }
 
 .upscale-input {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
-  flex-wrap: wrap;
-}
-.upscale-source {
-  display: flex;
-  align-items: center;
+  min-height: 0;
   gap: var(--space-14);
-  flex: 1 1 280px;
-  min-width: 0;
+  padding: var(--space-6) var(--space-20) var(--space-7);
 }
-.upscale-source .source-icon {
-  flex-shrink: 0;
-  width: var(--space-40);
-  height: var(--space-40);
-}
+.upscale-source-panel,
 .upscale-prompt {
-  flex: 1 1 240px;
   min-width: 0;
-  padding: var(--space-12) var(--space-14);
+  min-height: calc(88 * var(--unit));
   border: var(--space-1) solid var(--border);
   border-radius: var(--radius-control);
   background: var(--surface);
+  transition:
+    border-color var(--motion-control),
+    background var(--motion-control);
+}
+.upscale-source-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) calc(104 * var(--unit));
+  gap: var(--space-12);
+  padding: var(--space-10);
+}
+.upscale-source-select {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+.upscale-source-select .select-menu {
+  min-width: 0;
+  background: var(--sunken);
+}
+.upscale-source-select .instrument-trigger {
+  min-height: var(--space-32);
+  font-size: var(--space-11);
+}
+.upscale-source-select .select-menu__options {
+  min-width: 100%;
+}
+.upscale-source-select > span {
+  margin-top: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: var(--text-small-8);
+}
+.upload-dropzone {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-7);
+  border: var(--space-1) dashed var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--sunken);
+  color: var(--soft);
+  text-align: center;
+}
+.upload-dropzone svg {
+  color: var(--accent);
+}
+.upload-dropzone strong {
+  color: var(--text);
+  font-size: var(--space-10);
+  font-weight: 450;
+}
+.upload-dropzone span {
+  color: var(--muted);
+  font: var(--text-small-7) var(--mono);
+}
+.upload-dropzone:hover,
+.upload-dropzone[data-dragging] {
+  border-color: var(--accent);
+  background: var(--accent-ghost);
+}
+.upload-dropzone:focus-visible {
+  outline: var(--space-2) solid var(--accent);
+  outline-offset: var(--space-2);
+}
+.upload-dropzone:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+.upscale-prompt {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-10) var(--space-12);
+}
+.upscale-prompt:focus-within {
+  border-color: var(--accent);
+  background: var(--surface-wash);
 }
 .upscale-prompt-label {
   display: block;
@@ -112,9 +185,10 @@
   margin-bottom: var(--space-8);
 }
 .upscale-prompt textarea {
+  flex: 0 0 auto;
   display: block;
   width: 100%;
-  min-height: 48px;
+  min-height: calc(45 * var(--unit));
   border: 0;
   padding: 0;
   resize: none;
@@ -126,4 +200,29 @@
 }
 .upscale-prompt textarea::placeholder {
   color: var(--soft);
+}
+@media (max-width: 68rem) {
+  .upscale-input {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 35rem) {
+  .upscale-input {
+    gap: var(--space-10);
+    padding: var(--space-11) var(--space-13) var(--space-13);
+  }
+  .upscale-source-panel {
+    grid-template-columns: 1fr;
+  }
+  .upscale-source-select .select-menu__options {
+    max-width: calc(100vw - calc(70 * var(--unit)));
+  }
+  .upscale-source-select .select-menu__option > span {
+    white-space: normal;
+  }
+  .upload-dropzone {
+    min-height: calc(58 * var(--unit));
+    flex-direction: row;
+    gap: var(--space-7);
+  }
 }
