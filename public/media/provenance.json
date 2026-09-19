@@ -1,0 +1,32 @@
+[
+  {
+    "id": "library-01",
+    "model": "flux-3-video",
+    "mode": "i2v",
+    "providerStatus": "Ready",
+    "sourceSha256": "bd69eacb52b4f57fb56862c739696ebda0ec3c93a29131d8a443bb8a3a431eb3",
+    "previewSha256": "54c7cb297d4c8a124a6ac42d1e28a89b0fa4ddf1928df1a4405dc184ebb76e6f",
+    "conversion": "Silent 960px H.264 preview, 24 fps, CRF 24, faststart; metadata stripped. Poster at 0.5s.",
+    "meaning": "Previously generated with the BFL API; illustrative library clip, not produced in this app and not a camera-control finding."
+  },
+  {
+    "id": "library-02",
+    "model": "flux-3-video",
+    "mode": "i2v",
+    "providerStatus": "Ready",
+    "sourceSha256": "961a18ddf96e2f9214572f69e5913da9584b5f91af5328716166e8ef7ec256be",
+    "previewSha256": "0d9c5a515b16b072d6f1a2fe5883d6445f1b7f39b164ad1db4324d15d7a2a672",
+    "conversion": "Silent 960px H.264 preview, 24 fps, CRF 24, faststart; metadata stripped. Poster at 0.5s.",
+    "meaning": "Previously generated with the BFL API; illustrative library clip, not produced in this app and not a camera-control finding."
+  },
+  {
+    "id": "library-03",
+    "model": "flux-3-video",
+    "mode": "i2v",
+    "providerStatus": "Ready",
+    "sourceSha256": "8a8978b2d3eaac355cd07c3d6d7b4d447a2e299167846c2e444ae405c62fccbc",
+    "previewSha256": "6e5fef47a8062c0065e517bc6692298dc0b8dad88ec68bef299ab8e4b39e4d73",
+    "conversion": "Silent 960px H.264 preview, 24 fps, CRF 24, faststart; metadata stripped. Poster at 0.5s.",
+    "meaning": "Previously generated with the BFL API; illustrative library clip, not produced in this app and not a camera-control finding."
+  }
+]

@@ -1,0 +1,280 @@
+.generation-controls {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+.generation-controls__model {
+  width: 150px;
+}
+.generation-controls__duration {
+  width: 70px;
+}
+.generation-controls__aspect {
+  width: 76px;
+}
+.generation-controls__resolution {
+  width: 92px;
+}
+.generation-controls__draft {
+  width: 64px;
+}
+.instrument-field {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
+}
+.instrument-field:focus-within {
+  border-color: var(--accent);
+}
+.instrument-label {
+  display: block;
+  padding: 6px 8px 0;
+  color: var(--muted);
+  font: 7px var(--mono);
+  letter-spacing: 0.065em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.instrument-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 27px;
+  border: 0;
+  padding: 3px 8px 6px;
+  background: transparent;
+  color: var(--text);
+  font: 10px var(--mono);
+  text-align: left;
+}
+.instrument-trigger:hover {
+  color: var(--text);
+  background: var(--raised);
+}
+.instrument-trigger > svg:last-child {
+  margin-left: auto;
+  color: var(--muted);
+}
+.instrument-trigger:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+}
+.instrument-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.select-menu__trigger > * {
+  pointer-events: none;
+}
+.select-menu__value {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.select-menu:not(.select-menu--compact) .select-menu__trigger {
+  font-family: inherit;
+}
+.instrument-popover {
+  position: absolute;
+  top: calc(100% + 7px);
+  z-index: 40;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px;
+  background: var(--raised);
+  color: var(--text);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--accent-ink) 24%, transparent);
+}
+.select-menu__options {
+  left: 0;
+  min-width: 220px;
+}
+.select-menu--compact .select-menu__options {
+  min-width: 100%;
+}
+.select-menu__option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 34px;
+  border: 0;
+  border-radius: 2px;
+  padding: 7px 8px;
+  color: var(--text);
+  background: transparent;
+  font-size: 11px;
+  text-align: left;
+  white-space: nowrap;
+}
+.select-menu--compact .select-menu__option {
+  gap: 5px;
+  font: 10px var(--mono);
+}
+.select-menu__option:hover,
+.select-menu__option:focus {
+  outline: none;
+  color: var(--text);
+  background: var(--surface);
+}
+.select-menu__option[aria-selected="true"] {
+  color: var(--accent);
+}
+.select-menu__check {
+  display: inline-flex;
+  width: 12px;
+  margin-left: auto;
+}
+.draft-trigger {
+  justify-content: space-between;
+  gap: 5px;
+}
+.draft-trigger__track {
+  width: 18px;
+  height: 10px;
+  padding: 2px;
+  border-radius: 2px;
+  background: var(--border);
+}
+.draft-trigger__track i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--muted);
+}
+.draft-trigger[aria-checked="true"] .draft-trigger__track {
+  background: var(--accent);
+}
+.draft-trigger[aria-checked="true"] .draft-trigger__track i {
+  transform: translateX(8px);
+  background: var(--accent-ink);
+}
+.duration-popover {
+  right: 0;
+  width: 240px;
+  max-width: calc(100vw - 24px);
+  padding: 16px;
+}
+.tick-fader {
+  width: 100%;
+  min-width: 0;
+}
+.tick-fader--compact {
+  max-width: 190px;
+}
+.tick-fader__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 5px;
+}
+.tick-fader__heading label {
+  color: var(--muted);
+  font: 9px var(--mono);
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+.tick-fader__heading output {
+  color: var(--readout);
+  font: 11px var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.tick-fader input[type="range"] {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 22px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.tick-fader input[type="range"]:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.tick-fader input::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--accent) var(--fader-fill),
+    var(--border) var(--fader-fill)
+  );
+  box-shadow: inset 0 1px 1px
+    color-mix(in srgb, var(--accent-ink) 30%, transparent);
+}
+.tick-fader input::-webkit-slider-thumb {
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  margin-top: -5px;
+  border: 1px solid var(--muted);
+  border-radius: 50%;
+  background: var(--sunken);
+  box-shadow:
+    inset 0 1px 1px color-mix(in srgb, var(--text) 22%, transparent),
+    0 1px 2px color-mix(in srgb, var(--accent-ink) 30%, transparent);
+}
+.tick-fader input::-moz-range-track {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  box-shadow: inset 0 1px 1px
+    color-mix(in srgb, var(--accent-ink) 30%, transparent);
+}
+.tick-fader input::-moz-range-progress {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.tick-fader input::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--muted);
+  border-radius: 50%;
+  background: var(--sunken);
+  box-shadow: inset 0 1px 1px color-mix(in srgb, var(--text) 22%, transparent);
+}
+.tick-fader__ruler {
+  position: relative;
+  height: 10px;
+  margin: 0 6px 0;
+}
+.tick-fader__ruler i {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 6px;
+  background: var(--machined);
+}
+.tick-fader__ruler i.major {
+  height: 10px;
+  background: var(--muted);
+}
+.tick-fader__limits {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 4px 0;
+  color: var(--muted);
+  font: 7px var(--mono);
+}
+@media (max-width: 760px) {
+  .generation-controls {
+    row-gap: 8px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .draft-trigger__track i {
+    transition: transform 0.12s ease;
+  }
+}

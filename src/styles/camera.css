@@ -1,0 +1,221 @@
+.camera-panel {
+  display: grid;
+  grid-template-columns: 1.16fr 1fr;
+  border: 1px solid var(--border);
+  border-radius: 0 0 10px 10px;
+  margin: 0 13px;
+  background: var(--sunken);
+  overflow: hidden;
+  animation: panel-enter 0.22s ease-out;
+}
+.camera-choices {
+  padding: 21px 21px 15px;
+}
+.camera-choices .section-eyebrow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+.camera-choices .section-eyebrow > span:last-child {
+  color: var(--muted);
+  letter-spacing: 0;
+}
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin-top: 17px;
+}
+.preset {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 9px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 12px 2px 10px;
+  min-height: 80px;
+  color: var(--soft);
+  background: var(--surface);
+}
+.preset:hover {
+  background: var(--raised);
+  color: var(--accent-strong);
+  border-color: var(--border-strong);
+}
+.preset span {
+  font-size: 9px;
+  color: var(--soft);
+  white-space: nowrap;
+}
+.preset.selected {
+  border-color: var(--accent);
+  background: var(--accent-ghost);
+  color: var(--accent);
+  box-shadow: inset 0 1px #ffffff08;
+}
+.preset.selected span {
+  color: var(--accent);
+}
+.selection-dot {
+  display: none;
+}
+.preset.selected .selection-dot {
+  display: block;
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  width: 3px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.camera-note a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--soft);
+}
+.camera-note a:hover {
+  color: var(--accent);
+}
+.camera-note {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 9px;
+  color: var(--muted);
+  margin: 15px 0 0;
+}
+.preview-wrap {
+  position: relative;
+  border-left: 1px solid var(--border);
+  background: var(--sunken);
+  min-width: 0;
+  isolation: isolate;
+}
+.preview-wrap canvas {
+  display: block;
+}
+.preview-caption {
+  position: absolute;
+  left: 17px;
+  right: 12px;
+  top: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+.preview-caption > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.preview-caption strong {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text);
+}
+.preview-caption .section-eyebrow {
+  font-size: 7px;
+}
+.preview-caption button {
+  pointer-events: auto;
+}
+.preview-disclaimer {
+  position: absolute;
+  bottom: 12px;
+  left: 17px;
+  font-family: var(--mono);
+  font-size: 7px;
+  color: var(--muted);
+}
+.preview-fallback {
+  height: 270px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  color: var(--muted);
+}
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px;
+  border-radius: 5px;
+  color: var(--soft);
+}
+.icon-button:hover {
+  background: #ffffff0c;
+}
+.studio-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 3px;
+  align-items: center;
+}
+.text-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--soft);
+  padding: 0;
+}
+.prompt-dot {
+  width: 5px;
+  height: 5px;
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+}
+.studio-foot > span {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.studio-foot > span i {
+  width: 2px;
+  height: 2px;
+  background: var(--muted);
+}
+.composed-prompt {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  background: var(--sunken);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--soft);
+  animation: panel-enter 0.2s ease-out;
+}
+.composed-prompt p {
+  margin: 0;
+  flex: 1;
+}
+.error-message {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #2a211b;
+  border: 1px solid #5e493b;
+  color: #e1b397;
+  font-size: 12px;
+  border-radius: 6px;
+  margin: 12px 0;
+  line-height: 1.6;
+}

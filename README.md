@@ -1,0 +1,74 @@
+# FLUX Studio Lite
+
+A compact studio for moving images: describe a scene, choose a camera move, generate a FLUX 3 video, then upscale the result from 1.5× to 3× in Precise or Creative mode. The interface keeps one centred composer, a small shot diagram and the gallery directly below.
+
+This repository contains the local prototype. It supports two real BFL API operations and persists local jobs between restarts. It is an independent experiment and is not affiliated with Black Forest Labs.
+
+## Run locally
+
+Requires Node 22+ and `ffprobe` from FFmpeg. The server uses `ffprobe` to inspect videos and calculate upscale estimates from their actual dimensions.
+
+```sh
+npm ci
+npm run dev
+```
+
+Open `http://127.0.0.1:4317`. The three bundled library clips play without a key. For live generation, enter a BFL key in the connection dialogue or supply `BFL_API_KEY` in the server environment.
+
+```sh
+npm test
+npm run build
+npm start
+```
+
+The server binds to loopback only. A hosted version needs a dedicated cloud adapter with HTTPS, durable storage and rate limits.
+
+## Try it
+
+1. Keep **FLUX 3 · Text to video** selected and edit the scene description.
+2. Choose a camera button. Its wording appears in accent colour inside the prompt. Edit it freely; edits survive switching between moves. The camera-shaped diagram explains the selected preset and does not predict model output.
+3. Open **View composed prompt** to copy the complete text. The server uses the same composer. Camera off removes only the camera clause.
+4. Check the estimate, then generate. The result appears below; refreshing the page resumes the job.
+5. Choose **Upscale** on a gallery clip. Camera controls disappear. Set the amount with the bottom slider and choose **Precise** or **Creative**. Output dimensions and estimated cost update together.
+6. Open the key dialogue and choose **Forget key** to clear the tab's visitor key.
+
+All eight camera terms are exploratory. No reliability score is implied. A successful request verifies the plumbing, not camera behaviour across every subject.
+
+## Included
+
+- React, Vite and TypeScript with plain CSS and one lazy-loaded Three.js diagram.
+- Blackstone/Lime and Cyberpunk themes, opaque custom menus and keyboard-operable ruled faders.
+- Eight named camera requests with editable wording. Camera off produces an unmodified scene prompt. See [camera wording and sources](docs/camera-wording.md).
+- FLUX 3 text-to-video: 5–20 seconds, seven aspect ratios, HD / Full HD / QHD / UHD or HD draft, without audio. Duration and resolution update the cost estimate.
+- FLUX Video Upscale: 1.5–3× with Precise or Creative mode from a gallery clip or MP4 upload. No text or camera prompt is sent. Output estimates respect the provider's 13.75 MP limit.
+- Persist-before-submit jobs, request idempotency, session ownership and bounded API inputs.
+- Background recovery for server-key jobs; visitor-key polling requires the key on each request.
+- Local copies of generated videos, byte-range playback and decoded-frame-gated reveal.
+- A $5 UTC-day server-key budget and three requests per session per day. Failed or uncertain submissions conservatively retain their reservation.
+- Three prior studio clips labelled **Library**, with [media provenance](public/media/provenance.json).
+
+## Key handling
+
+The server key stays in the server environment. A visitor key is held in React state and `sessionStorage`, then sent in an HTTP header for each local request. It is never written to the job file, media or logs. The loopback HTTP connection is local; upstream BFL requests use TLS.
+
+Forgetting a visitor key clears browser state and `sessionStorage`. The installation then returns to its server connection, if configured. Visitor-key jobs cannot continue in the background without the key; re-enter it to resume. Anonymous session ownership uses a random HttpOnly, SameSite cookie and is not a user account.
+
+## Read the code
+
+Start with the [guided read-through](docs/read-through.md), then see the [architecture and cloud boundary](docs/architecture.md). [Verification](docs/verification.md) separates tested behaviour from future deployment work.
+
+## Scaling boundary
+
+Generation budget and provider concurrency are the first constraints. The local JSON store has one process owner; it is not a multi-instance database. A cloud version needs atomic budget reservations, durable result capture, request rate limits and Range-aware object delivery. No load-test claim is made for this prototype.
+
+## Next steps
+
+1. Retain a small set of API-confirmed camera findings across varied subjects.
+2. Port jobs to D1 and media to R2, add a durable background runner, then deploy the frontend on Cloudflare.
+3. Seed exact-input cached demo runs, including a versioned full-prompt fingerprint.
+
+Free camera dragging, image input, video editing, extra generators, batch jobs and authentication are outside this prototype.
+
+## Design notes
+
+The visual system uses graphite surfaces, compact instrument controls, Lime and Cyberpunk signal palettes, and an output-first layout. The included dither field carries its own MIT attribution in [`src/effects/LICENSE`](src/effects/LICENSE). No BFL logo or proprietary font files are included; fonts are self-hosted open-font packages.

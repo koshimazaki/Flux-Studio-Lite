@@ -1,0 +1,273 @@
+@keyframes panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.25;
+  }
+}
+@media (min-width: 1550px) {
+  .intro {
+    padding-top: 85px;
+  }
+  .gallery {
+    margin-top: 60px;
+  }
+  .topbar {
+    margin: 0 64px;
+  }
+  footer {
+    margin-left: 64px;
+    margin-right: 64px;
+  }
+}
+@media (max-width: 800px) {
+  .topbar {
+    margin: 0 24px;
+    height: 72px;
+  }
+  .brand-beta,
+  .local-label {
+    display: none;
+  }
+  main {
+    padding: 0 20px;
+  }
+  .intro {
+    padding-top: 45px;
+  }
+  .camera-panel {
+    grid-template-columns: 1fr 1fr;
+    margin: 0 8px;
+  }
+  .camera-choices {
+    padding: 18px 12px;
+  }
+  .preset-grid {
+    gap: 5px;
+  }
+  .preset span {
+    font-size: 8px;
+  }
+  .camera-choices .section-eyebrow > span:last-child {
+    display: none;
+  }
+  .gallery-grid {
+    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  footer {
+    margin-left: 24px;
+    margin-right: 24px;
+    flex-wrap: wrap;
+  }
+  footer > span:nth-child(2) {
+    order: 3;
+    width: 100%;
+  }
+}
+@media (max-width: 560px) {
+  .topbar {
+    height: 65px;
+    margin: 0 18px;
+  }
+  .wordmark {
+    font-size: 18px;
+    gap: 8px;
+  }
+  .connection-button {
+    font-size: 10px;
+    padding: 8px 9px;
+    gap: 7px;
+  }
+  .intro {
+    padding: 35px 0 24px;
+  }
+  .intro-kicker {
+    font-size: 7px;
+    letter-spacing: 1.1px;
+  }
+  main {
+    padding: 0 14px;
+  }
+  .composer-top {
+    padding: 15px 15px 5px;
+  }
+  .model-picker {
+    font-size: 11px;
+  }
+  .mode-label {
+    font-size: 6px;
+    letter-spacing: 0.7px;
+  }
+  .prompt-editor {
+    padding: 19px 16px 10px;
+  }
+  .prompt-editor textarea {
+    font-size: 16px;
+  }
+  .camera-editor {
+    gap: 7px;
+  }
+  .camera-editor-mark {
+    gap: 4px;
+  }
+  .camera-editor textarea {
+    font-size: 15px;
+  }
+  .prompt-suggestions {
+    padding: 6px 15px 17px;
+    gap: 6px;
+  }
+  .prompt-suggestions > span {
+    display: none;
+  }
+  .prompt-suggestions button {
+    font-size: 8px;
+    padding: 5px 6px;
+    gap: 5px;
+  }
+  .composer-toolbar {
+    flex-wrap: wrap;
+    padding: 11px 13px;
+    gap: 12px;
+  }
+  .parameters {
+    width: 100%;
+    gap: 16px;
+  }
+  .parameter {
+    font-size: 9px;
+    padding: 6px 7px;
+  }
+  .generate-group {
+    width: 100%;
+    justify-content: flex-end;
+    border-top: 1px solid var(--border);
+    padding-top: 11px;
+  }
+  .generate-button {
+    min-width: 140px;
+    padding: 11px 16px;
+  }
+  .cost strong {
+    font-size: 12px;
+  }
+  .camera-panel {
+    grid-template-columns: 1fr;
+    margin: 0 7px;
+  }
+  .camera-choices {
+    padding: 16px 13px 13px;
+  }
+  .camera-choices .section-eyebrow > span:last-child {
+    display: inline;
+  }
+  .preset-grid {
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .preset {
+    min-height: 67px;
+    padding: 8px 1px;
+    gap: 5px;
+  }
+  .preset span {
+    font-size: 9px;
+  }
+  .camera-note {
+    font-size: 8px;
+    margin-top: 10px;
+  }
+  .preview-wrap {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+  .studio-foot {
+    align-items: flex-start;
+    padding: 14px 2px;
+    gap: 8px;
+  }
+  .studio-foot > span {
+    font-size: 6px;
+    gap: 5px;
+    line-height: 1.8;
+  }
+  .text-button {
+    font-size: 9px;
+    gap: 5px;
+  }
+  .gallery {
+    margin-top: 28px;
+  }
+  .gallery-heading {
+    margin-bottom: 18px;
+  }
+  .gallery-heading h2 {
+    font-size: 20px;
+  }
+  .gallery-filters button {
+    font-size: 8px;
+    padding: 6px 7px;
+  }
+  .gallery-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .clip-media {
+    aspect-ratio: 16/9;
+  }
+  .clip-info h3 {
+    font-size: 13px;
+  }
+  .clip-meta {
+    font-size: 9px;
+  }
+  .gallery-footnote {
+    font-size: 7px;
+  }
+  .upscale-input {
+    gap: 12px;
+    padding: 20px 15px 26px;
+  }
+  .source-icon {
+    width: 45px;
+    height: 55px;
+  }
+  .source-content label {
+    font-size: 16px;
+  }
+  .source-content > span {
+    font-size: 7px;
+  }
+  .source-content select {
+    font-size: 10px;
+  }
+  .upload-button {
+    padding: 6px;
+  }
+  footer {
+    margin: 35px 18px 0;
+    padding-top: 19px;
+    font-size: 8px;
+  }
+  footer span:first-child {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,29 @@
+[
+  {
+    "id": "library-01",
+    "label": "Bloom study",
+    "url": "/media/library-01.mp4",
+    "poster": "/media/library-01.jpg",
+    "width": 960,
+    "height": 528,
+    "duration": 10.041667
+  },
+  {
+    "id": "library-02",
+    "label": "Floral transformation",
+    "url": "/media/library-02.mp4",
+    "poster": "/media/library-02.jpg",
+    "width": 960,
+    "height": 528,
+    "duration": 10.041667
+  },
+  {
+    "id": "library-03",
+    "label": "Living machine",
+    "url": "/media/library-03.mp4",
+    "poster": "/media/library-03.jpg",
+    "width": 960,
+    "height": 528,
+    "duration": 10.041667
+  }
+]

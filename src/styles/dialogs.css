@@ -1,0 +1,83 @@
+footer {
+  margin: 56px 48px 0;
+  padding: 23px 0 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 9px;
+}
+footer a {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+footer span:first-child {
+  font-size: 9px;
+  color: var(--muted);
+}
+.key-dialog {
+  width: min(450px, calc(100vw - 32px));
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 30px 90px #0009;
+}
+.key-dialog::backdrop {
+  background: #000a;
+  backdrop-filter: blur(5px);
+}
+.dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.key-dialog h2 {
+  font-size: 27px;
+  font-weight: 450;
+  letter-spacing: -0.7px;
+  margin: 17px 0 10px;
+}
+.key-dialog p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--soft);
+}
+.key-dialog form > label {
+  display: block;
+  font-size: 10px;
+  color: var(--soft);
+  margin: 23px 0 9px;
+}
+.key-dialog input[type="password"] {
+  display: block;
+  width: 100%;
+  background: var(--sunken);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  padding: 12px;
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+.key-dialog .key-footnote {
+  font-size: 10px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 17px;
+  margin-top: 23px;
+}
+.key-dialog .primary-button {
+  padding: 10px 14px;
+  font-size: 11px;
+}
