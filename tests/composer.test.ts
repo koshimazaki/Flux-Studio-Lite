@@ -67,6 +67,79 @@ describe("section camera contract", () => {
     for (const upscalePrompt of [42, null, "x".repeat(1201)])
       expect(() => validateInput({ ...valid, upscalePrompt })).toThrow();
   });
+  it("loads video prompt and camera without changing generation settings, while Recreate restores them", () => {
+    const state = {
+      ...initialComposer,
+      draft: true,
+      duration: 13,
+      aspectRatio: "21:9" as const,
+      resolution: "uhd" as const,
+      sourceId: "keep-source",
+      upscalePrompt: "Keep this guidance.",
+      upscaleFactor: 2.5,
+      upscaleCreativity: 1 as const,
+      cameraEdits: { orbit: "Unrelated current wording." },
+    };
+    const job = {
+      ...composerInput(initialComposer),
+      description: "A motorcycle in the forest.",
+      camera: {
+        "shot-sizes": "macro",
+        angles: "high-angle",
+        movements: "orbit",
+      },
+      cameraEdits: { macro: "A chrome detail.", "high-angle": "" },
+      duration: 9,
+      resolution: "fhd",
+      aspectRatio: "9:16",
+      draft: false,
+    } as Job;
+    const promptOnly = composerReducer(state, { type: "restore-prompt", job });
+    expect(composePrompt(composerInput(promptOnly))).toBe(composePrompt(job));
+    expect(promptOnly).toEqual({
+      ...state,
+      description: job.description,
+      cameraEnabled: job.cameraEnabled,
+      camera: job.camera,
+      cameraEdits: {
+        macro: "A chrome detail.",
+        "high-angle": "",
+        orbit: "Slow orbit around the subject.",
+      },
+    });
+    const recreated = composerReducer(state, { type: "restore", job });
+    expect(recreated).toMatchObject({
+      draft: false,
+      duration: 9,
+      resolution: "fhd",
+      aspectRatio: "9:16",
+      sourceId: "",
+    });
+  });
+  it("loads only upscale text and preserves mode, source and all other controls", () => {
+    const state = {
+      ...initialComposer,
+      sourceId: "current-source",
+      upscaleFactor: 3,
+      upscaleCreativity: 1 as const,
+    };
+    const job = {
+      ...composerInput(initialComposer),
+      generator: "upscale",
+      upscalePrompt: "Fine wood grain.",
+      sourceId: "saved-source",
+      upscaleFactor: 1.5,
+    } as Job;
+    expect(composerReducer(state, { type: "restore-prompt", job })).toEqual({
+      ...state,
+      upscalePrompt: "Fine wood grain.",
+    });
+    expect(composerReducer(state, { type: "restore", job })).toMatchObject({
+      generator: "upscale",
+      sourceId: "saved-source",
+      upscaleFactor: 1.5,
+    });
+  });
   it("rejects mixed sections, extra sections, missing sections and malformed edits", () => {
     const input = composerInput(initialComposer);
     for (const camera of [

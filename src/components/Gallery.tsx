@@ -29,7 +29,6 @@ export default function Gallery({
     <section className="gallery" aria-label="Generation gallery">
       <header className="gallery-heading">
         <div>
-          <span className="section-eyebrow">02 / THE OUTPUT</span>
           <h2>
             Your motion studies
             <span>
@@ -81,6 +80,11 @@ export default function Gallery({
               <h3>
                 <button
                   className="clip-title-button"
+                  title={
+                    job.generator === "video"
+                      ? "Use this prompt and camera direction; keep generation settings"
+                      : "Use this upscale prompt; keep generation settings"
+                  }
                   onClick={() => onSelect(job.id)}
                 >
                   {job.description || "Untitled study"}

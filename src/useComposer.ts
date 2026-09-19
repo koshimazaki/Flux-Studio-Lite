@@ -33,7 +33,7 @@ export const initialComposer: ComposerState = {
 type Action =
   | { type: "update"; patch: Partial<ComposerState> }
   | { type: "edit-camera"; id: CameraTermId; text: string }
-  | { type: "restore"; job: Job };
+  | { type: "restore" | "restore-prompt"; job: Job };
 export function composerReducer(
   state: ComposerState,
   action: Action,
@@ -45,6 +45,8 @@ export function composerReducer(
       cameraEdits: { ...state.cameraEdits, [action.id]: action.text },
     };
   const job = action.job;
+  if (action.type === "restore-prompt" && job.generator === "upscale")
+    return { ...state, upscalePrompt: job.upscalePrompt ?? "" };
   let camera = job.camera;
   let edits: CameraEdits = job.camera
     ? Object.fromEntries(
@@ -74,12 +76,16 @@ export function composerReducer(
     } as CameraSelection;
     edits = { [id]: job.cameraText ?? legacy?.clause ?? "" };
   }
-  return {
-    generator: job.generator,
+  const prompt = {
     description: job.description,
     cameraEnabled: job.cameraEnabled,
     camera,
     cameraEdits: { ...state.cameraEdits, ...edits },
+  };
+  if (action.type === "restore-prompt") return { ...state, ...prompt };
+  return {
+    generator: job.generator,
+    ...prompt,
     draft: job.draft,
     duration: job.duration,
     aspectRatio: job.aspectRatio ?? "16:9",

@@ -128,7 +128,14 @@ export default function App() {
     }
   }
   function retry(job: Job) {
+    restoredSelection.current = job.id;
     dispatch({ type: "restore", job });
+    selectJob(job.id);
+  }
+  function usePrompt(job: Job) {
+    // This explicit choice must not trigger the full reload/legacy-link restore.
+    restoredSelection.current = job.id;
+    dispatch({ type: "restore-prompt", job });
     selectJob(job.id);
   }
   return (
@@ -140,7 +147,7 @@ export default function App() {
             <i />
             <i />
           </span>
-          flux studio<span className="brand-beta">FLUX 3</span>
+          flux studio<span className="brand-beta">FLUX 3 · Camera control</span>
         </a>
         <div className="topbar-right">
           <AccountBalance
@@ -367,15 +374,12 @@ export default function App() {
           onRetry={retry}
           onSelect={(id) => {
             const job = jobs.find((item) => item.id === id);
-            if (job) retry(job);
+            if (job) usePrompt(job);
           }}
         />
       </main>
       <footer>
         <span>Independent FLUX experiment · built on the BFL API</span>
-        <a href="/api/health" target="_blank" rel="noopener">
-          Connection status <Icon name="arrow" size={12} />
-        </a>
       </footer>
       {showKey && (
         <KeyDialog

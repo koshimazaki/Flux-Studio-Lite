@@ -50,7 +50,7 @@ All 24 camera terms are exploratory. No reliability score is implied. A successf
 - Background recovery for server-key jobs; visitor-key polling requires the key on each request.
 - Local copies of generated videos, byte-range playback and decoded-frame-gated reveal.
 - A $5 UTC-day server-key budget and three requests per session per day. Failed or uncertain submissions conservatively retain their reservation.
-- Recreate restores a generated clip’s prompt and settings without submitting it. Enlarged playback shows the full saved prompt with Copy and Download actions.
+- Clicking a clip’s prompt loads its subject and camera wording while keeping the current generation settings. Recreate restores the full saved setup without submitting it. Enlarged playback shows the full saved prompt with Copy and Download actions.
 
 ## Key handling
 

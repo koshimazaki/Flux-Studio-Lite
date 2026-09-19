@@ -148,3 +148,11 @@ Cloudflare initially rejected the configured CPU allowance on the Free plan. Rem
 - Theme QA found a stale canvas colour during the button CSS transition. Resolving colour on painted frames fixes it; both loader and border were checked in Lime and Cyberpunk. Edge rotation is eight seconds.
 
 - Removed the entire scene-suggestion row and its unused styles. Clip actions use one right-aligned group beside status/cost; the default cabin prompt remains.
+
+## Laptop rhythm and prompt reuse
+
+- At 1280 × 800 CSS pixels, the fixture's main preview is 341 × 192, gallery thumbnails are 340 × 170, and the first-row actions end at approximately 799px with a short scene and all three edited camera phrases. Prompt text remains 16.2px; the mobile scene editor remains 16px. Long prompts naturally require scrolling.
+- At 413 × 800, header controls fit without overlap and there is no horizontal document overflow. Enlarged video playback and full prompt remain available. Temporary viewport override reset after checks.
+- Browser checked title click with Draft enabled: subject and all camera clauses changed while Draft, 5s and 16:9 stayed intact. Recreate then restored Draft off, 9s, Full HD and 9:16. No generation request was submitted. Unit coverage checks prompt-only restoration against full restoration, including upscale source/mode preservation.
+
+- Final checks: 60 tests pass; frontend production build, Worker typecheck and Pages bundle pass. No paid provider calls.

@@ -117,3 +117,9 @@ The public documentation now uses the current Pages address and describes the im
 The operator caught a yellow loader persisting after switching themes. The canvas had cached the colour at the start of a CSS transition. It now resolves the displayed colour on every painted frame, keeping the loader and edge aligned with the active theme.
 
 The scene-suggestion row was removed to shorten the composer. Clip actions now form one right-aligned group beside Ready and cost, with consistent spacing.
+
+## Laptop spacing and distinct prompt reuse
+
+The operator asked for less top whitespace, a slightly smaller logo/preview, a tighter right-aligned action group, and a visible first gallery row without crowded controls. A three-section layout uses 16px gaps, a shorter header, proportional preview sizing and shallower desktop thumbnails. Prompt padding is restored to 16px. The redundant gallery eyebrow and footer connection link are removed.
+
+Prompt selection and Recreate now have separate contracts: a title click copies only subject/camera text or upscale guidance; Recreate restores all saved settings. The title path marks its selection as handled so the full restore effect cannot immediately undo this distinction. Existing session ownership and clean-address selection remain.
