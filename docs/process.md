@@ -65,3 +65,11 @@ The operator also requested an account-budget check in place of Local Preview on
 ## Compact selected-preset icons
 
 The operator asked to retain selected presets without spending another row on labels. Each camera tab now places the selected preset’s coloured glyph beside its section name, or a dash for None. The full selection name stays in the native tooltip and accessible label. None, paging arrows and the guide link share one footer below the unchanged eight-tile grid. This supersedes the two-line text summaries above.
+
+## Hosted BYO-key and playback pass
+
+The operator authorized a working Cloudflare app with their own key and requested more legible preset identification, corrected angle symbols and faster library playback. This pass restores selected names beside icons, uses a human marker beside each camera glyph, fixes high/low vertical placement, distinguishes Macro from Extreme close-up, and adds ratio-shaped icons. Gallery hover previews are muted; explicit play opens a lightbox. The featured result can also be enlarged and does not autoplay when it arrives.
+
+The hosted adapter uses D1 job reservations and R2 media. A bounded MP4Box reader replaces ffprobe in the Worker; browser-supplied dimensions never determine the server estimate. Python and a separate paid inspection service were unnecessary. Workerd tests exposed unsupported `redirect: error`; manual redirect handling now rejects redirects without forwarding keys.
+
+A durable background runner remains deferred because keys are held only in the browser session. The UI asks visitors to keep the tab open until the clip is saved. Paid comparison clips, an exact-input cache, real-device and stranger testing remain deferred. Human visual approval is still separate from implementation checks.

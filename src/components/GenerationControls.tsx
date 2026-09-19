@@ -7,6 +7,7 @@ import type {
 import Icon from "./Icon";
 import SelectMenu from "./SelectMenu";
 import TickFader from "./TickFader";
+import AspectRatioIcon from "./AspectRatioIcon";
 
 interface Props {
   generator: Generator;
@@ -80,7 +81,11 @@ export default function GenerationControls({
               label="Aspect ratio"
               value={aspectRatio}
               compact
-              options={aspectOptions.map((value) => ({ value, label: value }))}
+              options={aspectOptions.map((value) => ({
+                value,
+                label: value,
+                icon: <AspectRatioIcon ratio={value} />,
+              }))}
               onChange={(value) => onAspectRatioChange(value as AspectRatio)}
             />
           </div>

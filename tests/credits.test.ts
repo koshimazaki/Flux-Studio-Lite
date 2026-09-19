@@ -12,7 +12,7 @@ describe("BFL account balance", () => {
       "https://api.bfl.ai/v1/credits",
       expect.objectContaining({
         headers: { "x-key": "fixture-private-key", accept: "application/json" },
-        redirect: "error",
+        redirect: "manual",
         cache: "no-store",
       }),
     );
@@ -45,4 +45,19 @@ describe("BFL account balance", () => {
     ).rejects.toThrow("Could not check the BFL balance. Try again.");
     expect(fetcher).toHaveBeenCalledOnce();
   });
+});
+
+it("refuses a redirect without forwarding the key to its destination", async () => {
+  const fetcher = vi
+    .fn<typeof fetch>()
+    .mockResolvedValue(
+      new Response(null, {
+        status: 302,
+        headers: { location: "https://untrusted.example/" },
+      }),
+    );
+  await expect(
+    new BflClient(fetcher).credits("fixture-private-key"),
+  ).rejects.toThrow("BFL could not complete the request.");
+  expect(fetcher).toHaveBeenCalledOnce();
 });

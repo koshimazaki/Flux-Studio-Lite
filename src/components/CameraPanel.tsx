@@ -103,7 +103,10 @@ export default function CameraPanel({
                       }
                     }}
                   >
-                    <span>{item.label}</span>
+                    <span className="camera-tab-label">
+                      <span>{item.label}</span>
+                      <strong>{choice?.label ?? "None"}</strong>
+                    </span>
                     <span
                       className={`camera-tab-choice ${choice ? "has-choice" : ""}`}
                       aria-hidden="true"

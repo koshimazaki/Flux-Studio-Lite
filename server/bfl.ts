@@ -44,7 +44,9 @@ export function providerUrl(value: unknown, kind: "poll" | "media"): URL {
 }
 
 export class BflClient {
-  constructor(private readonly fetcher: Fetcher = fetch) {}
+  constructor(
+    private readonly fetcher: Fetcher = (...args) => fetch(...args),
+  ) {}
 
   async submit(
     generator: "video" | "upscale",
@@ -61,7 +63,7 @@ export class BflClient {
         headers: { "Content-Type": "application/json", "x-key": key },
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(90_000),
-        redirect: "error",
+        redirect: "manual",
       });
     } catch {
       throw new AppError(
@@ -92,7 +94,7 @@ export class BflClient {
     const response = await this.fetcher(url, {
       headers: { "x-key": key },
       signal: AbortSignal.timeout(20_000),
-      redirect: "error",
+      redirect: "manual",
     });
     return this.readJson<ProviderResult>(response);
   }
@@ -103,7 +105,7 @@ export class BflClient {
       response = await this.fetcher("https://api.bfl.ai/v1/credits", {
         headers: { "x-key": key, accept: "application/json" },
         signal: AbortSignal.timeout(10_000),
-        redirect: "error",
+        redirect: "manual",
         cache: "no-store",
       });
     } catch {
@@ -122,7 +124,7 @@ export class BflClient {
   async download(url: string): Promise<Response> {
     const response = await this.fetcher(providerUrl(url, "media"), {
       signal: AbortSignal.timeout(60_000),
-      redirect: "error",
+      redirect: "manual",
     });
     if (response.status === 403 || response.status === 404)
       throw new AppError(

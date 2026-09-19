@@ -5,6 +5,7 @@ import { request } from "../useJobs";
 import Icon from "./Icon";
 import SelectMenu from "./SelectMenu";
 export default function SourceInput({
+  apiKey,
   sources,
   sourceId,
   factor,
@@ -13,6 +14,7 @@ export default function SourceInput({
   onError,
   onBusy,
 }: {
+  apiKey: string;
   sources: Source[];
   sourceId: string;
   factor: number;
@@ -31,10 +33,7 @@ export default function SourceInput({
     onError("");
     let objectUrl = "";
     try {
-      if (
-        file.size > 50 * 1024 * 1024 ||
-        !file.name.toLowerCase().endsWith(".mp4")
-      )
+      if (file.size > 50_000_000 || !file.name.toLowerCase().endsWith(".mp4"))
         throw new Error("Choose an MP4 file under 50 MB.");
       objectUrl = URL.createObjectURL(file);
       const video = document.createElement("video");
@@ -74,7 +73,10 @@ export default function SourceInput({
         `/api/uploads?${query}`,
         {
           method: "POST",
-          headers: { "Content-Type": "video/mp4" },
+          headers: {
+            "Content-Type": "video/mp4",
+            ...(apiKey ? { "x-byo-key": apiKey } : {}),
+          },
           body: file,
         },
       );

@@ -63,7 +63,7 @@ export default function App() {
   useEffect(() => {
     request<{ hasServerKey: boolean }>("/api/health")
       .then((h) => setHasServerKey(h.hasServerKey))
-      .catch(() => setError("The local connection is unavailable."));
+      .catch(() => setError("The studio connection is unavailable."));
   }, [setError]);
   const source = sources.find((s) => s.id === sourceId);
   const upscaleMode = upscaleCreativity === 0 ? "Precise" : "Creative";
@@ -200,6 +200,7 @@ export default function App() {
               />
             ) : (
               <SourceInput
+                apiKey={key}
                 sources={sources}
                 sourceId={sourceId}
                 factor={upscaleFactor}
@@ -346,7 +347,6 @@ export default function App() {
           onUpscale={chooseUpscale}
           onRetry={retry}
           onSelect={selectJob}
-          selectedJobId={featuredJob?.id}
         />
       </main>
       <footer>

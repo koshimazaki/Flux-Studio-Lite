@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": { "types": [], "lib": ["ES2022"] },
+  "include": [
+    "./**/*.ts",
+    "../shared/**/*.ts",
+    "../server/bfl.ts",
+    "../server/errors.ts",
+    "../server/validation.ts",
+    "../server/validate-camera.ts"
+  ]
+}

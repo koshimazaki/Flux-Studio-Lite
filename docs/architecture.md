@@ -40,27 +40,21 @@ The server sweeps its own-key jobs every five seconds, even after the browser cl
 
 `shared/camera.ts` defines the section order, term IDs, clauses and pose parameters. Validation checks section membership and bounded edits; glyphs and the Three preview read the same data. Old job IDs have a separate compatibility adapter. Finished states come from one shared predicate. The selected job URL is read on load and remains protected by the existing session boundary.
 
-`tokens.css` owns colours, spacing, radii, animation timing and scene materials. The composer uses a 90% unit scale while mobile textareas remain at least 1rem; CSS zoom is not used. `FeaturedVideo` owns the selected job's waiting/reveal/video state, so the gallery avoids creating a second player for it.
+`tokens.css` owns colours, spacing, radii, animation timing and scene materials. The composer uses a 90% unit scale while mobile textareas remain at least 1rem; CSS zoom is not used. `FeaturedVideo` owns the selected job’s waiting/reveal/video state. Gallery thumbnails preview on hover; play opens a native-dialog lightbox. Starting any player pauses the others.
 
-## Cloudflare phase — planned, not implemented
+## Cloudflare adapter
 
-| Local responsibility           | Hosted replacement                                              |
-| ------------------------------ | --------------------------------------------------------------- |
-| Vite middleware / built assets | Pages static frontend                                           |
-| Express HTTP handlers          | Pages Functions                                                 |
-| Single-process JSON job store  | D1 transactions and unique idempotency constraints              |
-| Local MP4 directory            | R2 streaming writes and Range-aware reads                       |
-| Five-second server sweep       | Durable scheduled runner with recoverable leases                |
-| ffprobe process                | Trusted generation metadata or bounded media inspection service |
-| Loopback origin check          | Exact deployment origin, HTTPS, CSP and rate limiting           |
+The Worker serves built assets, same-origin JSON endpoints, D1 job records and R2 media. It accepts visitor keys only. No shared BFL key or secret is deployed. D1's unique `(session, idempotency)` constraint reserves a request before its single paid submission. Existing request IDs cannot be reused for different settings. This guards against duplicate submissions; it does not reserve funds in the user's BFL account. BFL remains authoritative for the final charge.
 
-A durable runner is a conscious revision to the old poll-on-read plan: relying on an open tab cannot guarantee retrieval of expiring output URLs. A short `waitUntil` is not an unbounded job worker. BYO still requires an explicit foreground-resume contract unless its custody model changes.
+`shared/mp4.ts` uses MP4Box to read up to 4 MiB of metadata in 128 KiB ranges, skipping the MP4 media payload. Width, height and duration come from the saved object, not browser query parameters. Standard non-fragmented MP4s with one video track are supported; incomplete, fragmented, ambiguous or oversized metadata is rejected with an error. The same source limits and upscale cost formula apply locally and in the Worker. This avoids Python, ffprobe, transcode services and extra paid video inspection.
 
-The upscale API accepts an HTTPS URL as well as base64. In the cloud adapter, upload/stream to owned R2 storage and pass a short-lived provider-readable HTTPS URL in `input_video`; do not relay a 50 MB base64 payload through a Worker. Retain source ownership checks and constrain the generated URL to the configured storage origin. A local loopback URL cannot be fetched by BFL, so the current Node adapter still sends local bytes.
+Uploads require a valid BFL key. Generated downloads stream to R2 with a known byte length and a 250 MB ceiling. R2 commits the object before the source record and Ready state. Poll/copy work uses a recoverable D1 lease. Upscale receives a random, two-hour, object-specific HTTPS capability URL; ordinary media routes require the session cookie. Range, suffix ranges, HEAD and If-Range are supported. Neither BFL keys nor signed delivery URLs appear in public job records.
 
-Workers cannot execute ffprobe. The cloud adapter must obtain trusted dimensions/duration from supported metadata or a bounded inspection service before reserving upscale spend. Browser-supplied metadata alone is not a safe billing authority. R2 egress is free; storage and operations are separate charges.
+**Foreground contract:** visitor-key jobs advance while the page is visible and has the key. Keep the tab open until the result is saved. Refresh or re-enter the same key in the same browser session to resume. Closing the page for longer than BFL's delivery-link lifetime can lose an uncaptured result. There is no durable background runner or server-held key. A lost submission response is marked uncertain and never resubmitted automatically.
 
-Before publishing: atomic spend reservations, deployment secrets, cached demo fingerprints, stored-media authorisation, retryable copy leases, output size limits, Range/HEAD/conditional requests, real mobile playback, build and secret/history audits. Generate no additional paid findings batch implicitly.
+The Worker enforces exact-origin checks, HttpOnly Secure SameSite session cookies, bounded bodies, per-IP/session write limits and balance checks before generation. Static assets receive a Content Security Policy. Session cookies provide anonymous isolation, not accounts or cross-device sync. No load-test or durable background completion claim is made.
+
+See [Cloudflare operations](cloudflare.md) for setup, migration, seeding and limitations.
 
 ## Primary references checked 19 September 2026
 

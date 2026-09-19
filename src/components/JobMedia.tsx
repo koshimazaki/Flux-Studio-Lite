@@ -49,10 +49,6 @@ export default function JobMedia({ job }: { job: Job }) {
           playsInline
           loop
           controls={decoded}
-          autoPlay={
-            arrivedHere.current &&
-            !matchMedia("(prefers-reduced-motion: reduce)").matches
-          }
           aria-label={job.description}
           onLoadedData={() => setDecoded(true)}
           onError={() => setMediaError(true)}
@@ -86,7 +82,10 @@ export default function JobMedia({ job }: { job: Job }) {
                 0,
                 Math.floor((now - new Date(job.createdAt).getTime()) / 1000),
               )}
-              s elapsed · you can keep exploring
+              s elapsed ·{" "}
+              {job.keyMode === "byo"
+                ? "keep this tab open to save your clip"
+                : "you can keep exploring"}
             </span>
           )}
           {mediaError && (

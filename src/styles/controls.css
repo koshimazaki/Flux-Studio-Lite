@@ -12,7 +12,7 @@
   width: calc(70 * var(--unit));
 }
 .generation-controls__aspect {
-  width: calc(92 * var(--unit));
+  width: calc(110 * var(--unit));
 }
 .generation-controls__resolution {
   width: calc(92 * var(--unit));
@@ -282,4 +282,11 @@
   .draft-trigger__track i {
     transition: transform var(--motion-fast) ease;
   }
+}
+
+.aspect-ratio-icon {
+  width: var(--space-16);
+  height: var(--space-16);
+  flex-shrink: 0;
+  color: var(--soft);
 }

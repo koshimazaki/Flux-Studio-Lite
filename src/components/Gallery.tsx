@@ -1,6 +1,8 @@
 import { isTerminal } from "../../shared/types";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { Job, Source } from "../../shared/types";
+import Clip from "./Clip";
+import VideoLightbox, { type ViewingClip } from "./VideoLightbox";
 import Icon from "./Icon";
 import JobMedia, { statusLabel } from "./JobMedia";
 export default function Gallery({
@@ -9,15 +11,14 @@ export default function Gallery({
   onUpscale,
   onRetry,
   onSelect,
-  selectedJobId,
 }: {
   jobs: Job[];
   sources: Source[];
   onUpscale: (id: string) => void;
   onRetry: (job: Job) => void;
   onSelect: (id: string) => void;
-  selectedJobId?: string;
 }) {
+  const [viewing, setViewing] = useState<ViewingClip | null>(null);
   const [filter, setFilter] = useState<"all" | "session">("all");
   const generated = new Set(jobs.map((j) => j.resultUrl).filter(Boolean));
   const library = sources.filter(
@@ -56,16 +57,17 @@ export default function Gallery({
         {jobs.map((job) => (
           <article className="clip-card" key={job.id}>
             <div className="clip-media">
-              {job.id === selectedJobId ? (
-                <div className="job-message">
-                  <span className="section-eyebrow">SHOWING ABOVE</span>
-                  <button
-                    className="text-button"
-                    onClick={() => onSelect(job.id)}
-                  >
-                    View main video <Icon name="arrow" size={12} />
-                  </button>
-                </div>
+              {job.status === "Ready" && job.resultUrl ? (
+                <Clip
+                  url={job.resultUrl}
+                  label={job.description || "Untitled study"}
+                  onOpen={() =>
+                    setViewing({
+                      url: job.resultUrl!,
+                      label: job.description || "Untitled study",
+                    })
+                  }
+                />
               ) : (
                 <JobMedia job={job} />
               )}
@@ -117,6 +119,9 @@ export default function Gallery({
                   url={source.url}
                   poster={(source as Source & { poster?: string }).poster}
                   label={source.label}
+                  onOpen={() =>
+                    setViewing({ url: source.url, label: source.label })
+                  }
                 />
                 <span className="clip-badge">
                   LIBRARY / {String(index + 1).padStart(2, "0")}
@@ -150,59 +155,7 @@ export default function Gallery({
           this session appear above.
         </p>
       )}
+      <VideoLightbox clip={viewing} onClose={() => setViewing(null)} />
     </section>
-  );
-}
-export function Clip({
-  url,
-  poster,
-  label,
-}: {
-  url: string;
-  poster?: string;
-  label: string;
-}) {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [playing, setPlaying] = useState(false);
-  useEffect(() => {
-    const stop = () => {
-      if (document.hidden) {
-        ref.current?.pause();
-        setPlaying(false);
-      }
-    };
-    document.addEventListener("visibilitychange", stop);
-    return () => document.removeEventListener("visibilitychange", stop);
-  }, []);
-  return (
-    <>
-      <video
-        ref={ref}
-        src={url}
-        poster={poster}
-        preload={poster ? "none" : "metadata"}
-        muted
-        playsInline
-        loop
-        controls={playing}
-        aria-label={label}
-        onPause={() => setPlaying(false)}
-        onPlay={() => setPlaying(true)}
-      />
-      {!playing && (
-        <button
-          className="clip-play"
-          aria-label={`Play ${label}`}
-          onClick={() => {
-            document.querySelectorAll("video").forEach((v) => {
-              if (v !== ref.current) v.pause();
-            });
-            void ref.current?.play().catch(() => setPlaying(false));
-          }}
-        >
-          <Icon name="play" size={18} />
-        </button>
-      )}
-    </>
   );
 }

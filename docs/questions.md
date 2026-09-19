@@ -1,6 +1,6 @@
 # Implementation questions
 
-These answers describe the local build. Planned cloud behaviour is identified explicitly.
+These answers describe the local build and Cloudflare BYO-key adapter.
 
 ## Why named camera choices instead of dragging?
 
@@ -16,7 +16,7 @@ The clauses are useful starting points, and the operator explicitly asked to edi
 
 ## Why this small app alongside a larger workbench?
 
-This is a focused, readable generation-to-result flow. The bigger workbench serves a broader daily workflow; this prototype makes the camera vocabulary, job lifecycle and upscale path easy to inspect. The current version runs locally; a zero-setup hosted version is still a separate delivery step.
+This is a focused, readable generation-to-result flow. The bigger workbench serves a broader daily workflow; this prototype makes the camera vocabulary, job lifecycle and upscale path easy to inspect. The app also has a Cloudflare adapter; users connect their own BFL key.
 
 ## Does the 3D stage earn its place?
 
@@ -28,7 +28,7 @@ The local server validates inputs, reserves cost and saves the job before submit
 
 ## How does playback work?
 
-Owned clips are served by the local API with byte-range support and session checks. A cloud port must preserve Range/HEAD behaviour and durable capture. R2 streaming and a durable runner are planned; a short background callback alone is not a recovery guarantee.
+Owned clips are served by the local API with byte-range support and session checks. The Cloudflare adapter streams to R2 with Range/HEAD support and recoverable copy leases. BYO polling requires the visible page and key; a durable runner remains deferred.
 
 ## How much did agents write, and what was rejected?
 
@@ -40,7 +40,7 @@ Provider concurrency, rate limits and generation cost constrain throughput. The 
 
 ## What was cut or deferred?
 
-Free dragging, image input, additional generators, batch generation and accounts are outside this prototype. Cloud deployment, an exact-input cache, scored camera findings and a stranger test are not yet done. The dither waiting state and reveal shipped and remain in the main video slot.
+Free dragging, image input, additional generators, batch generation and accounts are outside this prototype. An exact-input cache, scored camera findings, a durable background runner and a stranger test are not yet done. The dither waiting state and reveal shipped and remain in the main video slot.
 
 ## Why no Zustand, shadcn or Tailwind?
 

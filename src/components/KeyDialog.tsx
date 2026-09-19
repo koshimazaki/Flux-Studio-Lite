@@ -37,8 +37,8 @@ export default function KeyDialog({
       </div>
       <h2>Bring your own key.</h2>
       <p>
-        Sent to BFL for each request. Kept in this tab’s session only; never
-        saved to the server.
+        Sent through this studio to BFL for each request. Kept in this tab’s
+        session only; never saved to the server.
       </p>
       <form
         onSubmit={(e) => {

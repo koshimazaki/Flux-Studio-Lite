@@ -2,7 +2,11 @@
 
 A compact studio for moving images: describe a scene, combine a shot size, angle and movement, generate a FLUX 3 video, then upscale the result from 1.5× to 3× in Precise or Creative mode. The main video sits above a compact centred composer, with the gallery underneath.
 
-This repository contains the local prototype. It supports two real BFL API operations and persists local jobs between restarts. It is an independent experiment and is not affiliated with Black Forest Labs.
+This repository contains the local prototype and a Cloudflare Worker adapter. Both support text-to-video and video upscale; the hosted app uses your own BFL key, D1 job history and R2 media. It is an independent experiment and is not affiliated with Black Forest Labs.
+
+## Cloudflare
+
+See [deployment and hosted behavior](docs/cloudflare.md). Connect your own key to check your balance and generate. Keep the tab open until the result is saved.
 
 ## Run locally
 
@@ -60,12 +64,12 @@ Start with the [guided read-through](docs/read-through.md), then see the [archit
 
 ## Scaling boundary
 
-Generation budget and provider concurrency are the first constraints. The local JSON store has one process owner; it is not a multi-instance database. A cloud version needs atomic budget reservations, durable result capture, request rate limits and Range-aware object delivery. No load-test claim is made for this prototype.
+Generation budget and provider concurrency are the first constraints. The local JSON store has one process owner. The Cloudflare adapter uses D1 idempotency reservations, rate limits and R2 Range-aware delivery. BYO jobs require the page to remain open until the video is saved; no durable background runner or load-test claim is made.
 
 ## Next steps
 
 1. Retain a small set of API-confirmed camera findings across varied subjects.
-2. Port jobs to D1 and media to R2, add a durable background runner, then deploy the frontend on Cloudflare.
+2. Evaluate a durable background runner with an explicit key-custody design.
 3. Seed exact-input cached demo runs, including a versioned full-prompt fingerprint.
 
 Free camera dragging, image input, video editing, extra generators, batch jobs and authentication are outside this prototype.

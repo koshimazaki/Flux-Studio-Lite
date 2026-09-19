@@ -1,7 +1,9 @@
 import type { Job, Source } from "../../shared/types";
 import { isTerminal } from "../../shared/types";
 import JobMedia, { statusLabel } from "./JobMedia";
-import { Clip } from "./Gallery";
+import Clip from "./Clip";
+import { useState } from "react";
+import VideoLightbox, { type ViewingClip } from "./VideoLightbox";
 import Icon from "./Icon";
 export default function FeaturedVideo({
   job,
@@ -12,6 +14,9 @@ export default function FeaturedVideo({
   source?: Source;
   onRetry: (job: Job) => void;
 }) {
+  const [viewing, setViewing] = useState<ViewingClip | null>(null);
+  const url =
+    job?.status === "Ready" ? job.resultUrl : !job ? source?.url : undefined;
   return (
     <section id="main-video" className="featured-video" aria-label="Main video">
       <div className="featured-media">
@@ -37,6 +42,20 @@ export default function FeaturedVideo({
               : "UPSCALED"
             : "FROM THE LIBRARY"}
         </span>
+        {url && (
+          <button
+            className="expand-video icon-button"
+            aria-label="Enlarge video"
+            onClick={() =>
+              setViewing({
+                url,
+                label: job?.description || source?.label || "Video",
+              })
+            }
+          >
+            <Icon name="expand" />
+          </button>
+        )}
       </div>
       <div className="featured-caption">
         <span>
@@ -52,6 +71,7 @@ export default function FeaturedVideo({
           </span>
         )}
       </div>
+      <VideoLightbox clip={viewing} onClose={() => setViewing(null)} />
     </section>
   );
 }

@@ -55,7 +55,7 @@ export default function AccountBalance({
     return (
       <span className="local-label">
         <i />
-        LOCAL PREVIEW
+        BFL ACCOUNT
       </span>
     );
   const current = result.owner === owner ? result : { loading: true };

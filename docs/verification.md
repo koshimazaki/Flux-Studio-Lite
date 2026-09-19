@@ -87,3 +87,13 @@ Cloudflare/D1/R2, a paid same-subject findings grid, exact-input cache, real BYO
 - Production build and 40 existing tests pass; no new tests were added for this presentation-only change.
 - Browser checked that choosing Close-up updates the tab icon and accessible name, switching to Angles retains it, and None restores the dash and removes only the shot phrase.
 - At the measured desktop size, tab height changed from approximately 55px to 38px and the initial camera panel from 297px to 256px. At 423 CSS pixels, tab labels fit and the page has no horizontal overflow.
+
+## Cloudflare and media pass — 19 September 2026
+
+This pass supersedes the earlier cloud-deferred notes. The Worker adapter uses D1 and R2; the local Express adapter remains available. Workerd tests use isolated storage and fake BFL responses, with no paid calls.
+
+- 52 tests cover the previous local/domain behavior plus bounded MP4 inspection, end-of-file metadata, high/low glyph orientation, Cloudflare submission deduplication, unknown submission handling, copy-to-R2, session isolation, Range playback, temporary upscale input links and uploaded-byte validation.
+- Production frontend build, Worker typecheck and Wrangler deployment dry run pass.
+- Desktop and narrow-browser checks confirm named camera choices, corrected angle icons, sideways preset navigation, selection summaries and enlarged-video open/close. Aspect selectors include proportioned rectangle icons. Native touch/Safari testing is still deferred.
+- The MP4 parser reads actual 960 × 528 library metadata and gives the same $1.36 estimate for a 2× Precise upscale. A synthetic large-media-box fixture confirms it skips payload bytes to find trailing metadata.
+- No real account balance or paid generation has been tested in this hosted pass. A user key is required. Keep the page open until the result is copied; background completion after closing the browser is not guaranteed.

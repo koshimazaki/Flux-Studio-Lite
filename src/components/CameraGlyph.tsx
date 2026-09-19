@@ -1,3 +1,4 @@
+import { angleGlyphPosition, framingGlyph } from "./camera-glyph-geometry";
 import type { CameraTerm, CameraSection } from "../../shared/camera";
 /** Three parametric glyphs read the same pose data as the 3D rig. */
 export default function CameraGlyph({
@@ -7,13 +8,9 @@ export default function CameraGlyph({
   section: CameraSection;
   term: CameraTerm;
 }) {
-  const {
-    distance = 2.7,
-    elevation = 0,
-    roll = 0,
-    motion,
-    amount = 0,
-  } = term.pose;
+  const { elevation = 0, roll = 0, motion, amount = 0 } = term.pose;
+  const camera = angleGlyphPosition(elevation);
+  const framing = framingGlyph(term);
   return (
     <svg
       width="2.625em"
@@ -29,22 +26,40 @@ export default function CameraGlyph({
       {section.glyph === "frame" ? (
         <>
           <path d="M5 12V5h9m20 0h9v7M5 24v7h9m20 0h9v-7" />
-          <g
-            transform={`translate(24 18) scale(${Math.min(2, 2.7 / distance)})`}
+          <svg
+            x="5"
+            y="5"
+            width="38"
+            height="26"
+            viewBox="5 5 38 26"
+            overflow="hidden"
           >
-            <circle cy="-6" r="2.5" />
-            <path d="M-4 4v-6q4-3 8 0v6M-2 4v5m4-5v5" />
-          </g>
+            <g transform={`translate(24 ${framing.y}) scale(${framing.scale})`}>
+              <circle cy="-6" r="2.5" />
+              <path d="M-4 4v-6q4-3 8 0v6M-2 4v5m4-5v5" />
+            </g>
+          </svg>
         </>
       ) : section.glyph === "angle" ? (
-        <>
-          <path d="M4 31h40" opacity=".3" />
-          <circle cx="24" cy="18" r="3" />
-          <g transform={`translate(24 18) rotate(${-elevation + roll})`}>
-            <path d="M-17 0h10m24 0h-9" strokeDasharray="2 3" />
-            <rect x="-22" y="-4" width="7" height="8" rx="1" />
+        <g transform={`rotate(${roll} 27 18)`}>
+          <path d="M4 32h40" opacity=".3" />
+          <g>
+            <circle cx="27" cy="14" r="2.5" />
+            <path d="M23 24v-5q4-3 8 0v5M25 24v6m4-6v6" />
+            {term.id === "profile" && <path d="m29 13 2 2-2 1" />}
           </g>
-        </>
+          <path
+            d={`M${camera.x} ${camera.y}L27 18`}
+            strokeDasharray="2 3"
+            opacity=".5"
+          />
+          <g
+            transform={`translate(${camera.x} ${camera.y}) rotate(${camera.rotation})`}
+          >
+            <rect x="-4" y="-3" width="7" height="6" rx="1" />
+            <path d="m3-2 3-1v6L3 2M-2-3v-2h3v2" />
+          </g>
+        </g>
       ) : (
         <>
           <rect x="18" y="13" width="11" height="10" rx="2" />
