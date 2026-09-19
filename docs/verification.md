@@ -118,3 +118,5 @@ Cloudflare initially rejected the configured CPU allowance on the Free plan. Rem
 
 - 54 tests, production build and Worker typecheck pass. Browser verified three borderless phrase lines in one editor, matching section colours; selecting None removes its line and choosing another angle updates the phrase. An edited shot phrase survives Done and appears in the coloured composer summary.
 - At a measured 413px viewport there is no page overflow. Longer shot/angle phrases grow to two lines without internal clipping; movement stays one line. No paid calls.
+
+- Published at https://c27c2a68.fluxstudio.pages.dev (canonical fluxstudio.pages.dev), source d7347aed2cd6bd5d268f2d1fc8df1d162ea49018. Live dialog verified shared Camera prompt group, borderless native textarea and theme-derived movement colour.

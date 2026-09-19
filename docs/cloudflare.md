@@ -1,6 +1,6 @@
 # Cloudflare deployment
 
-Live: [FLUX Studio](https://fluxstudio.pages.dev). Pages production deployment `ffebec54-e0d4-4f4b-a3b3-d8516351d687` on 19 September 2026, source `da0c2643cc8942f5c30766f58c8aa6376c74a369`. [Pinned deployment](https://ffebec54.fluxstudio.pages.dev). GitHub was not pushed.
+Live: [FLUX Studio](https://fluxstudio.pages.dev). Camera-text follow-up deployed on 19 September 2026 from `d7347aed2cd6bd5d268f2d1fc8df1d162ea49018`. [Pinned deployment](https://c27c2a68.fluxstudio.pages.dev). GitHub was not pushed.
 
 The hosted app uses your own BFL key. Connect it in the header: the balance check verifies the connection and shows the remaining account credits as USD. Generation/upscale estimates are separate from that balance. No shared provider key is configured or stored. The key exists temporarily in page/request memory during use; it is not persisted by the app.
 
