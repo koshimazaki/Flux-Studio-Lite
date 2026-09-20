@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Job } from "../../shared/types";
 import { isTerminal } from "../../shared/types";
 import { WaitField } from "./WaitField";
+import Clip from "./Clip";
 
 export const statusLabel = (status: string) =>
   (
@@ -18,12 +19,20 @@ export const statusLabel = (status: string) =>
     }) as Record<string, string>
   )[status] || status;
 
-export default function JobMedia({ job }: { job: Job }) {
-  const video = useRef<HTMLVideoElement>(null);
+export default function JobMedia({
+  job,
+  onOpen,
+}: {
+  job: Job;
+  /** Passing this gives a finished job the same contract as a library clip:
+   * a play button that opens the lightbox rather than inline controls. */
+  onOpen?: () => void;
+}) {
   const arrivedHere = useRef(job.status !== "Ready");
   const [decoded, setDecoded] = useState(false);
   const [revealed, setRevealed] = useState(!arrivedHere.current);
   const [mediaError, setMediaError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [now, setNow] = useState(Date.now());
   const waiting = !isTerminal(job.status);
   const unavailable = job.status === "Ready" && job.mediaAvailable === false;
@@ -32,32 +41,19 @@ export default function JobMedia({ job }: { job: Job }) {
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, [waiting]);
-  useEffect(() => {
-    const pause = () => {
-      if (document.hidden) video.current?.pause();
-    };
-    document.addEventListener("visibilitychange", pause);
-    return () => document.removeEventListener("visibilitychange", pause);
-  }, []);
   return (
     <div className="job-placeholder">
       {!unavailable && job.status === "Ready" && job.resultUrl && (
-        <video
-          ref={video}
-          src={job.resultUrl}
+        <Clip
+          // Remounting is how "Reload video" retries: one element, one source.
+          key={attempt}
+          url={job.resultUrl}
+          label={job.description || "Your latest generation"}
+          // The reveal waits on the first frame, which metadata alone is not.
           preload="auto"
-          muted
-          playsInline
-          loop
-          controls={decoded}
-          aria-label={job.description}
-          onLoadedData={() => setDecoded(true)}
+          onReady={() => setDecoded(true)}
           onError={() => setMediaError(true)}
-          onPlay={() =>
-            document.querySelectorAll("video").forEach((item) => {
-              if (item !== video.current) item.pause();
-            })
-          }
+          onOpen={onOpen}
         />
       )}
       {!unavailable &&
@@ -106,7 +102,7 @@ export default function JobMedia({ job }: { job: Job }) {
               className="text-button"
               onClick={() => {
                 setMediaError(false);
-                video.current?.load();
+                setAttempt((value) => value + 1);
               }}
             >
               Reload video

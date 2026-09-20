@@ -25,7 +25,22 @@ export default function FeaturedVideo({
     <section id="main-video" className="featured-video" aria-label="Main video">
       <div className="featured-media">
         {job ? (
-          <JobMedia key={job.id} job={job} />
+          // A finished job gets the same contract as a library clip below:
+          // a play button that opens the lightbox, not inline controls.
+          <JobMedia
+            key={job.id}
+            job={job}
+            onOpen={
+              job.resultUrl
+                ? () =>
+                    setViewing({
+                      url: job.resultUrl!,
+                      label: job.description || "Your latest generation",
+                      prompt: job.prompt,
+                    })
+                : undefined
+            }
+          />
         ) : source ? (
           // Same contract as a gallery card: hover previews, play opens the
           // lightbox. Passing onOpen is what switches Clip into that mode.
