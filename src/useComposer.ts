@@ -7,7 +7,7 @@ import {
   type CameraTermId,
 } from "../shared/camera";
 import { presets } from "../shared/legacy-camera";
-import type { GenerateInput, Job } from "../shared/types";
+import type { GenerateInput, Job, Source } from "../shared/types";
 import { DEFAULT_PROMPT } from "./components/PromptInput";
 export type ComposerState = Omit<GenerateInput, "presetId" | "cameraText"> & {
   camera: CameraSelection;
@@ -112,6 +112,30 @@ export function composerInput(state: ComposerState): GenerateInput {
     sourceId: state.generator === "upscale" ? state.sourceId : undefined,
   };
 }
+
+/** An explicit source wins; otherwise continue with the newest saved result. */
+export function upscaleSource(
+  selectedId: string,
+  jobs: Job[],
+  sources: Source[],
+): Source | undefined {
+  if (selectedId) return sources.find((source) => source.id === selectedId);
+  const generated = new Map(
+    sources
+      .filter((source) => source.origin === "generated")
+      .map((source) => [source.id, source]),
+  );
+  const latest = jobs
+    .filter(
+      (job) =>
+        job.status === "Ready" &&
+        job.mediaAvailable !== false &&
+        generated.has(job.id),
+    )
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))[0];
+  return latest ? generated.get(latest.id) : undefined;
+}
+
 export function useComposer() {
   const [state, dispatch] = useReducer(composerReducer, initialComposer);
   const set = <K extends keyof ComposerState>(

@@ -17,7 +17,7 @@ A focused adaptation of the author's [FLUX API Control Surface](https://github.c
 1. Keep **FLUX 3 · Text to video** selected and edit the scene description.
 2. Open Shot sizes, Angles or Movements and pick at most one term per section, or None. Each section colours its own editable clause, and edits survive switching terms.
 3. Open **View composed prompt** to see exactly what the server will send, check the estimate, then generate.
-4. Choose **Upscale** on any clip, set the amount and mode, and watch the output dimensions and cost update together.
+4. Switch to **Upscale** to use your newest saved generation, or choose **Upscale** on a particular clip. Set the amount and mode; the output dimensions and cost update together.
 
 ## Run locally
 
