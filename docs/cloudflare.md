@@ -80,6 +80,29 @@ pull-request CI, dependency installation or the build. The workflow's external
 actions are pinned to immutable commit SHAs, and its GitHub token is read-only
 except for recording the production deployment.
 
+Without those secrets the job skips instead of failing, so a fork, or this
+repository before its token exists, keeps a green `main` and begins deploying
+the moment the credential is added.
+
+### Why this is safe on a public repository
+
+The repository is readable by anyone; the deployment is reachable by no one.
+Four independent controls, each sufficient alone:
+
+- **Fork pull requests are never given secrets.** That is a platform guarantee
+  rather than a setting in this file, so a stranger's pull request cannot read
+  the token however it edits the workflow.
+- **The job only runs on a push to `main`,** so for a pull request there is no
+  deployment job to reach in the first place.
+- **The `production` environment holds the secrets** and restricts deployments
+  to `main`, so they are not repository-wide.
+- **The token is scoped to single steps, not the job.** `npm ci` and the build
+  run with it absent from their environment, so a compromised dependency has
+  nothing to read; only the migration and deploy steps receive it.
+
+The token is itself limited to Pages Edit and D1 Edit on one account, so the
+worst case is this project's own deployment rather than the account.
+
 The job builds first, applies pending migrations with Wrangler, deploys that
 exact Pages bundle and then requests `/api/health`. Production deployments are
 serialized and an in-progress `main` run is never cancelled. Restrict the
