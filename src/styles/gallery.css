@@ -211,6 +211,29 @@
   margin-top: var(--space-5);
 }
 
+/* Shown only when the provider reports real progress; the width is that
+   number, never an animation standing in for one. */
+.job-progress {
+  width: min(220px, 60%);
+  height: var(--space-3);
+  margin-top: var(--space-8);
+  border-radius: var(--space-3);
+  background: var(--raised);
+  overflow: hidden;
+}
+.job-progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+  transition: width var(--motion-enter) linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .job-progress span {
+    transition: none;
+  }
+}
+
 .featured-video {
   max-width: 52.875rem;
   margin: 0 auto var(--space-22);

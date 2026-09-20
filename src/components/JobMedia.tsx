@@ -3,6 +3,7 @@ import type { Job } from "../../shared/types";
 import { isTerminal } from "../../shared/types";
 import { WaitField } from "./WaitField";
 import Clip from "./Clip";
+import { generationProgress } from "../generation-progress";
 
 export const statusLabel = (status: string) =>
   (
@@ -35,6 +36,7 @@ export default function JobMedia({
   const [attempt, setAttempt] = useState(0);
   const [now, setNow] = useState(Date.now());
   const waiting = !isTerminal(job.status);
+  const progress = generationProgress(job);
   const unavailable = job.status === "Ready" && job.mediaAvailable === false;
   useEffect(() => {
     if (!waiting) return;
@@ -85,8 +87,24 @@ export default function JobMedia({
                     ? "Bringing out the finer details."
                     : "Your scene is taking shape.")}
           </p>
+          {waiting && progress !== undefined && (
+            // Real progress from the provider. Absent, the elapsed seconds
+            // below stay the only honest thing to show.
+            <div
+              className="job-progress"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(progress * 100)}
+            >
+              <span style={{ width: `${progress * 100}%` }} />
+            </div>
+          )}
           {waiting && (
             <span className="elapsed">
+              {progress !== undefined
+                ? `${Math.round(progress * 100)}% · `
+                : ""}
               {Math.max(
                 0,
                 Math.floor((now - new Date(job.createdAt).getTime()) / 1000),
