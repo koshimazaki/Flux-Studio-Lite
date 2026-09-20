@@ -182,17 +182,6 @@ export function useJobs(key: string) {
     selectJob(job.id);
     return job;
   }
-  async function stop(id: string) {
-    setError("");
-    const { job } = await request<{ job: Job }>(
-      `/api/jobs/${encodeURIComponent(id)}/stop`,
-      { method: "POST" },
-    );
-    setJobs((current) =>
-      current.map((candidate) => (candidate.id === job.id ? job : candidate)),
-    );
-    return job;
-  }
   return {
     jobs,
     sources,
