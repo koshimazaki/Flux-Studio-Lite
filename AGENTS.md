@@ -12,7 +12,7 @@ hosted changes, also read [Cloudflare operations](docs/cloudflare.md).
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | `shared/`        | Model inputs, camera wording, pricing, lifecycle, replay rules, rate limits and library validation. No framework, Node or DOM APIs. |
 | `src/`           | The single-screen React interaction, polling, composer reducer, catalogue adapter, components, Three.js scene and styles.           |
-| `server/`        | The local Express adapter: validation, ownership, local lifecycle, provider calls and `ffprobe` media inspection.                   |
+| `server/`        | The local Express adapter: validation, ownership, local lifecycle, provider calls and MP4 inspection.                               |
 | `worker/`        | The hosted adapter: the same API over D1/R2, bounded MP4 parsing, polling leases, rate limits and lifecycle sweep.                  |
 | `migrations/`    | Ordered D1 schema changes. Apply them to an isolated database before any remote migration.                                          |
 | `observability/` | Count-only daily generation statistics and their reader. It must not grow into prompt or visitor tracking.                          |
@@ -54,8 +54,6 @@ confirmed regression into a focused test rather than storing a review transcript
 
 Two environment facts are easy to miss:
 
-- **`ffprobe` is required.** `server/media.ts` uses it to measure an MP4. Without
-  FFmpeg, uploads return 400 and a job may stay in `copying`.
 - **`shared/` must stay portable.** `npm run check:worker` compiles it under
   `"types": []`, so a Node or DOM import fails the hosted boundary.
 - **`worker/env.d.ts` is generated.** Regenerate it with Wrangler; do not hand-edit it.

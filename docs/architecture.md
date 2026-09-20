@@ -1,14 +1,14 @@
 # Architecture and the cloud boundary
 
 ```text
-                                      ┌─ Express → JSON + files + ffprobe
+                                      ┌─ Express → JSON + files + MP4Box
 React composer → same-origin /api/* ──┤
                                       └─ Pages Worker → D1 + R2 + MP4Box
                     │                                  │
                     └──────── BFL submit / poll ───────┘
 ```
 
-`shared/` owns model inputs, camera wording, pricing, lifecycle, replay rules, rate limits and catalogue validation. The browser and both adapters use the same composer and contracts. Each adapter validates every input again and never accepts a user URL or arbitrary upstream endpoint. Upscale uses a validated library entry or a session-owned clip id. Express inspects the local MP4 with ffprobe and sends base64 bytes to BFL; the Worker inspects R2 ranges with MP4Box and gives BFL a public library URL or a short-lived object-specific capability URL.
+`shared/` owns model inputs, camera wording, pricing, lifecycle, replay rules, rate limits and catalogue validation. The browser and both adapters use the same composer and contracts. Each adapter validates every input again and never accepts a user URL or arbitrary upstream endpoint. Upscale uses a validated library entry or a session-owned clip id. Express inspects the local MP4 with the same MP4Box reader and sends base64 bytes to BFL; the Worker inspects R2 ranges with MP4Box and gives BFL a public library URL or a short-lived object-specific capability URL.
 
 The live contracts are native `fetch` calls to `/v1/flux-3-video` and `/v1/flux-tools/video-upscale-v1`. Return `cost` values are credits, converted to USD by dividing by 100. Estimates and confirmed charges have separate fields. BFL's optional progress is not replaced with a fabricated percentage.
 
@@ -42,7 +42,7 @@ The server sweeps its own-key jobs every five seconds, even after the browser cl
 - **Raw Three.js:** one isolated, finite procedural scene. No controls, assets, rigging, shadows or React renderer dependency. Geometry/materials, animation and listeners are disposed. R3F would become useful as the scene grows.
 - **CSS / native animation:** short panel transitions and a 1.6-second camera path do not need Anime.js. The decorative canvas uses 30 fps, pauses offscreen/hidden and respects reduced motion.
 - **Plain CSS:** token groups plus small component styles, no utility framework or component kit. Vite splits Three into a lazy chunk. Fonts have no runtime third-party requests.
-- **Express locally:** readable same-origin endpoints, secure ownership boundary, established byte-range responses. Node and ffprobe are local adapters, not Cloudflare-compatible code.
+- **Express locally:** readable same-origin endpoints, secure ownership boundary, established byte-range responses. Node's filesystem and process APIs are the local adapter, not Cloudflare-compatible code.
 
 `shared/camera.ts` defines the section order, term IDs, clauses and pose parameters. Validation checks section membership and bounded edits; glyphs and the Three preview read the same data. Old job IDs have a separate compatibility adapter. Finished states come from one shared predicate. The selected job is retained in tab history while the address stays clean. Old ?job links are read and migrated; selection and settings restore on reload under the existing session boundary. Selecting a clip title switches to its generator and loads only its subject/camera text (or its optional upscale prompt), preserving the current source and output settings. Recreate restores the full saved setup. Explicit title selection bypasses the full restoration effect used for reload/legacy links; neither action submits a request.
 
@@ -52,7 +52,7 @@ The server sweeps its own-key jobs every five seconds, even after the browser cl
 
 The Worker serves built assets, same-origin JSON endpoints, D1 job records and R2 media. It accepts visitor keys only. No shared BFL key or secret is deployed. D1's unique `(session, idempotency)` constraint reserves a request before its single paid submission. Existing request IDs cannot be reused for different settings. This guards against duplicate submissions; it does not reserve funds in the user's BFL account. BFL remains authoritative for the final charge.
 
-`shared/mp4.ts` uses MP4Box to read up to 4 MiB of metadata in 128 KiB ranges, skipping the MP4 media payload. Width, height and duration come from the saved object, not browser query parameters. Standard non-fragmented MP4s with one video track are supported; incomplete, fragmented, ambiguous or oversized metadata is rejected with an error. The same source limits and upscale cost formula apply locally and in the Worker. This avoids Python, ffprobe, transcode services and extra paid video inspection.
+`shared/mp4.ts` uses MP4Box to read up to 4 MiB of metadata in 128 KiB ranges, skipping the MP4 media payload. Width, height and duration come from the saved object, not browser query parameters. Standard non-fragmented MP4s with one video track are supported; incomplete, fragmented, ambiguous or oversized metadata is rejected with an error. The same source limits and upscale cost formula apply locally and in the Worker. Both adapters call it, so an upscale estimate cannot differ between them. This avoids Python, FFmpeg, transcode services and extra paid video inspection.
 
 Uploads require a valid BFL key. Generated downloads stream to R2 with a known byte length and a 250 MB ceiling. R2 commits the object before the source record and Ready state. Poll/copy work uses a recoverable D1 lease. Upscaling a private session clip receives a random, two-hour, object-specific HTTPS capability URL; ordinary media routes require the session cookie. Upscaling a library clip lends BFL the public asset URL instead, so no token exists to leak or expire, and its metadata comes from the catalogue that `shared/library.ts` limit-checked at load rather than from the browser. Range, suffix ranges, HEAD and If-Range are supported. Neither BFL keys nor signed delivery URLs appear in public job records.
 
@@ -85,3 +85,15 @@ See [Cloudflare operations](cloudflare.md) for setup, migrations, static library
 The public catalogue ships four clips as static assets, so a first-time visitor never meets an empty hero and gallery and desktop fills its four-column row exactly. Each is a real run of this studio on the hosted deployment. The catalogue records the exact description, camera selection and per-term wording, composed prompt, duration/resolution/aspect/draft and provider-confirmed cost needed to inspect and recreate its setup, while provider identifiers and internal file hashes remain private. One of the four is the composer's own default prompt; one is a draft-mode run, which is why it costs $0.30 against $1.70 for a full ten seconds. One run per camera combination shows the pipeline working and is not a reliability measurement for the catalogue. `shared/library.ts` validates every entry once at load and drops anything malformed or outside an upload's own limits, so a bad catalogue cannot price an upscale. Each entry also ships the run that produced it, so a library clip offers Recreate, prompt reuse and the saved prompt in its lightbox exactly as one of the visitor's own generations does: `src/library.ts` presents that record as a `Job`, and the existing restore paths take it unchanged. A catalogue clip is never selected as the featured job, because its id names a catalogue entry rather than a row in this browser's session. A test checks that every shipped setup is still a request the studio would accept and that `composePrompt` rebuilds its recorded prompt exactly. Camera directions flow inline in the composer and remain separate editable coloured lines in Camera controls. Enlarged playback renders the exact saved job prompt beneath the media with Copy and Download actions.
 
 The desktop layout uses three horizontal sections with a shared spacing rhythm: preview, composer and gallery. A 56px header reduces top whitespace without shrinking connection controls. The main preview and composer share a bounded fluid width from 846px to 1376px; the normal laptop view keeps the preview at a 340px height limit, while very wide displays allow it to grow against viewport height up to 560px. The library uses a separate bounded width from 1096px to 2016px and four columns on desktop, two on compact screens and one on phones. Desktop thumbnails use near-2:1 crops while their full video remains unchanged. At very wide sizes, scoped units enlarge the composer controls, gallery type and card details without changing the mobile scale. A 24px heading gap lets the images read as a separate shelf. Ready clips show only their cost beside Recreate, Download and Upscale. Connection state remains in the header, and the decorative page footer has been removed so it cannot create a wide empty band on large displays.
+
+## Scaling boundary
+
+Generation budget and provider concurrency are the first constraints. The local
+JSON store has one process owner. The Cloudflare adapter uses D1 idempotency
+reservations, per-route rate limits and R2 Range-aware delivery, and its stored
+state is bounded: a five-minute sweep ages out abandoned jobs and expires
+records with their media, capped per run so no single invocation pays for a
+backlog. On Pages, where there is no cron trigger, that sweep rides the request
+path, so housekeeping scales with visits. BYO jobs need the page open until the
+video is saved; a durable background runner would need key custody this
+deployment deliberately does not have. No load-test claim is made.
