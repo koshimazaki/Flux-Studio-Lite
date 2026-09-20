@@ -35,6 +35,9 @@ identifiers, credentials and private reference paths are omitted.
   so run-to-run variation is the provider's own and there is nothing to record.
   Sending an unknown field risks a 422 on every generation. `draft` into
   `draft_enhance` is the only determinism the API exposes.
+- **A CI deployment token.** Cloudflare's Pages and D1 permissions are
+  account-scoped, so the narrowest token would still expose every project in
+  the account. Releases stay manual. See [Cloudflare](cloudflare.md).
 - **A public community feed.** Every platform that runs one has accounts: an
   owner who accepted terms, who can be banned, and who can delete their own
   work. This app is deliberately anonymous, so a published clip would have
