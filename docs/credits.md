@@ -27,3 +27,18 @@ recreate each setup.
   wording, diagrams and examples here are this studio's own interpretation.
 - No BFL logo or proprietary font files are included. Fonts are self-hosted
   open-font packages.
+
+## BFL documentation this follows
+
+The implementation follows Black Forest Labs' published documentation, checked
+19 September 2026:
+
+- [Generate a video with FLUX 3](https://docs.bfl.ai/api-reference/utility/generate-a-video-with-flux-3)
+- [Video upscale, constraints and pricing](https://docs.bfl.ai/flux_tools/flux_video_upscale)
+- [Camera prompting guide](https://docs.bfl.ai/guides/prompting_video_camera_terms)
+- [Pricing](https://docs.bfl.ai/quick_start/pricing)
+- [Credits endpoint](https://docs.bfl.ai/api-reference/get-the-users-credits)
+
+The camera guide supplies the public terminology. The editable wording,
+diagrams and examples here are this studio's own interpretation — see
+[camera wording and sources](camera-wording.md) for that boundary.
