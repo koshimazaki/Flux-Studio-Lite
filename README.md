@@ -6,8 +6,6 @@ A compact studio for FLUX 3 video, focused on camera control. Adapted from the l
 
 An independent experiment, not affiliated with Black Forest Labs.
 
-<!-- Add the walkthrough video here after uploading it as a GitHub attachment. -->
-
 ## Live demo
 
 Try the live version at **[fluxstudio.pages.dev](https://fluxstudio.pages.dev)**. Explore four library clips without a key, or connect your own BFL key to generate. Keep the tab open until your clip is saved.
