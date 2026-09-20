@@ -199,6 +199,42 @@ afterAll(async () => {
 });
 
 describe("Cloudflare adapter in workerd with isolated D1/R2 and fake BFL", () => {
+  it("keeps retired stopped rows terminal even with no polling URL", async () => {
+    const db = await mf.getD1Database("DB");
+    const session = newSession();
+    const id = randomUUID();
+    await insertStaleJob(db, session.slice(15), id, 0, "stopped");
+    const response = await call(`/api/jobs/${id}`, {
+      headers: { cookie: session, "x-byo-key": "test-only-key" },
+    });
+    const { job } = (await response.json()) as { job: Job };
+    expect(response.status).toBe(200);
+    expect(job.status).toBe("stopped");
+    expect(job.error).toBeUndefined();
+    const { jobs } = (await (
+      await call("/api/history", { headers: { cookie: session } })
+    ).json()) as { jobs: Job[] };
+    expect(jobs.find((item) => item.id === id)?.status).toBe("stopped");
+  });
+  it("rejects the retired stop endpoint without abandoning an accepted job", async () => {
+    const session = newSession();
+    const { job } = (await (
+      await post("retired-stop-endpoint", input, session)
+    ).json()) as { job: Job };
+    const response = await call(`/api/jobs/${job.id}/stop`, {
+      method: "POST",
+      headers: { cookie: session, "x-byo-key": "test-only-key" },
+    });
+    expect(response.status).toBe(404);
+    const result = (await (
+      await call(`/api/jobs/${job.id}`, {
+        headers: { cookie: session, "x-byo-key": "test-only-key" },
+      })
+    ).json()) as { job: Job };
+    expect(result.job.status).toBe("Ready");
+    expect(result.job.resultUrl).toBeTruthy();
+  });
+
   it("persists a task-specific provider HTTP 500 as terminal instead of Planning", async () => {
     const session = newSession();
     const { job } = (await (
