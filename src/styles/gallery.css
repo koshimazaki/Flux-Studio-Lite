@@ -88,14 +88,40 @@
   z-index: 2;
   top: var(--space-10);
   right: var(--space-10);
-  width: var(--space-24);
-  height: var(--space-24);
+  width: max(24px, var(--space-24));
+  height: max(24px, var(--space-24));
+  padding: 0;
+  line-height: 1;
   display: grid;
   place-items: center;
-  color: var(--text);
-  background: var(--badge-bg);
-  border: var(--space-1) solid var(--badge-border);
+  color: var(--clip-hide-ink);
+  background: var(--clip-hide-bg);
+  border: var(--space-1) solid var(--clip-hide-border);
   border-radius: var(--radius-round);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--motion-enter),
+    background var(--motion-enter);
+}
+.clip-hide-button svg {
+  display: block;
+}
+.clip-media:hover .clip-hide-button,
+.clip-media:focus-within .clip-hide-button {
+  opacity: 1;
+  pointer-events: auto;
+}
+.clip-hide-button:hover,
+.clip-hide-button:focus-visible {
+  color: var(--clip-hide-ink);
+  background: var(--clip-hide-hover-bg);
+}
+@media (hover: none) {
+  .clip-hide-button {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 .clip-play {
   position: absolute;
