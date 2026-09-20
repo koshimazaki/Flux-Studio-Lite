@@ -32,13 +32,17 @@ if (process.env.NODE_ENV === "production") {
 const server = app.listen(port, "127.0.0.1", () =>
   console.log(`FLUX Studio Lite is ready at http://127.0.0.1:${port}`),
 );
-const resume = setInterval(() => {
+// Age out abandoned jobs the way the Worker sweep does, then advance the jobs
+// this server holds its own key for.
+const tick = setInterval(() => {
+  void service.sweep().catch(() => {});
   void service.resumeServerJobs().catch(() => {});
 }, 5_000);
-resume.unref();
+tick.unref();
+void service.sweep();
 void service.resumeServerJobs();
 for (const signal of ["SIGINT", "SIGTERM"] as const)
   process.on(signal, () => {
-    clearInterval(resume);
+    clearInterval(tick);
     server.close(() => process.exit(0));
   });

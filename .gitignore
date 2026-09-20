@@ -6,3 +6,8 @@ dist/
 .DS_Store
 .dr-morph-review/
 !env.example
+
+.wrangler/
+
+.pages/
+.pages-project/

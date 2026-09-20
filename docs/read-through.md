@@ -2,29 +2,77 @@
 
 This order follows one user action through the app. Read the tests beside each domain boundary.
 
+The same request is served by two adapters: Express locally and a Worker on Cloudflare. Everything
+they must agree about lives in `shared/`, which imports no framework, no Node and no DOM API.
+`npm run check:worker` compiles that layer under `"types": []`, so a platform import there fails the
+build while every other check stays green.
+
+## The portable core
+
 1. `shared/types.ts` — the two generators, inputs, public job and source.
-2. `shared/presets.ts` — eight camera clauses, the shared composer, and USD estimates. No framework imports.
-3. `src/App.tsx` — the single-screen interaction: mode, scene, camera, key, source and submission. `PromptInput.tsx` edits the scene and coloured camera text; `GenerationControls.tsx` owns model/duration/ratio/resolution/draft; `UpscaleControls.tsx` owns amount and mode. `SelectMenu.tsx`, `TickFader.tsx` and `ThemePicker.tsx` keep shared interactions small. Upscale replaces the camera surface. Keep each component under 500 lines.
-4. `src/useJobs.ts` — initial history load, per-request keys, single polling loop and submission.
-5. `server/validation.ts` — the allowlist. Unexpected fields cannot choose a provider URL, model, cost or arbitrary file.
-6. `server/app.ts` — loopback/origin checks, anonymous session cookie, request rate limit and route ownership.
-7. `server/jobs.ts` — reserve, persist, submit once, poll, copy, inspect, mark Ready. Budget reservations are conservative.
-8. `server/bfl.ts` — exactly two endpoints; allowlisted polling/delivery; safe fixed error messages; no blind POST retry.
-9. `server/store.ts` — atomic local snapshots and interrupted-submit handling. `publicJob` removes provider/internal data.
-10. `server/media.ts` — actual media inspection, byte bounds and atomic download. `ffprobe` is why this adapter is local.
-11. `src/components/Gallery.tsx` and `JobMedia.tsx` — library versus new jobs, decoded-frame reveal, user-triggered library playback, hidden-page pause, explicit playback errors.
-12. `src/scene/camera-paths.ts` — pure geometry; then `create-camera-scene.ts` and `CameraPreview.tsx` for the isolated Three lifecycle.
-13. `src/components/WaitField.tsx` and `src/effects/dither.ts` — bounded decorative canvas, same-field reveal, reduced motion, cleanup.
-14. `src/components/KeyDialog.tsx` — browser-session custody and Forget. No localStorage key.
-15. `src/styles/` — small groups of plain CSS, including all responsive and reduced-motion overrides.
-16. `tests/` — camera maths, validation/pricing, concurrent caps/idempotency, key non-persistence, session ownership, actual MP4 Range delivery and invalid uploads.
+2. `shared/presets.ts` and `shared/camera.ts` — the camera clauses, the shared composer and USD
+   estimates. `legacy-camera.ts` keeps older preset ids replayable rather than rewriting history.
+3. `shared/idempotency.ts` — `canonicalInput` is the one definition of "the same request", so a
+   replay cannot become a second paid submission by reordering fields.
+4. `shared/mp4.ts` — `inspectMp4` and `checkUpscaleLimits`. Bounded parsing with `MAX_INPUT_BYTES`,
+   so dimensions and duration are measured rather than trusted.
+5. `shared/lifecycle.ts`, `shared/limits.ts`, `shared/job-storage.ts`, `shared/library.ts` —
+   retention and sweep intervals, rate-limit buckets, the persisted-media merge rule, and the
+   catalogue parser. Both adapters read these constants; neither redefines them.
 
-## Decisions worth being able to explain
+## The screen
 
-- Why a closed tab should not lose a server-key result, and why BYO has different recovery guarantees.
-- Why an uncertain submission keeps its reservation and is not automatically retried.
-- Why Ready follows durable copying and media inspection.
-- Why camera controls are absent from Upscale, and why its provider payload has no camera prompt.
-- Why the same pure composer runs on both sides but only the server is authoritative.
-- Why library clips are usable demonstration material but not empirical camera findings.
-- Why the local JSON store is appropriate for this pass and must change for a hosted multi-user deployment.
+6. `src/App.tsx` — the single-screen interaction: mode, scene, camera, key, source and submission.
+7. `src/useComposer.ts` — composer state as a reducer, with `composerInput` producing the request.
+8. `src/usePageKey.ts` — browser-session key custody, and deleting a legacy persisted credential
+   without ever reading it back.
+9. `src/useJobs.ts` — initial history load, per-request keys, one polling loop and submission.
+   `src/job-links.ts` and `src/library.ts` resolve a linked or catalogue job without bypassing
+   ownership checks.
+10. `src/components/` — `PromptInput` edits the scene and coloured camera text; `GenerationControls`
+    owns model, duration, ratio, resolution and draft; `UpscaleControls` owns amount and mode.
+    `SelectMenu`, `TickFader` and `ThemePicker` keep shared interactions small. Upscale replaces the
+    camera surface. Keep each component under 500 lines.
+11. `src/components/Gallery.tsx` and `JobMedia.tsx` — library versus new jobs, decoded-frame reveal,
+    user-triggered playback, hidden-page pause, explicit playback errors.
+12. `src/scene/camera-paths.ts` — pure geometry; then `create-camera-scene.ts` and
+    `CameraPreview.tsx` for the isolated Three lifecycle.
+13. `src/styles/` — small groups of plain CSS, including all responsive and reduced-motion overrides.
+
+## The local adapter
+
+14. `server/validation.ts` and `server/validate-camera.ts` — the allowlist. Unexpected fields cannot
+    choose a provider URL, model, cost or arbitrary file.
+15. `server/app.ts` — loopback/origin checks, anonymous session cookie, rate limit, route ownership.
+16. `server/jobs.ts` — reserve, persist, submit once, poll, copy, inspect, mark Ready. Budget
+    reservations are conservative.
+17. `server/bfl.ts` — the two submission endpoints, credits check, allowlisted polling and delivery
+    hosts, fixed error messages and no blind POST retry. Shared with the Worker.
+18. `server/store.ts` — atomic local snapshots and interrupted-submit handling. `publicJob` removes
+    provider and internal data.
+19. `server/media.ts` — byte bounds and atomic download. `ffprobe` is why this adapter is local, and
+    why the test suite needs FFmpeg installed.
+
+## The hosted adapter
+
+20. `worker/index.ts` — the same routes over `fetch`, reusing `server/bfl.ts`, `server/errors.ts`
+    and `server/validation.ts` unchanged. Read it next to `server/app.ts`; where they diverge, the
+    divergence should be the platform, not the rules.
+21. `worker/jobs.ts` — submit, poll and copy against D1 and R2, with recoverable leases in place of
+    a single process holding an in-flight lock.
+22. `worker/storage.ts` — D1 rows and R2 objects, `ownedJob` and `saveJob`. Ownership is enforced
+    here, not at the edge.
+23. `worker/media.ts` — upload, store and range-serve, using `shared/mp4.ts` where the local adapter
+    uses `ffprobe`.
+24. `worker/sweep.ts` — ages out abandoned jobs and expired rows. A cron trigger and the request
+    path both call it; whichever fires first claims the interval.
+25. `migrations/` — D1 schema in order. `worker/env.d.ts` is generated by `wrangler types`; do not
+    hand-edit it.
+26. `observability/` — the only thing the deployment records about its own use: sessions and
+    generations per UTC day.
+
+## Evidence
+
+27. `tests/` — camera maths and composer, validation and pricing, credits, concurrent caps and
+    idempotency, key non-persistence, session ownership, MP4 parsing, real Range delivery, invalid
+    uploads, and the Worker against isolated D1 and R2.

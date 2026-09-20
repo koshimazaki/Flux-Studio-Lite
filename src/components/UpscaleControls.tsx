@@ -41,7 +41,7 @@ export default function UpscaleControls({
             </label>
           ))}
         </div>
-        <p>
+        <p className="sr-only">
           {creativity === 0
             ? "Preserves original detail"
             : "Reimagines finer detail"}

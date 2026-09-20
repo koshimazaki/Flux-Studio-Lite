@@ -44,7 +44,9 @@ export function providerUrl(value: unknown, kind: "poll" | "media"): URL {
 }
 
 export class BflClient {
-  constructor(private readonly fetcher: Fetcher = fetch) {}
+  constructor(
+    private readonly fetcher: Fetcher = (...args) => fetch(...args),
+  ) {}
 
   async submit(
     generator: "video" | "upscale",
@@ -61,7 +63,7 @@ export class BflClient {
         headers: { "Content-Type": "application/json", "x-key": key },
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(90_000),
-        redirect: "error",
+        redirect: "manual",
       });
     } catch {
       throw new AppError(
@@ -92,15 +94,37 @@ export class BflClient {
     const response = await this.fetcher(url, {
       headers: { "x-key": key },
       signal: AbortSignal.timeout(20_000),
-      redirect: "error",
+      redirect: "manual",
     });
     return this.readJson<ProviderResult>(response);
+  }
+
+  async credits(key: string): Promise<number> {
+    let response: Response;
+    try {
+      response = await this.fetcher("https://api.bfl.ai/v1/credits", {
+        headers: { "x-key": key, accept: "application/json" },
+        signal: AbortSignal.timeout(10_000),
+        redirect: "manual",
+        cache: "no-store",
+      });
+    } catch {
+      throw new AppError(502, "Could not check the BFL balance. Try again.");
+    }
+    const data = await this.readJson<{ credits?: unknown } | null>(response);
+    if (
+      typeof data?.credits !== "number" ||
+      !Number.isFinite(data.credits) ||
+      data.credits < 0
+    )
+      throw new AppError(502, "BFL returned an invalid credit balance.");
+    return data.credits;
   }
 
   async download(url: string): Promise<Response> {
     const response = await this.fetcher(providerUrl(url, "media"), {
       signal: AbortSignal.timeout(60_000),
-      redirect: "error",
+      redirect: "manual",
     });
     if (response.status === 403 || response.status === 404)
       throw new AppError(

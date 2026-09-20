@@ -26,6 +26,7 @@ export default function JobMedia({ job }: { job: Job }) {
   const [mediaError, setMediaError] = useState(false);
   const [now, setNow] = useState(Date.now());
   const waiting = !isTerminal(job.status);
+  const unavailable = job.status === "Ready" && job.mediaAvailable === false;
   useEffect(() => {
     if (!waiting) return;
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -40,7 +41,7 @@ export default function JobMedia({ job }: { job: Job }) {
   }, []);
   return (
     <div className="job-placeholder">
-      {job.status === "Ready" && job.resultUrl && (
+      {!unavailable && job.status === "Ready" && job.resultUrl && (
         <video
           ref={video}
           src={job.resultUrl}
@@ -49,10 +50,6 @@ export default function JobMedia({ job }: { job: Job }) {
           playsInline
           loop
           controls={decoded}
-          autoPlay={
-            arrivedHere.current &&
-            !matchMedia("(prefers-reduced-motion: reduce)").matches
-          }
           aria-label={job.description}
           onLoadedData={() => setDecoded(true)}
           onError={() => setMediaError(true)}
@@ -63,22 +60,34 @@ export default function JobMedia({ job }: { job: Job }) {
           }
         />
       )}
-      {(waiting || (!revealed && !mediaError && job.status === "Ready")) && (
-        <WaitField
-          active={waiting || !decoded}
-          onDone={() => setRevealed(true)}
-        />
-      )}
-      {(waiting || job.status !== "Ready" || mediaError) && (
+      {!unavailable &&
+        (waiting || (!revealed && !mediaError && job.status === "Ready")) && (
+          <WaitField
+            active={waiting || !decoded}
+            onDone={() => setRevealed(true)}
+          />
+        )}
+      {(waiting || job.status !== "Ready" || mediaError || unavailable) && (
         <div className="job-message" role="status">
-          <span className={waiting ? "status-dot pulse" : "status-dot"} />
-          <strong>
-            {mediaError ? "Video could not load" : statusLabel(job.status)}
-          </strong>
+          {!waiting && <span className="status-dot" />}
+          {!waiting && (
+            <strong>
+              {unavailable
+                ? "Video no longer stored"
+                : mediaError
+                  ? "Video could not load"
+                  : statusLabel(job.status)}
+            </strong>
+          )}
           <p>
-            {mediaError
+            {mediaError && !unavailable
               ? "Your saved clip is still available. Try loading it again."
-              : job.error || "Your scene is taking shape."}
+              : job.error ||
+                (job.status === "copying"
+                  ? "Your clip is almost ready."
+                  : job.generator === "upscale"
+                    ? "Bringing out the finer details."
+                    : "Your scene is taking shape.")}
           </p>
           {waiting && (
             <span className="elapsed">
@@ -86,10 +95,13 @@ export default function JobMedia({ job }: { job: Job }) {
                 0,
                 Math.floor((now - new Date(job.createdAt).getTime()) / 1000),
               )}
-              s elapsed · you can keep exploring
+              s elapsed ·{" "}
+              {job.keyMode === "byo"
+                ? "keep this tab open to save your clip"
+                : "you can keep exploring"}
             </span>
           )}
-          {mediaError && (
+          {mediaError && !unavailable && (
             <button
               className="text-button"
               onClick={() => {

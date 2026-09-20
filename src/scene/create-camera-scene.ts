@@ -1,3 +1,4 @@
+import { emptyCamera, type CameraSelection } from "../../shared/camera";
 import * as THREE from "three";
 import { cameraPath, cameraPose } from "./camera-paths";
 
@@ -13,27 +14,38 @@ export function createCameraScene(canvas: HTMLCanvasElement) {
   const view = new THREE.PerspectiveCamera(38, 1, 0.1, 40);
   view.position.set(6.5, 4.7, 7.4);
   view.lookAt(0, 1.1, 0);
-  scene.add(new THREE.HemisphereLight(0xdfeeee, 0x222827, 2.1));
-  const light = new THREE.DirectionalLight(0xffffff, 2.7);
+  const css = getComputedStyle(canvas);
+  const color = (name: string) =>
+    new THREE.Color(css.getPropertyValue(name).trim());
+  scene.add(
+    new THREE.HemisphereLight(
+      color("--scene-sky"),
+      color("--scene-ground"),
+      2.1,
+    ),
+  );
+  const light = new THREE.DirectionalLight(color("--scene-light"), 2.7);
   light.position.set(-3, 6, 4);
   scene.add(light);
 
   const material = new THREE.MeshStandardMaterial({
-    color: 0xa9b7b4,
+    color: color("--scene-subject"),
     roughness: 0.9,
   });
   const accent = new THREE.MeshStandardMaterial({
-    color: 0x9fc8cd,
+    color: color("--scene-accent"),
     roughness: 0.75,
     metalness: 0.1,
   });
   const dark = new THREE.MeshStandardMaterial({
-    color: 0x354443,
+    color: color("--scene-dark"),
     roughness: 1,
   });
+  const subject = new THREE.Group();
+  scene.add(subject);
   function mesh(geometry: THREE.BufferGeometry, surface = material) {
     const result = new THREE.Mesh(geometry, surface);
-    scene.add(result);
+    subject.add(result);
     return result;
   }
   function limb(from: THREE.Vector3, to: THREE.Vector3, radius: number) {
@@ -81,7 +93,12 @@ export function createCameraScene(canvas: HTMLCanvasElement) {
     dark,
   );
   pedestal.position.y = -0.015;
-  const grid = new THREE.GridHelper(8, 24, 0x526968, 0x334140);
+  const grid = new THREE.GridHelper(
+    8,
+    24,
+    color("--scene-grid-major"),
+    color("--scene-grid-minor"),
+  );
   grid.material.transparent = true;
   grid.material.opacity = 0.34;
   grid.position.y = -0.04;
@@ -150,10 +167,10 @@ export function createCameraScene(canvas: HTMLCanvasElement) {
     lens.rotation.x = Math.PI / 2;
   }
   const glass = new THREE.MeshStandardMaterial({
-    color: 0x172e35,
+    color: color("--scene-glass"),
     roughness: 0.2,
     metalness: 0.2,
-    emissive: 0x102a31,
+    emissive: color("--scene-emissive"),
     emissiveIntensity: 0.3,
   });
   cameraPart(new THREE.CircleGeometry(0.095, 16), glass, 0, 0, 0.439);
@@ -161,7 +178,7 @@ export function createCameraScene(canvas: HTMLCanvasElement) {
   const path = new THREE.Line(
     new THREE.BufferGeometry(),
     new THREE.LineBasicMaterial({
-      color: 0x9fc8cd,
+      color: color("--scene-accent"),
       transparent: true,
       opacity: 0.48,
     }),
@@ -173,7 +190,7 @@ export function createCameraScene(canvas: HTMLCanvasElement) {
       new THREE.Vector3(),
     ]),
     new THREE.LineDashedMaterial({
-      color: 0x9fc8cd,
+      color: color("--scene-accent"),
       dashSize: 0.065,
       gapSize: 0.065,
       transparent: true,
@@ -182,7 +199,7 @@ export function createCameraScene(canvas: HTMLCanvasElement) {
   );
   scene.add(sight);
 
-  let selected = "";
+  let selected: CameraSelection = emptyCamera;
   let elapsed = 1600;
   let previousTime = 0;
   let frame = 0;
@@ -193,6 +210,8 @@ export function createCameraScene(canvas: HTMLCanvasElement) {
     const pose = cameraPose(selected, progress);
     rig.position.fromArray(pose.position);
     rig.lookAt(...pose.target);
+    rig.rotateZ(pose.roll);
+    subject.rotation.y = pose.subjectRotation;
     const positions = sight.geometry.getAttribute(
       "position",
     ) as THREE.BufferAttribute;
@@ -230,7 +249,7 @@ export function createCameraScene(canvas: HTMLCanvasElement) {
   observer.observe(canvas);
 
   return {
-    play(preset: string, reduced = false) {
+    play(preset: CameraSelection, reduced = false) {
       stop();
       selected = preset;
       reducedMotion = reduced;
@@ -239,6 +258,12 @@ export function createCameraScene(canvas: HTMLCanvasElement) {
       path.geometry = new THREE.BufferGeometry().setFromPoints(
         cameraPath(preset).map((point) => new THREE.Vector3(...point)),
       );
+      const maxDistance = Math.max(
+        ...cameraPath(preset).map((p) => Math.hypot(...p)),
+      );
+      const scale = Math.max(1, maxDistance / 3.5);
+      view.position.set(6.5 * scale, 4.7 * scale, 7.4 * scale);
+      view.lookAt(0, 1.1, 0);
       updatePose(reduced ? 1 : 0);
       resize();
       if (visible && !reduced) frame = requestAnimationFrame(tick);

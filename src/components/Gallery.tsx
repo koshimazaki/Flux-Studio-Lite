@@ -1,25 +1,28 @@
-import { useEffect, useRef, useState } from "react";
+import { isTerminal } from "../../shared/types";
+import { useState } from "react";
 import type { Job, Source } from "../../shared/types";
+import Clip from "./Clip";
+import ClipActions from "./ClipActions";
+import VideoLightbox, { type ViewingClip } from "./VideoLightbox";
 import Icon from "./Icon";
 import JobMedia, { statusLabel } from "./JobMedia";
-const closed = new Set([
-  "Ready",
-  "Error",
-  "expired",
-  "Request Moderated",
-  "Content Moderated",
-]);
 export default function Gallery({
   jobs,
   sources,
   onUpscale,
   onRetry,
+  onSelect,
+  onLibrarySetup,
 }: {
   jobs: Job[];
   sources: Source[];
   onUpscale: (id: string) => void;
   onRetry: (job: Job) => void;
+  onSelect: (id: string) => void;
+  /** Loads a catalogue clip's recorded run: the whole setup, or its prompt only. */
+  onLibrarySetup: (source: Source, full: boolean) => void;
 }) {
+  const [viewing, setViewing] = useState<ViewingClip | null>(null);
   const [filter, setFilter] = useState<"all" | "session">("all");
   const generated = new Set(jobs.map((j) => j.resultUrl).filter(Boolean));
   const library = sources.filter(
@@ -29,7 +32,6 @@ export default function Gallery({
     <section className="gallery" aria-label="Generation gallery">
       <header className="gallery-heading">
         <div>
-          <span className="section-eyebrow">02 / THE OUTPUT</span>
           <h2>
             Your motion studies
             <span>
@@ -58,34 +60,86 @@ export default function Gallery({
         {jobs.map((job) => (
           <article className="clip-card" key={job.id}>
             <div className="clip-media">
-              <JobMedia job={job} />
+              {job.status === "Ready" &&
+              job.mediaAvailable !== false &&
+              job.resultUrl ? (
+                <Clip
+                  url={job.resultUrl}
+                  label={job.description || "Untitled study"}
+                  onOpen={() =>
+                    setViewing({
+                      url: job.resultUrl!,
+                      label: job.description || "Untitled study",
+                      prompt: job.prompt,
+                    })
+                  }
+                />
+              ) : (
+                <JobMedia job={job} />
+              )}
               <span className="clip-badge">
                 {job.generator === "upscale" ? "UPSCALED" : "FLUX 3"}
               </span>
             </div>
             <div className="clip-info">
-              <h3>{job.description || "Untitled study"}</h3>
+              <h3>
+                <button
+                  className="clip-title-button"
+                  title={
+                    job.generator === "video"
+                      ? "Switch to video and use this prompt and camera direction; keep output settings"
+                      : "Switch to upscale and use this prompt; keep output settings"
+                  }
+                  onClick={() => onSelect(job.id)}
+                >
+                  {job.description || "Untitled study"}
+                </button>
+              </h3>
               <div className="clip-meta">
                 <span>
-                  {job.status === "Ready" ? "Ready" : statusLabel(job.status)} ·
-                  ${Number(job.costActualUsd ?? job.costEstimateUsd).toFixed(2)}
-                  {job.costActualUsd === undefined ? " est." : ""}
+                  {job.status === "Ready" && job.mediaAvailable !== false ? (
+                    <>
+                      $
+                      {Number(job.costActualUsd ?? job.costEstimateUsd).toFixed(
+                        2,
+                      )}
+                      {job.costActualUsd === undefined ? " est." : ""}
+                    </>
+                  ) : (
+                    <>
+                      {job.mediaAvailable === false
+                        ? "Video no longer stored"
+                        : statusLabel(job.status)}{" "}
+                      · $
+                      {Number(job.costActualUsd ?? job.costEstimateUsd).toFixed(
+                        2,
+                      )}
+                      {job.costActualUsd === undefined ? " est." : ""}
+                    </>
+                  )}
                 </span>
-                {job.status === "Ready" && job.generator === "video" ? (
-                  <button
-                    onClick={() => {
-                      const source = sources.find(
-                        (s) => s.url === job.resultUrl || s.id === job.id,
-                      );
-                      if (source) onUpscale(source.id);
-                    }}
-                    title="Use this clip in Upscale"
-                  >
-                    Upscale <Icon name="expand" size={12} />
-                  </button>
-                ) : closed.has(job.status) && job.status !== "Ready" ? (
+                {job.status === "Ready" &&
+                job.mediaAvailable !== false &&
+                job.resultUrl ? (
+                  <ClipActions
+                    url={job.resultUrl}
+                    filename={`flux-study-${job.id}.mp4`}
+                    onRecreate={() => onRetry(job)}
+                    onUpscale={
+                      job.generator === "video"
+                        ? () => {
+                            const source = sources.find(
+                              (s) => s.url === job.resultUrl || s.id === job.id,
+                            );
+                            if (source) onUpscale(source.id);
+                          }
+                        : undefined
+                    }
+                  />
+                ) : isTerminal(job.status) ? (
                   <button onClick={() => onRetry(job)}>
-                    Try again <Icon name="refresh" size={12} />
+                    {job.status === "Ready" ? "Recreate" : "Try again"}{" "}
+                    <Icon name="refresh" size={12} />
                   </button>
                 ) : null}
               </div>
@@ -98,23 +152,52 @@ export default function Gallery({
               <div className="clip-media">
                 <Clip
                   url={source.url}
-                  poster={(source as Source & { poster?: string }).poster}
+                  poster={source.poster}
                   label={source.label}
+                  onOpen={() =>
+                    setViewing({
+                      url: source.url,
+                      label: source.label,
+                      prompt: source.setup?.prompt,
+                    })
+                  }
                 />
                 <span className="clip-badge">
                   LIBRARY / {String(index + 1).padStart(2, "0")}
                 </span>
               </div>
               <div className="clip-info">
-                <h3>{source.label}</h3>
+                <h3>
+                  {source.setup ? (
+                    <button
+                      className="clip-title-button"
+                      title="Switch to video and use this clip's prompt and camera direction; keep output settings"
+                      onClick={() => onLibrarySetup(source, false)}
+                    >
+                      {source.label}
+                    </button>
+                  ) : (
+                    source.label
+                  )}
+                </h3>
                 <div className="clip-meta">
                   <span>
                     {Number(source.duration.toFixed(1))}s · {source.width} ×{" "}
                     {source.height}
+                    {source.setup
+                      ? ` · $${source.setup.costUsd.toFixed(2)}`
+                      : ""}
                   </span>
-                  <button onClick={() => onUpscale(source.id)}>
-                    Upscale <Icon name="expand" size={12} />
-                  </button>
+                  <ClipActions
+                    url={source.url}
+                    filename={`${source.id}.mp4`}
+                    onRecreate={
+                      source.setup
+                        ? () => onLibrarySetup(source, true)
+                        : undefined
+                    }
+                    onUpscale={() => onUpscale(source.id)}
+                  />
                 </div>
               </div>
             </article>
@@ -128,64 +211,13 @@ export default function Gallery({
         </div>
       )}
       {filter === "all" && library.length > 0 && (
-        <p className="gallery-footnote">
-          Library clips are existing studio generations. Camera experiments in
-          this session appear above.
+        <p className="gallery-footnote" id="library-recreate-note">
+          Your saved clips stay available after refresh in this browser.
+          Download to keep a copy. Library clips are existing studio
+          generations. Recreate loads a clip’s saved prompt and settings.
         </p>
       )}
+      <VideoLightbox clip={viewing} onClose={() => setViewing(null)} />
     </section>
-  );
-}
-function Clip({
-  url,
-  poster,
-  label,
-}: {
-  url: string;
-  poster?: string;
-  label: string;
-}) {
-  const ref = useRef<HTMLVideoElement>(null);
-  const [playing, setPlaying] = useState(false);
-  useEffect(() => {
-    const stop = () => {
-      if (document.hidden) {
-        ref.current?.pause();
-        setPlaying(false);
-      }
-    };
-    document.addEventListener("visibilitychange", stop);
-    return () => document.removeEventListener("visibilitychange", stop);
-  }, []);
-  return (
-    <>
-      <video
-        ref={ref}
-        src={url}
-        poster={poster}
-        preload={poster ? "none" : "metadata"}
-        muted
-        playsInline
-        loop
-        controls={playing}
-        aria-label={label}
-        onPause={() => setPlaying(false)}
-        onPlay={() => setPlaying(true)}
-      />
-      {!playing && (
-        <button
-          className="clip-play"
-          aria-label={`Play ${label}`}
-          onClick={() => {
-            document.querySelectorAll("video").forEach((v) => {
-              if (v !== ref.current) v.pause();
-            });
-            void ref.current?.play().catch(() => setPlaying(false));
-          }}
-        >
-          <Icon name="play" size={18} />
-        </button>
-      )}
-    </>
   );
 }

@@ -1,10 +1,8 @@
 import type { CSSProperties } from "react";
 const paths: Record<string, string> = {
   arrow: "M5 12h14m-5-5 5 5-5 5",
-  turn: "M4 4v9h15m-5-5 5 5-5 5",
   palette:
     "M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1.6-3.2c-.9-1.2-.1-2.8 1.4-2.8h2a3 3 0 0 0 3-3 9 9 0 0 0-9-9ZM7 10h.01M10 6.5h.01M15 7.5h.01M6.5 14h.01",
-  plus: "M12 5v14M5 12h14",
   camera:
     "M4 8h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Zm12 4 6-4v12l-6-4M6 8V4h6v4M5 12h3",
   chevron: "m8 10 4 4 4-4",
@@ -38,7 +36,11 @@ export default function Icon({
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      style={style}
+      style={{
+        width: `calc(${size} * var(--unit))`,
+        height: `calc(${size} * var(--unit))`,
+        ...style,
+      }}
     >
       <path d={paths[name] || paths.camera} />
     </svg>

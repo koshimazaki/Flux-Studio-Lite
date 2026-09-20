@@ -1,29 +1,138 @@
 [
   {
     "id": "library-01",
-    "label": "Bloom study",
+    "label": "Motorbike, slow pan",
     "url": "/media/library-01.mp4",
     "poster": "/media/library-01.jpg",
     "width": 960,
     "height": 528,
-    "duration": 10.041667
+    "duration": 10.041667,
+    "bytes": 1519159,
+    "setup": {
+      "generator": "video",
+      "description": "A rough BMW 70's motorbike in the woods. Reflections in the chrome, golden hour.",
+      "camera": {
+        "shot-sizes": "close-up",
+        "angles": "low-angle",
+        "movements": "pan"
+      },
+      "cameraEdits": {
+        "close-up": "Close-up of the subject.",
+        "low-angle": "Low angle looking up at the subject.",
+        "pan": "Pan slowly across the subject."
+      },
+      "cameraEnabled": true,
+      "duration": 10,
+      "resolution": "hd",
+      "aspectRatio": "16:9",
+      "draft": false,
+      "upscaleFactor": 2,
+      "upscaleCreativity": 0,
+      "prompt": "A rough BMW 70's motorbike in the woods. Reflections in the chrome, golden hour.\n\nClose-up of the subject.\n\nLow angle looking up at the subject.\n\nPan slowly across the subject.",
+      "costUsd": 1.7,
+      "generatedAt": "2026-09-19T21:36:24.149Z"
+    }
   },
   {
     "id": "library-02",
-    "label": "Floral transformation",
+    "label": "Chrome chair, orbit",
     "url": "/media/library-02.mp4",
     "poster": "/media/library-02.jpg",
     "width": 960,
     "height": 528,
-    "duration": 10.041667
+    "duration": 5.041667,
+    "bytes": 421391,
+    "setup": {
+      "generator": "video",
+      "description": "A sculptural chrome chair in a quiet concrete gallery. Soft afternoon light falls across the floor.",
+      "camera": {
+        "shot-sizes": "close-up",
+        "angles": "high-angle",
+        "movements": "orbit"
+      },
+      "cameraEdits": {
+        "close-up": "Close-up of the subject.",
+        "high-angle": "High angle looking down at the subject.",
+        "orbit": "Slow orbit around the subject."
+      },
+      "cameraEnabled": true,
+      "duration": 5,
+      "resolution": "hd",
+      "aspectRatio": "16:9",
+      "draft": false,
+      "upscaleFactor": 2,
+      "upscaleCreativity": 0,
+      "prompt": "A sculptural chrome chair in a quiet concrete gallery. Soft afternoon light falls across the floor.\n\nClose-up of the subject.\n\nHigh angle looking down at the subject.\n\nSlow orbit around the subject.",
+      "costUsd": 0.85,
+      "generatedAt": "2026-09-19T20:42:38.485Z"
+    }
   },
   {
     "id": "library-03",
-    "label": "Living machine",
+    "label": "Redwood lake, tilt",
     "url": "/media/library-03.mp4",
     "poster": "/media/library-03.jpg",
     "width": 960,
     "height": 528,
-    "duration": 10.041667
+    "duration": 10.041667,
+    "bytes": 965074,
+    "setup": {
+      "generator": "video",
+      "description": "A red wood forrest in New Zealand, lake view. Early morning mist, still water and a soft overcast sky.",
+      "camera": {
+        "shot-sizes": "macro",
+        "angles": "high-angle",
+        "movements": "tilt"
+      },
+      "cameraEdits": {
+        "macro": "Macro detail of the subject's surface.",
+        "high-angle": "High angle looking down at the subject.",
+        "tilt": "Tilt slowly upward along the subject."
+      },
+      "cameraEnabled": true,
+      "duration": 10,
+      "resolution": "hd",
+      "aspectRatio": "16:9",
+      "draft": false,
+      "upscaleFactor": 2,
+      "upscaleCreativity": 0,
+      "prompt": "A red wood forrest in New Zealand, lake view. Early morning mist, still water and a soft overcast sky.\n\nMacro detail of the subject's surface.\n\nHigh angle looking down at the subject.\n\nTilt slowly upward along the subject.",
+      "costUsd": 1.7,
+      "generatedAt": "2026-09-19T21:30:29.313Z"
+    }
+  },
+  {
+    "id": "library-04",
+    "label": "Red cabin, dolly in",
+    "url": "/media/library-04.mp4",
+    "poster": "/media/library-04.jpg",
+    "width": 960,
+    "height": 528,
+    "duration": 5.041667,
+    "bytes": 569518,
+    "setup": {
+      "generator": "video",
+      "description": "A solitary red cabin on a rocky island. Early morning mist, still water and a soft overcast sky.",
+      "camera": {
+        "shot-sizes": "macro",
+        "angles": "worms-eye",
+        "movements": "dolly-in"
+      },
+      "cameraEdits": {
+        "macro": "Macro detail of the subject's surface.",
+        "worms-eye": "Worm's eye view from ground level.",
+        "dolly-in": "Dolly in toward the subject."
+      },
+      "cameraEnabled": true,
+      "duration": 5,
+      "resolution": "hd",
+      "aspectRatio": "16:9",
+      "draft": true,
+      "upscaleFactor": 2,
+      "upscaleCreativity": 0,
+      "prompt": "A solitary red cabin on a rocky island. Early morning mist, still water and a soft overcast sky.\n\nMacro detail of the subject's surface.\n\nWorm's eye view from ground level.\n\nDolly in toward the subject.",
+      "costUsd": 0.3,
+      "generatedAt": "2026-09-19T20:46:09.015Z"
+    }
   }
 ]

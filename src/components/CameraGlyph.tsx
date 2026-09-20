@@ -1,36 +1,20 @@
-import type { PresetId } from "../../shared/types";
-
-type Props = { preset: PresetId; size?: number };
-
-const movementPaths: Record<PresetId, string> = {
-  orbit_l: "M39 16c3 15-29 18-32 4m0 0-1 6m1-6 6 2",
-  orbit_r: "M9 16c-3 15 29 18 32 4m0 0 1 6m-1-6-6 2",
-  orbit_360: "M8 16C8 2 40 2 40 18S8 34 8 23m0 0-3 4m3-4 5 1",
-  dolly_in: "M30 18h12m-4-4 4 4-4 4",
-  dolly_out: "M43 18H31m4-4-4 4 4 4",
-  crane_up: "M31 28V14c0-5 4-7 9-7m-4-3 4 3-3 4",
-  low: "M30 25 40 15m-6 0h6v6",
-  top: "M24 23v7m-4-4 4 4 4-4",
-};
-
-const cameraTransforms: Record<PresetId, string> = {
-  orbit_l: "translate(24 15)",
-  orbit_r: "translate(24 15)",
-  orbit_360: "translate(24 18) scale(.86)",
-  dolly_in: "translate(16 18)",
-  dolly_out: "translate(16 18)",
-  crane_up: "translate(16 25)",
-  low: "translate(16 25) rotate(-26)",
-  top: "translate(24 12) rotate(90) scale(.85)",
-};
-
-/** A shared camera silhouette; the arrow explains motion and the tilt explains framing. */
-export default function CameraGlyph({ preset, size = 42 }: Props) {
-  const dolly = preset === "dolly_in" || preset === "dolly_out";
+import { angleGlyphPosition, framingGlyph } from "./camera-glyph-geometry";
+import type { CameraTerm, CameraSection } from "../../shared/camera";
+/** Three parametric glyphs read the same pose data as the 3D rig. */
+export default function CameraGlyph({
+  section,
+  term,
+}: {
+  section: CameraSection;
+  term: CameraTerm;
+}) {
+  const { elevation = 0, roll = 0, motion, amount = 0 } = term.pose;
+  const camera = angleGlyphPosition(elevation);
+  const framing = framingGlyph(term);
   return (
     <svg
-      width={size}
-      height={size * 0.75}
+      width="2.625em"
+      height="1.969em"
       viewBox="0 0 48 36"
       fill="none"
       stroke="currentColor"
@@ -39,15 +23,61 @@ export default function CameraGlyph({ preset, size = 42 }: Props) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <g transform={cameraTransforms[preset]}>
-        <rect x="-9" y="-5" width="12" height="10" rx="1.6" />
-        <path d="M3-2 9-5V5L3 2M-6-5v-3h6v3" />
-        <path d="M-6-1h3" opacity=".45" />
-      </g>
-      <path d={movementPaths[preset]} />
-      {dolly && <path d="M46 10v16" opacity=".35" />}
-      {preset === "low" && <path d="M5 34h36" opacity=".35" />}
-      {preset === "top" && <path d="M15 31v3h18v-3" opacity=".45" />}
+      {section.glyph === "frame" ? (
+        <>
+          <path d="M5 12V5h9m20 0h9v7M5 24v7h9m20 0h9v-7" />
+          <svg
+            x="5"
+            y="5"
+            width="38"
+            height="26"
+            viewBox="5 5 38 26"
+            overflow="hidden"
+          >
+            <g transform={`translate(24 ${framing.y}) scale(${framing.scale})`}>
+              <circle cy="-6" r="2.5" />
+              <path d="M-4 4v-6q4-3 8 0v6M-2 4v5m4-5v5" />
+            </g>
+          </svg>
+        </>
+      ) : section.glyph === "angle" ? (
+        <g transform={`rotate(${roll} 27 18)`}>
+          <path d="M4 32h40" opacity=".3" />
+          <g>
+            <circle cx="27" cy="14" r="2.5" />
+            <path d="M23 24v-5q4-3 8 0v5M25 24v6m4-6v6" />
+            {term.id === "profile" && <path d="m29 13 2 2-2 1" />}
+          </g>
+          <path
+            d={`M${camera.x} ${camera.y}L27 18`}
+            strokeDasharray="2 3"
+            opacity=".5"
+          />
+          <g
+            transform={`translate(${camera.x} ${camera.y}) rotate(${camera.rotation})`}
+          >
+            <rect x="-4" y="-3" width="7" height="6" rx="1" />
+            <path d="m3-2 3-1v6L3 2M-2-3v-2h3v2" />
+          </g>
+        </g>
+      ) : (
+        <>
+          <rect x="18" y="13" width="11" height="10" rx="2" />
+          <path d="m29 16 6-3v10l-6-3M21 13v-3h5v3" />
+          {motion === "orbit" || motion === "arc" || motion === "subject" ? (
+            <path
+              d={`M8 17C8 3 40 3 40 18S8 32 8 23m0 0-3 4m3-4 5 1`}
+              strokeDasharray={amount < 360 ? "18 4" : undefined}
+            />
+          ) : (
+            <g
+              transform={`rotate(${motion === "tilt" || motion === "crane" ? -90 : 0} 24 18)`}
+            >
+              <path d="M6 29h34m-4-4 4 4-4 4" />
+            </g>
+          )}
+        </>
+      )}
     </svg>
   );
 }

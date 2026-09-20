@@ -7,6 +7,7 @@ import type {
 import Icon from "./Icon";
 import SelectMenu from "./SelectMenu";
 import TickFader from "./TickFader";
+import AspectRatioIcon from "./AspectRatioIcon";
 
 interface Props {
   generator: Generator;
@@ -17,6 +18,8 @@ interface Props {
   onAspectRatioChange: (ratio: AspectRatio) => void;
   resolution: VideoResolution;
   onResolutionChange: (resolution: VideoResolution) => void;
+  cameraEnabled: boolean;
+  onCameraEnabledChange: (enabled: boolean) => void;
   draft: boolean;
   onDraftChange: (draft: boolean) => void;
 }
@@ -55,6 +58,8 @@ export default function GenerationControls({
   onResolutionChange,
   draft,
   onDraftChange,
+  cameraEnabled,
+  onCameraEnabledChange,
 }: Props) {
   return (
     <div className="generation-controls">
@@ -76,7 +81,11 @@ export default function GenerationControls({
               label="Aspect ratio"
               value={aspectRatio}
               compact
-              options={aspectOptions.map((value) => ({ value, label: value }))}
+              options={aspectOptions.map((value) => ({
+                value,
+                label: value,
+                icon: <AspectRatioIcon ratio={value} />,
+              }))}
               onChange={(value) => onAspectRatioChange(value as AspectRatio)}
             />
           </div>
@@ -119,6 +128,24 @@ export default function GenerationControls({
               onClick={() => onDraftChange(!draft)}
             >
               <span>{draft ? "On" : "Off"}</span>
+              <span className="draft-trigger__track" aria-hidden="true">
+                <i />
+              </span>
+            </button>
+          </div>
+          <div className="instrument-field generation-controls__camera">
+            <span id="camera-label" className="instrument-label">
+              Camera
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={cameraEnabled}
+              aria-labelledby="camera-label"
+              className="instrument-trigger draft-trigger"
+              onClick={() => onCameraEnabledChange(!cameraEnabled)}
+            >
+              <span>{cameraEnabled ? "On" : "Off"}</span>
               <span className="draft-trigger__track" aria-hidden="true">
                 <i />
               </span>

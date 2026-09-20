@@ -1,8 +1,8 @@
 .theme-picker .instrument-label,
 .theme-picker .select-menu__trigger .select-menu__value {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  width: var(--space-1);
+  height: var(--space-1);
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
@@ -12,61 +12,34 @@
   background: var(--metal);
 }
 .theme-picker .instrument-trigger {
-  min-height: 34px;
-  padding: 8px 9px;
-  gap: 7px;
+  min-height: calc(34 * var(--unit));
+  padding: var(--space-8) var(--space-9);
+  gap: var(--space-7);
   color: var(--soft);
 }
 .theme-picker .select-menu__options {
   right: 0;
   left: auto;
-  min-width: 235px;
+  min-width: calc(235 * var(--unit));
 }
 .theme-swatch {
   display: flex;
-  border: 1px solid var(--machined);
-  border-radius: 2px;
+  border: var(--space-1) solid var(--machined);
+  border-radius: var(--radius-xs);
   overflow: hidden;
 }
 .theme-swatch i {
   display: block;
-  width: 9px;
-  height: 16px;
+  width: var(--space-9);
+  height: var(--space-16);
 }
-.source-content h2 {
-  font-size: 18px;
-  font-weight: 450;
-  margin: 0 0 3px;
-  letter-spacing: -0.2px;
-}
-.source-content .select-menu {
-  max-width: 330px;
-  background: var(--sunken);
-}
-.source-content .instrument-trigger {
-  font-size: 11px;
-  min-height: 32px;
-}
-.source-content .select-menu__options {
-  min-width: 100%;
-}
-@media (max-width: 560px) {
+@media (max-width: 35rem) {
   .topbar-right {
-    gap: 8px;
+    gap: var(--space-8);
   }
   .theme-picker .instrument-trigger {
-    padding: 7px;
-    gap: 4px;
-    min-height: 32px;
-  }
-  .source-content h2 {
-    font-size: 16px;
-  }
-  .source-content .select-menu__options {
-    min-width: 0;
-    max-width: calc(100vw - 90px);
-  }
-  .source-content .select-menu__option > span {
-    white-space: normal;
+    padding: var(--space-7);
+    gap: var(--space-4);
+    min-height: var(--space-32);
   }
 }

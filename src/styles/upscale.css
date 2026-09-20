@@ -1,11 +1,11 @@
 .upscale-controls {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: var(--space-22);
   flex-wrap: wrap;
 }
 .upscale-amount {
-  width: 174px;
+  width: var(--col-fader);
 }
 .upscale-mode {
   border: 0;
@@ -14,14 +14,35 @@
   min-width: 0;
 }
 .mode-segments {
+  position: relative;
   display: flex;
-  padding: 3px;
-  border: 1px solid var(--border-strong);
-  border-radius: 4px;
+  width: var(--col-mode);
+  padding: var(--space-3);
+  border: var(--space-1) solid var(--border-strong);
+  border-radius: var(--radius-control);
   background: var(--bg);
+}
+/* The selected chip is one element that slides between the two halves, so
+   switching mode reads like the camera and draft switches rather than a
+   instant repaint. The labels are equal halves, so it travels its own width. */
+.mode-segments::before {
+  content: "";
+  position: absolute;
+  top: var(--space-3);
+  bottom: var(--space-3);
+  left: var(--space-3);
+  width: calc(50% - var(--space-3));
+  border-radius: var(--radius-xs);
+  background: var(--raised);
+  box-shadow: inset 0 0 0 var(--space-1) var(--border-strong);
+}
+.mode-segments:has(label:nth-child(2) input:checked)::before {
+  transform: translateX(100%);
 }
 .mode-segments label {
   position: relative;
+  flex: 1 1 0;
+  min-width: 0;
   cursor: pointer;
 }
 .mode-segments input {
@@ -35,27 +56,26 @@
 }
 .mode-segments span {
   display: block;
-  padding: 7px 10px;
-  border-radius: 2px;
+  text-align: center;
+  white-space: nowrap;
+  padding: var(--space-7) var(--space-10);
+  border-radius: var(--radius-xs);
   color: var(--soft);
-  font-size: 10px;
+  font-size: var(--space-10);
 }
 .mode-segments input:checked + span {
   color: var(--accent);
-  background: var(--raised);
-  box-shadow: inset 0 0 0 1px var(--border-strong);
 }
 .mode-segments input:focus-visible + span {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: var(--space-2) solid var(--accent);
+  outline-offset: var(--space-2);
 }
-.upscale-mode p {
-  margin: 7px 0 0;
-  color: var(--muted);
-  font-size: 9px;
-  text-align: center;
+@media (prefers-reduced-motion: no-preference) {
+  .mode-segments::before {
+    transition: transform var(--motion-fast) ease;
+  }
 }
-@media (max-width: 700px) {
+@media (max-width: 43.75rem) {
   .composer-toolbar:has(.upscale-controls) {
     flex-wrap: wrap;
   }
@@ -66,16 +86,182 @@
     margin-left: auto;
   }
 }
-@media (max-width: 560px) {
+@media (max-width: 35rem) {
   .upscale-controls {
-    gap: 18px;
+    gap: var(--space-18);
     width: 100%;
     justify-content: space-between;
   }
   .upscale-amount {
-    width: min(150px, 48%);
+    width: min(calc(150 * var(--unit)), 48%);
+  }
+  .mode-segments {
+    width: auto;
   }
   .mode-segments span {
-    padding: 7px 9px;
+    padding: var(--space-7) var(--space-9);
+  }
+}
+
+.upscale-input {
+  /* The panel's border and padding inset its contents, so the outer column is
+     one inset wider than the controls it lines up with. */
+  --panel-inset: calc(var(--space-10) + var(--space-1));
+  --col-source: calc(
+    var(--col-model) + var(--space-20) + var(--col-fader) - var(--panel-inset)
+  );
+  display: grid;
+  grid-template-columns:
+    calc(
+      var(--col-source) + var(--space-22) + var(--col-mode) +
+        calc(2 * var(--panel-inset))
+    )
+    minmax(0, 1fr);
+  align-items: stretch;
+  min-height: 0;
+  gap: var(--space-14);
+  padding: var(--space-6) var(--space-18) var(--space-7);
+}
+.upscale-source-panel,
+.upscale-prompt {
+  min-width: 0;
+  min-height: calc(88 * var(--unit));
+  border: var(--space-1) solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  transition:
+    border-color var(--motion-control),
+    background var(--motion-control);
+}
+.upscale-source-panel {
+  display: grid;
+  grid-template-columns: var(--col-source) var(--col-mode);
+  gap: var(--space-22);
+  padding: var(--space-10);
+}
+.upscale-source-select {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+.upscale-source-select .select-menu {
+  min-width: 0;
+  background: var(--sunken);
+}
+.upscale-source-select .instrument-trigger {
+  min-height: var(--space-32);
+  font-size: var(--space-11);
+}
+.upscale-source-select .select-menu__options {
+  min-width: 100%;
+}
+.upscale-source-select > span {
+  margin-top: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: var(--text-small-8);
+}
+.upload-dropzone {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-7);
+  border: var(--space-1) dashed var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--sunken);
+  color: var(--soft);
+  text-align: center;
+}
+.upload-dropzone svg {
+  color: var(--accent);
+}
+.upload-dropzone strong {
+  color: var(--text);
+  font-size: var(--space-10);
+  font-weight: 450;
+}
+.upload-dropzone span {
+  color: var(--muted);
+  font: var(--text-small-7) var(--mono);
+}
+.upload-dropzone:hover,
+.upload-dropzone[data-dragging] {
+  border-color: var(--accent);
+  background: var(--accent-ghost);
+}
+.upload-dropzone:focus-visible {
+  outline: var(--space-2) solid var(--accent);
+  outline-offset: var(--space-2);
+}
+.upload-dropzone:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+.upscale-prompt {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-10) var(--space-12);
+}
+.upscale-prompt:focus-within {
+  border-color: var(--accent);
+  background: var(--surface-wash);
+}
+.upscale-prompt-label {
+  display: block;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: var(--text-small-8);
+  margin-bottom: var(--space-8);
+}
+.upscale-prompt textarea {
+  flex: 0 0 auto;
+  display: block;
+  width: 100%;
+  min-height: calc(45 * var(--unit));
+  border: 0;
+  padding: 0;
+  resize: none;
+  color: var(--text);
+  background: transparent;
+  font: inherit;
+  font-size: var(--space-13);
+  line-height: 1.5;
+}
+.upscale-prompt textarea::placeholder {
+  color: var(--soft);
+}
+@media (max-width: 68rem) {
+  .upscale-input {
+    grid-template-columns: 1fr;
+  }
+  .upscale-source-panel {
+    grid-template-columns: minmax(0, 1fr) var(--col-mode);
+  }
+}
+@media (max-width: 35rem) {
+  .upscale-input {
+    gap: var(--space-10);
+    padding: var(--space-11) var(--space-13) var(--space-13);
+  }
+  .upscale-source-panel {
+    grid-template-columns: 1fr;
+  }
+  .upscale-source-select .select-menu__options {
+    max-width: calc(100vw - calc(70 * var(--unit)));
+  }
+  .upscale-source-select .select-menu__option > span {
+    white-space: normal;
+  }
+  .upload-dropzone {
+    min-height: calc(58 * var(--unit));
+    flex-direction: row;
+    gap: var(--space-7);
   }
 }

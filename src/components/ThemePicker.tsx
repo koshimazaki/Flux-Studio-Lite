@@ -7,12 +7,12 @@ const themes = [
   {
     value: "blackstone-lime",
     label: "Blackstone / Lime",
-    colors: ["#1e2227", "#a8be5c", "#c0d672"],
+    colors: ["--surface", "--lime-accent", "--lime-readout"],
   },
   {
     value: "cyberpunk",
     label: "Cyberpunk",
-    colors: ["#1e2227", "#ea7b7b", "#b3e9f4"],
+    colors: ["--surface", "--coral-accent", "--cyan-readout"],
   },
 ] as const;
 
@@ -48,7 +48,7 @@ export default function ThemePicker() {
           icon: (
             <span className="theme-swatch" aria-hidden="true">
               {item.colors.map((color) => (
-                <i key={color} style={{ background: color }} />
+                <i key={color} style={{ background: `var(${color})` }} />
               ))}
             </span>
           ),

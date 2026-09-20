@@ -1,68 +1,81 @@
 # Working on FLUX Studio Lite
 
-Read [README.md](README.md) for what the app does, [docs/read-through.md](docs/read-through.md)
-for where each responsibility lives, and [docs/architecture.md](docs/architecture.md) for the
-cloud boundary, before changing behaviour.
+Read [README.md](README.md) for what the app does,
+[the code read-through](docs/read-through.md) for where each responsibility
+lives, [the architecture](docs/architecture.md) for the cloud boundary, and the
+[review checklist](docs/review-checklist.md) before changing behaviour. For
+hosted changes, also read [Cloudflare operations](docs/cloudflare.md).
 
 ## Where things are
 
-| Path      | Holds                                                                                                                                                                                                                  |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `shared/` | Model inputs, camera wording, pricing and the prompt composer. No framework, no Node, no DOM — this is the layer that ports to Cloudflare unchanged.                                                                   |
-| `src/`    | One screen. `App.tsx` is the interaction, `useJobs.ts` the polling loop, `components/` the small shared controls, `scene/` the isolated Three.js diagram.                                                              |
-| `server/` | The local adapter: `validation.ts` is the allowlist, `app.ts` the origin and ownership boundary, `jobs.ts` the lifecycle, `bfl.ts` exactly two provider endpoints, `media.ts` the MP4 inspection that needs `ffprobe`. |
-| `tests/`  | Camera maths, validation and pricing, idempotency and concurrency, session ownership, real MP4 range delivery.                                                                                                         |
-| `docs/`   | Architecture and the cloud boundary, camera wording and its sources, the read-through, and what has actually been verified.                                                                                            |
+| Path             | Holds                                                                                                                               |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `shared/`        | Model inputs, camera wording, pricing, lifecycle, replay rules, rate limits and library validation. No framework, Node or DOM APIs. |
+| `src/`           | The single-screen React interaction, polling, composer reducer, catalogue adapter, components, Three.js scene and styles.           |
+| `server/`        | The local Express adapter: validation, ownership, local lifecycle, provider calls and `ffprobe` media inspection.                   |
+| `worker/`        | The hosted adapter: the same API over D1/R2, bounded MP4 parsing, polling leases, rate limits and lifecycle sweep.                  |
+| `migrations/`    | Ordered D1 schema changes. Apply them to an isolated database before any remote migration.                                          |
+| `observability/` | Count-only daily generation statistics and their reader. It must not grow into prompt or visitor tracking.                          |
+| `tests/`         | Camera maths, validation, pricing, replay safety, lifecycle, session ownership, real MP4 delivery and isolated D1/R2 behaviour.     |
+| `docs/`          | Architecture, Cloudflare operations, camera wording, verification evidence, read-through and review questions.                      |
 
-`docs/read-through.md` walks these in the order one user action travels through them. Start there
+`docs/read-through.md` follows one user action through these layers. Start there
 rather than opening files at random.
 
 ## Provider documentation
 
-The two live contracts and the camera wording come from BFL's own docs, checked 19 September 2026:
+The live contracts and camera wording come from BFL's own documentation,
+checked 19 September 2026:
 
 - [Generate a video with FLUX 3](https://docs.bfl.ai/api-reference/utility/generate-a-video-with-flux-3)
 - [Video upscale, constraints and pricing](https://docs.bfl.ai/flux_tools/flux_video_upscale)
 - [Camera prompting guide](https://docs.bfl.ai/guides/prompting_video_camera_terms) — see
-  [docs/camera-wording.md](docs/camera-wording.md) for what the demo does and does not claim from it.
+  [camera wording](docs/camera-wording.md) for what the demo does and does not claim.
 - [Pricing](https://docs.bfl.ai/quick_start/pricing)
 
-Cite the documented behaviour. Do not infer an exact prompt or a reliability claim from an example video.
+Cite documented behaviour. Do not infer an exact prompt or reliability claim
+from an example video.
 
 ## Checking your work
 
 ```sh
-npm run format:check   # prettier
-npm run lint           # eslint, typescript-eslint, react-hooks
-npm run typecheck      # tsc --noEmit
-npm test               # vitest
-npm run build          # tsc --noEmit && vite build
+npm run format:check
+npm run lint
+npm run typecheck
+npm test
+npm run build:pages
 ```
 
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs all five on every push to `main` and
-every pull request. Run them locally before proposing a change; a red CI is not a review comment.
+[CI](.github/workflows/ci.yml) runs the formatting, lint, type, test, build and
+Cloudflare boundary checks on every pull request and push to `main`. Run the
+relevant checks locally before proposing a change; a red CI is not a review
+comment. Use the review checklist for agent and XReview passes, and turn a
+confirmed regression into a focused test rather than storing a review transcript.
 
-Two environment facts that are not obvious from the source:
+Two environment facts are easy to miss:
 
-- **`ffprobe` is required.** `server/media.ts` shells out to it to read an MP4's real dimensions.
-  Without it, uploads return 400 and a job never leaves `copying`. It is a documented dependency,
-  not a bug — install FFmpeg.
-- **`shared/` must stay free of Node and DOM APIs.** When the Cloudflare port is present,
-  `npm run check:worker` compiles that layer under `"types": []`, so a single `node:fs` import
-  there fails the build while every other check stays green.
+- **`ffprobe` is required.** `server/media.ts` uses it to measure an MP4. Without
+  FFmpeg, uploads return 400 and a job may stay in `copying`.
+- **`shared/` must stay portable.** `npm run check:worker` compiles it under
+  `"types": []`, so a Node or DOM import fails the hosted boundary.
+- **`worker/env.d.ts` is generated.** Regenerate it with Wrangler; do not hand-edit it.
 
 ## Rules that matter
 
-- Generation is a paid side effect. Persist the idempotency reservation before submitting, and
-  never automatically retry a submission whose outcome is uncertain.
-- Keep visitor keys transient. Never persist one, never log one, and never claim storage is
-  operator-blind when the operator controls the secret.
-- Keep model inputs, pricing and lifecycle rules in `shared/`, so the local and hosted adapters
-  cannot disagree. When a shared contract changes, verify every adapter that reads it.
-- Control-character classes in the sanitisers are deliberate. Filenames, provenance labels and the
-  API key are stripped of `\x00-\x1f\x7f` before use.
-- Keep components small; `docs/read-through.md` asks for under 500 lines each.
-- Update the relevant doc in the same change as the behaviour, and say what you actually ran.
-  Distinguish local evidence from deployed behaviour.
-- Local verification does not authorise a paid call, a migration, a deployment or a publication.
-  Follow the operator's requested scope for those.
+- Generation is a paid side effect. Persist the idempotency reservation before
+  submission and never automatically retry an uncertain submission. Quota
+  eviction must preserve replay protection until normal retention.
+- Keep visitor keys transient. Never persist or log one. Public assets and docs
+  must exclude credentials, provider job identifiers, private lineage, personal
+  preparation and machine-specific paths.
+- Keep shared model inputs, pricing, lifecycle and replay rules in `shared/` so
+  the local and hosted adapters cannot disagree. Verify every adapter that reads
+  a changed contract.
+- Control-character classes in sanitizers are deliberate. Filenames, catalogue
+  labels and BFL keys strip `\x00-\x1f\x7f` before use.
+- Keep production modules focused and update the relevant documentation in the
+  same change as behaviour. Say what was actually run and distinguish local
+  evidence from deployed behaviour.
+- Preserve existing worktree changes and keep edits scoped to the request.
+- Local verification does not authorize a paid call, remote migration,
+  deployment or publication. Follow the operator's requested scope.

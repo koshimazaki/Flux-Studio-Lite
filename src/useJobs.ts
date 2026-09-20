@@ -1,10 +1,12 @@
+import { isTerminal } from "../shared/types";
+import { selectedJob, cleanJobUrl, jobHistoryState } from "./job-links";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Job, Source, GenerateInput } from "../shared/types";
 export async function request<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const response = await fetch(path, options);
+  const response = await fetch(path, { ...options, cache: "no-store" });
   const data = await response.json();
   if (!response.ok)
     throw new Error(
@@ -12,32 +14,50 @@ export async function request<T>(
     );
   return data;
 }
-const terminal = new Set([
-  "Ready",
-  "Error",
-  "expired",
-  "Request Moderated",
-  "Content Moderated",
-]);
 export function useJobs(key: string) {
   const [jobs, setJobs] = useState<Job[]>([]),
     [sources, setSources] = useState<Source[]>([]),
     [error, setError] = useState("");
+  const [selectedId, setSelectedId] = useState(() =>
+    selectedJob(location.href, history.state),
+  );
+  const selectedRef = useRef(selectedId);
+  selectedRef.current = selectedId;
+  const keyRef = useRef(key);
+  keyRef.current = key;
   const needsKey =
     !key &&
-    jobs.some((job) => job.keyMode === "byo" && !terminal.has(job.status));
+    jobs.some((job) => job.keyMode === "byo" && !isTerminal(job.status));
   const jobsRef = useRef(jobs);
   jobsRef.current = jobs;
+  const pollError = useRef("");
   const refresh = useCallback(async () => {
     const data = await request<{ jobs: Job[]; sources: Source[] }>(
       "/api/history",
     );
+    const linkedId = selectedRef.current;
+    if (linkedId && !data.jobs.some((job) => job.id === linkedId)) {
+      try {
+        const linked = await request<{ job: Job }>(
+          `/api/jobs/${encodeURIComponent(linkedId)}`,
+          { headers: keyRef.current ? { "x-byo-key": keyRef.current } : {} },
+        );
+        data.jobs.push(linked.job);
+      } catch {
+        setError(
+          "That job is unavailable in this browser session. Showing your latest clip.",
+        );
+        setSelectedId(null);
+        history.replaceState(
+          jobHistoryState(history.state, null),
+          "",
+          cleanJobUrl(location.href),
+        );
+      }
+    }
     setJobs(data.jobs);
     setSources(data.sources);
   }, []);
-  useEffect(() => {
-    refresh().catch((e) => setError(e.message));
-  }, [refresh]);
   useEffect(() => {
     let cancelled = false,
       inFlight = false,
@@ -48,7 +68,7 @@ export function useJobs(key: string) {
       inFlight = true;
       if (!document.hidden) {
         for (const job of jobsRef.current.filter(
-          (j) => !terminal.has(j.status),
+          (j) => !isTerminal(j.status),
         )) {
           try {
             const result = await request<{ job: Job; needsKey?: boolean }>(
@@ -62,12 +82,21 @@ export function useJobs(key: string) {
             setJobs((current) =>
               current.map((j) => (j.id === result.job.id ? result.job : j)),
             );
+            // A poll that recovers retracts its own banner. Errors raised
+            // elsewhere stay until their own owner clears them.
+            if (pollError.current) {
+              const recovered = pollError.current;
+              pollError.current = "";
+              setError((current) => (current === recovered ? "" : current));
+            }
             if (result.job.status === "Ready") await refresh();
           } catch (e) {
-            if (!cancelled)
-              setError(
-                e instanceof Error ? e.message : "Could not refresh the job.",
-              );
+            if (!cancelled) {
+              const message =
+                e instanceof Error ? e.message : "Could not refresh the job.";
+              pollError.current = message;
+              setError(message);
+            }
           }
         }
       }
@@ -89,6 +118,36 @@ export function useJobs(key: string) {
       document.removeEventListener("visibilitychange", visibility);
     };
   }, [key, refresh]);
+  useEffect(() => {
+    const navigate = () => {
+      setSelectedId(selectedJob(location.href, history.state));
+    };
+    // Migrate old ?job links without losing the selected clip on reload.
+    history.replaceState(
+      jobHistoryState(history.state, selectedRef.current),
+      "",
+      cleanJobUrl(location.href),
+    );
+    window.addEventListener("popstate", navigate);
+    return () => window.removeEventListener("popstate", navigate);
+  }, []);
+  useEffect(() => {
+    void refresh().catch((e) => setError(e.message));
+  }, [selectedId, refresh]);
+  function selectJob(id: string) {
+    setSelectedId(id);
+    history.replaceState(
+      jobHistoryState(history.state, id),
+      "",
+      cleanJobUrl(location.href),
+    );
+    document.getElementById("main-video")?.scrollIntoView({
+      block: "start",
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
+    });
+  }
   async function generate(input: GenerateInput) {
     setError("");
     const { job } = await request<{ job: Job }>("/api/jobs", {
@@ -101,8 +160,19 @@ export function useJobs(key: string) {
       body: JSON.stringify(input),
     });
     setJobs((current) => [job, ...current.filter((j) => j.id !== job.id)]);
-    history.replaceState(null, "", `?job=${encodeURIComponent(job.id)}`);
+    selectJob(job.id);
     return job;
   }
-  return { jobs, sources, error, setError, needsKey, refresh, generate };
+  return {
+    jobs,
+    sources,
+    error,
+    setError,
+    needsKey,
+    refresh,
+    generate,
+    selectJob,
+    selectedId,
+    featuredJob: jobs.find((job) => job.id === selectedId) ?? jobs[0],
+  };
 }
