@@ -12,12 +12,15 @@ export default function Gallery({
   onUpscale,
   onRetry,
   onSelect,
+  onLibrarySetup,
 }: {
   jobs: Job[];
   sources: Source[];
   onUpscale: (id: string) => void;
   onRetry: (job: Job) => void;
   onSelect: (id: string) => void;
+  /** Loads a catalogue clip's recorded run: the whole setup, or its prompt only. */
+  onLibrarySetup: (source: Source, full: boolean) => void;
 }) {
   const [viewing, setViewing] = useState<ViewingClip | null>(null);
   const [filter, setFilter] = useState<"all" | "session">("all");
@@ -57,7 +60,9 @@ export default function Gallery({
         {jobs.map((job) => (
           <article className="clip-card" key={job.id}>
             <div className="clip-media">
-              {job.status === "Ready" && job.resultUrl ? (
+              {job.status === "Ready" &&
+              job.mediaAvailable !== false &&
+              job.resultUrl ? (
                 <Clip
                   url={job.resultUrl}
                   label={job.description || "Untitled study"}
@@ -82,8 +87,8 @@ export default function Gallery({
                   className="clip-title-button"
                   title={
                     job.generator === "video"
-                      ? "Use this prompt and camera direction; keep generation settings"
-                      : "Use this upscale prompt; keep generation settings"
+                      ? "Switch to video and use this prompt and camera direction; keep output settings"
+                      : "Switch to upscale and use this prompt; keep output settings"
                   }
                   onClick={() => onSelect(job.id)}
                 >
@@ -92,7 +97,7 @@ export default function Gallery({
               </h3>
               <div className="clip-meta">
                 <span>
-                  {job.status === "Ready" ? (
+                  {job.status === "Ready" && job.mediaAvailable !== false ? (
                     <>
                       $
                       {Number(job.costActualUsd ?? job.costEstimateUsd).toFixed(
@@ -102,7 +107,10 @@ export default function Gallery({
                     </>
                   ) : (
                     <>
-                      {statusLabel(job.status)} · $
+                      {job.mediaAvailable === false
+                        ? "Video no longer stored"
+                        : statusLabel(job.status)}{" "}
+                      · $
                       {Number(job.costActualUsd ?? job.costEstimateUsd).toFixed(
                         2,
                       )}
@@ -110,7 +118,9 @@ export default function Gallery({
                     </>
                   )}
                 </span>
-                {job.status === "Ready" && job.resultUrl ? (
+                {job.status === "Ready" &&
+                job.mediaAvailable !== false &&
+                job.resultUrl ? (
                   <ClipActions
                     url={job.resultUrl}
                     filename={`flux-study-${job.id}.mp4`}
@@ -128,7 +138,8 @@ export default function Gallery({
                   />
                 ) : isTerminal(job.status) ? (
                   <button onClick={() => onRetry(job)}>
-                    Try again <Icon name="refresh" size={12} />
+                    {job.status === "Ready" ? "Recreate" : "Try again"}{" "}
+                    <Icon name="refresh" size={12} />
                   </button>
                 ) : null}
               </div>
@@ -141,10 +152,14 @@ export default function Gallery({
               <div className="clip-media">
                 <Clip
                   url={source.url}
-                  poster={(source as Source & { poster?: string }).poster}
+                  poster={source.poster}
                   label={source.label}
                   onOpen={() =>
-                    setViewing({ url: source.url, label: source.label })
+                    setViewing({
+                      url: source.url,
+                      label: source.label,
+                      prompt: source.setup?.prompt,
+                    })
                   }
                 />
                 <span className="clip-badge">
@@ -152,15 +167,35 @@ export default function Gallery({
                 </span>
               </div>
               <div className="clip-info">
-                <h3>{source.label}</h3>
+                <h3>
+                  {source.setup ? (
+                    <button
+                      className="clip-title-button"
+                      title="Switch to video and use this clip's prompt and camera direction; keep output settings"
+                      onClick={() => onLibrarySetup(source, false)}
+                    >
+                      {source.label}
+                    </button>
+                  ) : (
+                    source.label
+                  )}
+                </h3>
                 <div className="clip-meta">
                   <span>
                     {Number(source.duration.toFixed(1))}s · {source.width} ×{" "}
                     {source.height}
+                    {source.setup
+                      ? ` · $${source.setup.costUsd.toFixed(2)}`
+                      : ""}
                   </span>
                   <ClipActions
                     url={source.url}
                     filename={`${source.id}.mp4`}
+                    onRecreate={
+                      source.setup
+                        ? () => onLibrarySetup(source, true)
+                        : undefined
+                    }
                     onUpscale={() => onUpscale(source.id)}
                   />
                 </div>

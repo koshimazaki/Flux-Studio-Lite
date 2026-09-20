@@ -1,0 +1,78 @@
+# Review checklist
+
+Use these questions when reviewing changes, including an agent or XReview pass.
+Answer from source and test evidence. Report concrete failures with a file,
+trigger, consequence and proposed fix; a passing build alone is not evidence
+that a paid or destructive operation is safe.
+
+## Architecture and paid requests
+
+- Do Express and the Worker validate and canonicalize the same inputs, including
+  old defaults, omitted fields and reordered camera selections?
+- Is the idempotency reservation durable before the provider submission? Do
+  concurrent requests, lost responses, quota eviction and retries preserve it
+  until its documented retention boundary?
+- Can polling, refresh or recovery accidentally resubmit a paid request? Do
+  terminal states stop polling and release leases without hiding uncertainty?
+- Are upscale dimensions and prices derived from trusted media metadata or the
+  validated static catalogue, rather than browser assertions?
+
+See [architecture](architecture.md), `shared/idempotency.ts`,
+`shared/lifecycle.ts`, and the server/Worker tests.
+
+## Ownership, storage and counts
+
+- Are private media, history and jobs restricted to the owning session? Are
+  provider input links scoped and time-limited, with redirects rejected?
+- Can a key, provider identifier or private lineage leak through assets, logs,
+  errors or public job responses? Inspect the built assets as well as source.
+- Does cleanup remove the intended R2 objects and source rows while preserving
+  replay protection and historical counts? Is unavailable media presented honestly?
+- Do daily counts survive deletion, repeated sweeps and later jobs on the same
+  day without losing, double-counting or reclassifying completed generations?
+- Do rate limits, batch bounds and retention claims match the actual code paths,
+  including Pages request-triggered housekeeping and failure recovery?
+
+See [Cloudflare operations](cloudflare.md), [observability](../observability/README.md),
+`worker/storage.ts`, `worker/sweep.ts`, and migrations. Apply migrations in an
+isolated test database; remote migration is a separate operation.
+
+## Composer and library
+
+- Does a clip-title click switch to the matching generator and restore only its
+  prompt/camera text while preserving current settings? Does Recreate restore
+  the full saved setup without submitting it?
+- Do both directions between video and Upscale work? Do library clips stay out
+  of session-job polling and saved-job selection?
+- Does every shipped library setup still validate and reproduce its recorded
+  prompt? Are provider identifiers and private provenance absent from public files?
+- Can a first-time visitor inspect the library without a key? Check keyboard
+  controls, a narrow viewport and reduced motion when affected by the change.
+
+## Verification and documentation
+
+```sh
+npm test
+npm run build:pages
+npx prettier --check src shared server worker observability tests docs README.md AGENTS.md
+git diff --check
+```
+
+Worker tests use isolated D1/R2 and a fake provider; they do not verify live paid
+generation. Browser-check changed user flows separately. Keep generated Worker
+typings excluded from formatting. CI workflow configuration is the source for
+which checks run on a pull request; do not claim CI passed from local results.
+
+When behavior changes, update its source of documentation in the same change:
+
+| Changed contract                        | Documentation to revisit          |
+| --------------------------------------- | --------------------------------- |
+| User-facing flow or setup               | README and architecture           |
+| API, state, replay, key handling        | Architecture and this checklist   |
+| Storage, limits, migrations, deployment | Cloudflare operations             |
+| Aggregates or privacy boundary          | Observability                     |
+| Verification result or known limitation | Verification, with scope and date |
+
+Keep documentation about the product and its implementation. Private preparation,
+review transcripts and machine-specific evidence belong outside public files.
+Remove stale claims and broken links rather than appending contradictory notes.

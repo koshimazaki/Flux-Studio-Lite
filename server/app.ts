@@ -6,6 +6,12 @@ import { BflClient } from "./bfl";
 import { AppError, requireKey } from "./errors";
 import { BUDGET_USD, JobService, SESSION_LIMIT } from "./jobs";
 import { MAX_INPUT_BYTES, validateUpscaleSource } from "./media";
+import {
+  RATE_LIMITS,
+  RATE_LIMIT_MESSAGE,
+  RATE_WINDOW_MS,
+  type RateBucket,
+} from "../shared/limits";
 import { publicJob, publicSource, Store } from "./store";
 import { validateIdempotencyKey, validateInput } from "./validation";
 
@@ -28,7 +34,28 @@ export async function createApp(options: AppOptions) {
     options.serverKey,
     bfl,
   );
+  /**
+   * The local mirror of the Worker's D1 limiter: same buckets, same window,
+   * one in-memory map instead of a shared table. Every API route has a ceiling
+   * so a runaway client cannot loop a route for free on either backend.
+   */
   const rateWindows = new Map<string, { starts: number; count: number }>();
+  function limit(bucket: RateBucket, id: string) {
+    const now = Date.now();
+    const key = `${bucket}:${id}`;
+    const open = rateWindows.get(key);
+    const window =
+      open && now - open.starts < RATE_WINDOW_MS
+        ? open
+        : { starts: now, count: 0 };
+    window.count++;
+    rateWindows.set(key, window);
+    if (rateWindows.size > 1000)
+      for (const [existing, value] of rateWindows)
+        if (now - value.starts > RATE_WINDOW_MS) rateWindows.delete(existing);
+    if (window.count > RATE_LIMITS[bucket])
+      throw new AppError(429, RATE_LIMIT_MESSAGE);
+  }
 
   app.use("/api", (request, response, next) => {
     response.setHeader("Cache-Control", "no-store");
@@ -59,26 +86,13 @@ export async function createApp(options: AppOptions) {
         path: "/",
       });
     response.locals.sessionId = sessionId;
-    if (request.method === "POST") {
-      const now = Date.now();
-      const window = rateWindows.get(sessionId);
-      const current =
-        window && now - window.starts < 60_000
-          ? window
-          : { starts: now, count: 0 };
-      current.count++;
-      rateWindows.set(sessionId, current);
-      if (current.count > 8)
-        return next(
-          new AppError(
-            429,
-            "Please wait a moment before starting another request.",
-          ),
-        );
-      if (rateWindows.size > 1000)
-        for (const [id, value] of rateWindows)
-          if (now - value.starts > 60_000) rateWindows.delete(id);
-    }
+    // Paid writes are counted once here; each read route counts its own bucket.
+    if (request.method === "POST")
+      try {
+        limit("submit", sessionId);
+      } catch (error) {
+        return next(error);
+      }
     next();
   });
 
@@ -91,13 +105,15 @@ export async function createApp(options: AppOptions) {
     }),
   );
   app.get("/api/credits", async (request, response) => {
+    limit("credits", response.locals.sessionId);
     const key = requireKey(request.headers["x-byo-key"] ?? options.serverKey);
     const credits = await bfl.credits(key);
     response.json({ credits, checkedAt: new Date().toISOString() });
   });
-  app.get("/api/history", async (_request, response) =>
-    response.json(await service.history(response.locals.sessionId)),
-  );
+  app.get("/api/history", async (_request, response) => {
+    limit("history", response.locals.sessionId);
+    response.json(await service.history(response.locals.sessionId));
+  });
   app.post(
     "/api/jobs",
     express.json({ limit: "16kb" }),
@@ -122,6 +138,7 @@ export async function createApp(options: AppOptions) {
     },
   );
   app.get("/api/jobs/:id", async (request, response) => {
+    limit("poll", response.locals.sessionId);
     const byoKey =
       request.headers["x-byo-key"] === undefined
         ? undefined
@@ -174,6 +191,7 @@ export async function createApp(options: AppOptions) {
     },
   );
   app.get("/api/clips/:id", async (request, response) => {
+    limit("media", response.locals.sessionId);
     const source = store.data.sources.find(
       (item) =>
         item.id === request.params.id &&

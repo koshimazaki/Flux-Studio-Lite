@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { cameraSections, cameraTerms, emptyCamera } from "../shared/camera";
+import {
+  cameraSections,
+  cameraTerms,
+  emptyCamera,
+  type CameraTermId,
+} from "../shared/camera";
 import { composePrompt } from "../shared/presets";
 import {
   composerInput,
@@ -70,6 +75,7 @@ describe("section camera contract", () => {
   it("loads video prompt and camera without changing generation settings, while Recreate restores them", () => {
     const state = {
       ...initialComposer,
+      generator: "upscale" as const,
       draft: true,
       duration: 13,
       aspectRatio: "21:9" as const,
@@ -98,6 +104,7 @@ describe("section camera contract", () => {
     expect(composePrompt(composerInput(promptOnly))).toBe(composePrompt(job));
     expect(promptOnly).toEqual({
       ...state,
+      generator: "video",
       description: job.description,
       cameraEnabled: job.cameraEnabled,
       camera: job.camera,
@@ -116,7 +123,7 @@ describe("section camera contract", () => {
       sourceId: "",
     });
   });
-  it("loads only upscale text and preserves mode, source and all other controls", () => {
+  it("switches to upscale for prompt reuse while preserving source and all other controls", () => {
     const state = {
       ...initialComposer,
       sourceId: "current-source",
@@ -132,6 +139,7 @@ describe("section camera contract", () => {
     } as Job;
     expect(composerReducer(state, { type: "restore-prompt", job })).toEqual({
       ...state,
+      generator: "upscale",
       upscalePrompt: "Fine wood grain.",
     });
     expect(composerReducer(state, { type: "restore", job })).toMatchObject({
@@ -161,11 +169,15 @@ describe("section camera contract", () => {
       expect(() => validateInput({ ...input, cameraEdits })).toThrow();
   });
   it("retains per-term edits while submitting only the selected terms", () => {
-    let state = composerReducer(initialComposer, {
-      type: "edit-camera",
-      id: "orbit",
-      text: "Custom orbit.",
+    // Camera edits reach the reducer the way CameraDialog sends them.
+    const editCamera = (id: CameraTermId, text: string) => ({
+      type: "update" as const,
+      patch: { cameraEdits: { [id]: text } },
     });
+    let state = composerReducer(
+      initialComposer,
+      editCamera("orbit", "Custom orbit."),
+    );
     state = composerReducer(state, {
       type: "update",
       patch: { camera: { ...emptyCamera, movements: "pan" } },
@@ -177,11 +189,7 @@ describe("section camera contract", () => {
       patch: { camera: initialComposer.camera },
     });
     expect(composePrompt(composerInput(state))).toContain("Custom orbit.");
-    state = composerReducer(state, {
-      type: "edit-camera",
-      id: "orbit",
-      text: "",
-    });
+    state = composerReducer(state, editCamera("orbit", ""));
     expect(composePrompt(validateInput(composerInput(state)))).toBe(
       state.description,
     );

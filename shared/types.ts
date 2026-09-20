@@ -36,6 +36,18 @@ export interface GenerateInput {
   upscaleCreativity: 0 | 1;
 }
 
+/**
+ * The run that produced a catalogue clip, shipped with it so Recreate and
+ * prompt reuse work on a library clip exactly as on a visitor's own job.
+ */
+export interface LibrarySetup extends GenerateInput {
+  /** The composed prompt the provider received, recorded verbatim. */
+  prompt: string;
+  /** Provider-confirmed charge for the original run. */
+  costUsd: number;
+  generatedAt: string;
+}
+
 export interface Source {
   id: string;
   label: string;
@@ -45,6 +57,8 @@ export interface Source {
   height: number;
   duration: number;
   origin: "sample" | "upload" | "generated";
+  /** Present on catalogue clips only; uploads and generations have their own job. */
+  setup?: LibrarySetup;
 }
 
 export interface Job extends GenerateInput {
@@ -56,6 +70,8 @@ export interface Job extends GenerateInput {
   costEstimateUsd: number;
   costActualUsd?: number;
   resultUrl?: string;
+  /** False when retention or quota kept the run record but removed its media. */
+  mediaAvailable?: false;
   error?: string;
   progress?: number;
   keyMode: "server" | "byo";

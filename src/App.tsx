@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { isTerminal } from "../shared/types";
 import GenerateButton from "./components/GenerateButton";
-import type { Job } from "../shared/types";
+import type { Job, Source } from "../shared/types";
 import { usePageKey } from "./usePageKey";
 import { useComposer, composerInput } from "./useComposer";
 import AccountBalance from "./components/AccountBalance";
@@ -12,6 +12,7 @@ import {
   estimateUpscaleUsd,
 } from "../shared/presets";
 import { request, useJobs } from "./useJobs";
+import { librarySetupJob } from "./library";
 import CameraDialog from "./components/CameraDialog";
 import Gallery from "./components/Gallery";
 import KeyDialog from "./components/KeyDialog";
@@ -132,11 +133,27 @@ export default function App() {
     dispatch({ type: "restore", job });
     selectJob(job.id);
   }
-  function usePrompt(job: Job) {
+  function applyPrompt(job: Job) {
     // This explicit choice must not trigger the full reload/legacy-link restore.
     restoredSelection.current = job.id;
     dispatch({ type: "restore-prompt", job });
     selectJob(job.id);
+  }
+  /**
+   * A library clip restores its recorded run into the composer, but is never
+   * selected as the featured job: its id names a catalogue entry, so polling or
+   * linking it would look for a session job that does not exist.
+   */
+  function applyLibrarySetup(source: Source, full: boolean) {
+    const job = librarySetupJob(source);
+    if (!job) return;
+    dispatch({ type: full ? "restore" : "restore-prompt", job });
+    composerRef.current?.scrollIntoView({
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
+      block: "center",
+    });
   }
   return (
     <>
@@ -370,8 +387,9 @@ export default function App() {
           onRetry={retry}
           onSelect={(id) => {
             const job = jobs.find((item) => item.id === id);
-            if (job) usePrompt(job);
+            if (job) applyPrompt(job);
           }}
+          onLibrarySetup={applyLibrarySetup}
         />
       </main>
       {showKey && (

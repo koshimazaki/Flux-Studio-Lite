@@ -5,7 +5,7 @@
   flex-wrap: wrap;
 }
 .upscale-amount {
-  width: calc(174 * var(--unit));
+  width: var(--col-fader);
 }
 .upscale-mode {
   border: 0;
@@ -14,14 +14,35 @@
   min-width: 0;
 }
 .mode-segments {
+  position: relative;
   display: flex;
+  width: var(--col-mode);
   padding: var(--space-3);
   border: var(--space-1) solid var(--border-strong);
   border-radius: var(--radius-control);
   background: var(--bg);
 }
+/* The selected chip is one element that slides between the two halves, so
+   switching mode reads like the camera and draft switches rather than a
+   instant repaint. The labels are equal halves, so it travels its own width. */
+.mode-segments::before {
+  content: "";
+  position: absolute;
+  top: var(--space-3);
+  bottom: var(--space-3);
+  left: var(--space-3);
+  width: calc(50% - var(--space-3));
+  border-radius: var(--radius-xs);
+  background: var(--raised);
+  box-shadow: inset 0 0 0 var(--space-1) var(--border-strong);
+}
+.mode-segments:has(label:nth-child(2) input:checked)::before {
+  transform: translateX(100%);
+}
 .mode-segments label {
   position: relative;
+  flex: 1 1 0;
+  min-width: 0;
   cursor: pointer;
 }
 .mode-segments input {
@@ -35,6 +56,8 @@
 }
 .mode-segments span {
   display: block;
+  text-align: center;
+  white-space: nowrap;
   padding: var(--space-7) var(--space-10);
   border-radius: var(--radius-xs);
   color: var(--soft);
@@ -42,12 +65,15 @@
 }
 .mode-segments input:checked + span {
   color: var(--accent);
-  background: var(--raised);
-  box-shadow: inset 0 0 0 var(--space-1) var(--border-strong);
 }
 .mode-segments input:focus-visible + span {
   outline: var(--space-2) solid var(--accent);
   outline-offset: var(--space-2);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mode-segments::before {
+    transition: transform var(--motion-fast) ease;
+  }
 }
 @media (max-width: 43.75rem) {
   .composer-toolbar:has(.upscale-controls) {
@@ -69,18 +95,32 @@
   .upscale-amount {
     width: min(calc(150 * var(--unit)), 48%);
   }
+  .mode-segments {
+    width: auto;
+  }
   .mode-segments span {
     padding: var(--space-7) var(--space-9);
   }
 }
 
 .upscale-input {
+  /* The panel's border and padding inset its contents, so the outer column is
+     one inset wider than the controls it lines up with. */
+  --panel-inset: calc(var(--space-10) + var(--space-1));
+  --col-source: calc(
+    var(--col-model) + var(--space-20) + var(--col-fader) - var(--panel-inset)
+  );
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns:
+    calc(
+      var(--col-source) + var(--space-22) + var(--col-mode) +
+        calc(2 * var(--panel-inset))
+    )
+    minmax(0, 1fr);
   align-items: stretch;
   min-height: 0;
   gap: var(--space-14);
-  padding: var(--space-6) var(--space-20) var(--space-7);
+  padding: var(--space-6) var(--space-18) var(--space-7);
 }
 .upscale-source-panel,
 .upscale-prompt {
@@ -95,8 +135,8 @@
 }
 .upscale-source-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) calc(104 * var(--unit));
-  gap: var(--space-12);
+  grid-template-columns: var(--col-source) var(--col-mode);
+  gap: var(--space-22);
   padding: var(--space-10);
 }
 .upscale-source-select {
@@ -200,6 +240,9 @@
 @media (max-width: 68rem) {
   .upscale-input {
     grid-template-columns: 1fr;
+  }
+  .upscale-source-panel {
+    grid-template-columns: minmax(0, 1fr) var(--col-mode);
   }
 }
 @media (max-width: 35rem) {

@@ -6,9 +6,25 @@ import {
   estimateVideoUsd,
   presets,
 } from "../shared/presets";
+import { access, readFile } from "node:fs/promises";
+import { canonicalInput } from "../shared/idempotency";
+import { parseLibrary } from "../shared/library";
+import { librarySetupJob } from "../src/library";
+import {
+  composerInput,
+  composerReducer,
+  initialComposer,
+} from "../src/useComposer";
+import {
+  expireStaleJob,
+  JOB_MAX_AGE_MS,
+  MAX_RESULT_BYTES,
+  SESSION_STORAGE_BYTES,
+  TOTAL_STORAGE_BYTES,
+} from "../shared/lifecycle";
 import { providerUrl } from "../server/bfl";
 import { validateInput } from "../server/validation";
-import type { VideoResolution } from "../shared/types";
+import type { GenerateInput, Job, VideoResolution } from "../shared/types";
 
 const input = {
   generator: "video",
@@ -203,5 +219,120 @@ describe("provider trust boundary", () => {
     expect(() =>
       providerUrl("https://api.bfl.ai/v1/flux-3-video", "poll"),
     ).toThrow();
+  });
+});
+
+describe("shared policy", () => {
+  it("compares replays by value, so both backends answer one the same way", () => {
+    const base = validateInput(input);
+    // Older rows may carry any key order inside camera and cameraEdits.
+    const ordered = {
+      ...base,
+      camera: { "shot-sizes": "close-up", angles: null, movements: "pan" },
+      cameraEdits: { pan: "Pan gently.", dutch: "" },
+    } as GenerateInput;
+    const shuffled = {
+      ...base,
+      camera: { movements: "pan", "shot-sizes": "close-up", angles: null },
+      cameraEdits: { dutch: "", pan: "Pan gently." },
+    } as GenerateInput;
+    expect(canonicalInput(shuffled)).toBe(canonicalInput(ordered));
+    // A job recorded before aspect ratio and creativity existed still replays.
+    const legacy: Partial<GenerateInput> = { ...base };
+    delete legacy.aspectRatio;
+    delete legacy.upscaleCreativity;
+    expect(canonicalInput(legacy)).toBe(canonicalInput(base));
+    // An absent camera wording means the preset's clause, not a blank one.
+    expect(canonicalInput({ ...base, cameraText: presets[0].clause })).toBe(
+      canonicalInput(base),
+    );
+    expect(canonicalInput({ ...base, cameraText: "" })).not.toBe(
+      canonicalInput(base),
+    );
+    // Dropping a field that was submitted is a change, not a match.
+    expect(canonicalInput({ ...base, upscalePrompt: "Fine linen." })).not.toBe(
+      canonicalInput(base),
+    );
+  });
+
+  it("publishes only catalogue clips that pass an upload's own limits", async () => {
+    const catalogue = JSON.parse(
+      await readFile("public/media/gallery.json", "utf8"),
+    );
+    const shipped = parseLibrary(catalogue);
+    expect(shipped).toHaveLength(4);
+    expect(
+      shipped.every(
+        (clip) => clip.origin === "sample" && clip.url.startsWith("/media/"),
+      ),
+    ).toBe(true);
+    const [first] = catalogue;
+    for (const broken of [
+      { ...first, url: "https://elsewhere.test/clip.mp4" },
+      { ...first, poster: "https://elsewhere.test/clip.jpg", duration: 0 },
+      { ...first, duration: 30 },
+      { ...first, bytes: 60_000_000 },
+      { ...first, bytes: undefined },
+      { ...first, width: 960.5 },
+      { ...first, id: "../escape" },
+    ])
+      expect(parseLibrary([broken])).toEqual([]);
+    expect(parseLibrary("not a catalogue")).toEqual([]);
+  });
+
+  it("ships a catalogue whose recorded runs still reproduce their prompts", async () => {
+    const shipped = parseLibrary(
+      JSON.parse(await readFile("public/media/gallery.json", "utf8")),
+    );
+    for (const clip of shipped) {
+      expect(clip.setup).toBeDefined();
+      const setup = clip.setup!;
+      // The shipped inputs are a request this studio would still accept today.
+      const validated = validateInput(setup);
+      // And its own composer rebuilds, exactly, the prompt that made the video.
+      expect(composePrompt(validated)).toBe(setup.prompt);
+      // Recreate restores that run rather than approximating it.
+      const job = librarySetupJob(clip)!;
+      const restored = composerReducer(initialComposer, {
+        type: "restore",
+        job,
+      });
+      expect(composePrompt(composerInput(restored))).toBe(setup.prompt);
+      expect(composerInput(restored)).toMatchObject({
+        duration: setup.duration,
+        resolution: setup.resolution,
+        aspectRatio: setup.aspectRatio,
+        draft: setup.draft,
+      });
+    }
+  });
+
+  it("keeps private provider lineage out of the public media catalogue", async () => {
+    await expect(access("public/media/provenance.json")).rejects.toThrow();
+    const published = await readFile("public/media/gallery.json", "utf8");
+    expect(published).not.toMatch(/jobId|sha256|providerStatus/);
+    expect(published).not.toMatch(
+      /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i,
+    );
+  });
+
+  it("keeps storage ceilings above a single result, so an arrival is never evicted", () => {
+    // Eviction drops oldest first. If one generation could fill a visitor's
+    // whole ceiling, the clip they just paid for could be the one removed.
+    expect(SESSION_STORAGE_BYTES).toBeGreaterThanOrEqual(MAX_RESULT_BYTES);
+    // And a single visitor can never fill the deployment on their own.
+    expect(TOTAL_STORAGE_BYTES).toBeGreaterThan(SESSION_STORAGE_BYTES);
+  });
+
+  it("expires an abandoned job once and never touches a finished one", () => {
+    const job = { status: "Generating" } as Job;
+    expect(expireStaleJob(job, Date.now())).toBe(false);
+    expect(expireStaleJob(job, Date.now() - JOB_MAX_AGE_MS - 1)).toBe(true);
+    expect(job.status).toBe("expired");
+    expect(job.error).toContain("30-minute");
+    // Terminal states, and unreadable timestamps, are left exactly as they are.
+    expect(expireStaleJob(job, 0)).toBe(false);
+    expect(expireStaleJob({ status: "Ready" } as Job, 0)).toBe(false);
+    expect(expireStaleJob({ status: "copying" } as Job, NaN)).toBe(false);
   });
 });

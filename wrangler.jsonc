@@ -22,5 +22,9 @@
   "r2_buckets": [
     { "binding": "MEDIA", "bucket_name": "flux-studio-lite-media" },
   ],
+  // Lifecycle sweep: age out abandoned jobs, drop dead links and expired
+  // rows. Pages has no cron trigger, so worker/sweep.ts also runs from the
+  // request path; whichever fires first claims the interval.
+  "triggers": { "crons": ["*/5 * * * *"] },
   "observability": { "enabled": true, "head_sampling_rate": 0.1 },
 }

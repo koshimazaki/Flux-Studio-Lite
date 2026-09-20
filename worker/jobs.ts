@@ -1,5 +1,7 @@
 import { BflClient, providerUrl } from "../server/bfl";
 import { AppError } from "../server/errors";
+import { canonicalInput } from "../shared/idempotency";
+import { expireStaleJob, MAX_RESULT_BYTES } from "../shared/lifecycle";
 import {
   composePrompt,
   estimateUpscaleUsd,
@@ -14,10 +16,11 @@ import {
 import {
   inspectObject,
   ownedJob,
+  resolveSource,
   saveJob,
   saveSource,
-  sourceObject,
   type JobRow,
+  type ResolvedSource,
 } from "./storage";
 import { putMedia } from "./media";
 
@@ -31,13 +34,27 @@ const statuses = new Set<JobStatus>([
 ]);
 const publicJob = (row: JobRow) => JSON.parse(row.data) as Job;
 function duplicate(row: JobRow, input: GenerateInput) {
-  if (row.input !== JSON.stringify(input))
+  // Both backends answer a replay with shared/idempotency.ts, never raw JSON.
+  if (canonicalInput(JSON.parse(row.input)) !== canonicalInput(input))
     throw new AppError(
       409,
       "That request identifier was already used with different settings.",
     );
   return publicJob(row);
 }
+
+/** Lends BFL a private session object for two hours; public clips need no token. */
+async function inputVideoUrl(env: Env, source: ResolvedSource, origin: string) {
+  if (source.kind === "library") return new URL(source.source.url, origin).href;
+  const token = crypto.randomUUID() + crypto.randomUUID();
+  await env.DB.prepare(
+    "INSERT INTO shares (token,object_key,expires) VALUES (?,?,?)",
+  )
+    .bind(token, source.key, Date.now() + 2 * 3600_000)
+    .run();
+  return `${origin}/api/input/${token}`;
+}
+
 export async function submit(
   env: Env,
   input: GenerateInput,
@@ -55,17 +72,17 @@ export async function submit(
   if (existing) return duplicate(existing, input);
   const source =
     input.generator === "upscale"
-      ? await sourceObject(env, input.sourceId!, session)
+      ? await resolveSource(env, input.sourceId!, session)
       : undefined;
-  const inspected = source
-    ? await inspectObject(env, source.key, true)
+  // A library clip was measured when the catalogue loaded; a session clip is
+  // measured from its own stored bytes. Neither figure comes from the browser.
+  const metadata = source
+    ? source.kind === "library"
+      ? source.source
+      : (await inspectObject(env, source.key, true)).metadata
     : undefined;
-  const estimate = inspected
-    ? estimateUpscaleUsd(
-        inspected.metadata,
-        input.upscaleFactor,
-        input.upscaleCreativity,
-      )
+  const estimate = metadata
+    ? estimateUpscaleUsd(metadata, input.upscaleFactor, input.upscaleCreativity)
     : estimateVideoUsd(input.draft, input.duration, input.resolution);
   const credits = await bfl.credits(key);
   if (credits / 100 < estimate)
@@ -109,16 +126,9 @@ export async function submit(
   }
   const row = await ownedJob(env, job.id, session);
   try {
-    let inputVideo: string | undefined;
-    if (source) {
-      const token = crypto.randomUUID() + crypto.randomUUID();
-      await env.DB.prepare(
-        "INSERT INTO shares (token,object_key,expires) VALUES (?,?,?)",
-      )
-        .bind(token, source.key, Date.now() + 2 * 3600_000)
-        .run();
-      inputVideo = `${origin}/api/input/${token}`;
-    }
+    const inputVideo = source
+      ? await inputVideoUrl(env, source, origin)
+      : undefined;
     const body = inputVideo
       ? {
           input_video: inputVideo,
@@ -178,6 +188,14 @@ export async function poll(
     }
     return { job };
   }
+  // The same age limit the sweep applies, so a returning tab and the background
+  // sweep agree on when a job stopped being worth polling.
+  if (expireStaleJob(job, row.created_at)) {
+    row.polling_url = null;
+    row.remote_url = null;
+    await saveJob(env, row, job);
+    return { job };
+  }
   if (!key) return { job, needsKey: true };
   const now = Date.now();
   const acquired = await env.DB.prepare(
@@ -228,7 +246,7 @@ export async function poll(
           objectKey,
           response.body!,
           Number(response.headers.get("content-length")),
-          250_000_000,
+          MAX_RESULT_BYTES,
         );
       }
       const { metadata, bytes } = await inspectObject(env, objectKey);

@@ -32,21 +32,20 @@ export const initialComposer: ComposerState = {
 };
 type Action =
   | { type: "update"; patch: Partial<ComposerState> }
-  | { type: "edit-camera"; id: CameraTermId; text: string }
   | { type: "restore" | "restore-prompt"; job: Job };
 export function composerReducer(
   state: ComposerState,
   action: Action,
 ): ComposerState {
+  // Camera dialogue edits arrive as an "update" patch; see CameraDialog onApply.
   if (action.type === "update") return { ...state, ...action.patch };
-  if (action.type === "edit-camera")
-    return {
-      ...state,
-      cameraEdits: { ...state.cameraEdits, [action.id]: action.text },
-    };
   const job = action.job;
   if (action.type === "restore-prompt" && job.generator === "upscale")
-    return { ...state, upscalePrompt: job.upscalePrompt ?? "" };
+    return {
+      ...state,
+      generator: job.generator,
+      upscalePrompt: job.upscalePrompt ?? "",
+    };
   let camera = job.camera;
   let edits: CameraEdits = job.camera
     ? Object.fromEntries(
@@ -82,7 +81,8 @@ export function composerReducer(
     camera,
     cameraEdits: { ...state.cameraEdits, ...edits },
   };
-  if (action.type === "restore-prompt") return { ...state, ...prompt };
+  if (action.type === "restore-prompt")
+    return { ...state, generator: job.generator, ...prompt };
   return {
     generator: job.generator,
     ...prompt,

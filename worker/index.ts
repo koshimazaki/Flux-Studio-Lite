@@ -1,9 +1,10 @@
 import { BflClient } from "../server/bfl";
 import { AppError, requireKey } from "../server/errors";
 import { validateIdempotencyKey, validateInput } from "../server/validation";
-import { history, rateLimit, sourceObject } from "./storage";
+import { history, rateLimit, sessionSource } from "./storage";
 import { serveMedia, upload } from "./media";
 import { poll, submit } from "./jobs";
+import { sweep } from "./sweep";
 
 const json = (data: unknown, status = 200) =>
   Response.json(data, {
@@ -14,7 +15,7 @@ const json = (data: unknown, status = 200) =>
     },
   });
 export default {
-  async fetch(request, env): Promise<Response> {
+  async fetch(request, env, ctx): Promise<Response> {
     const url = new URL(request.url);
     if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
     let cookie: string | undefined;
@@ -48,23 +49,30 @@ export default {
         );
         await rateLimit(
           env,
-          `ip:${Array.from(new Uint8Array(hash), (n) => n.toString(16).padStart(2, "0")).join("")}`,
-          20,
+          "submitPerIp",
+          Array.from(new Uint8Array(hash), (n) =>
+            n.toString(16).padStart(2, "0"),
+          ).join(""),
         );
-        await rateLimit(env, `session:${session}`);
+        await rateLimit(env, "submit", session);
       }
       let response: Response;
-      if (get && url.pathname === "/api/health")
+      if (get && url.pathname === "/api/health") {
+        // Housekeeping rides on the two routes a page load hits once, never on
+        // the 4-second poll, so its cost scales with visits rather than ticks.
+        ctx.waitUntil(sweep(env).catch(() => {}));
         response = json({ ok: true, hasServerKey: false, hosted: true });
-      else if (get && url.pathname === "/api/credits") {
-        await rateLimit(env, `credits:${session}`, 20);
+      } else if (get && url.pathname === "/api/credits") {
+        await rateLimit(env, "credits", session);
         response = json({
           credits: await new BflClient().credits(requireKey(key)),
           checkedAt: new Date().toISOString(),
         });
-      } else if (get && url.pathname === "/api/history")
+      } else if (get && url.pathname === "/api/history") {
+        await rateLimit(env, "history", session);
+        ctx.waitUntil(sweep(env).catch(() => {}));
         response = json(await history(env, session));
-      else if (post && url.pathname === "/api/jobs") {
+      } else if (post && url.pathname === "/api/jobs") {
         if (Number(request.headers.get("content-length")) > 16384)
           throw new AppError(413, "The request is too large.");
         // Bound the JSON body even for clients using chunked transfer encoding.
@@ -104,31 +112,38 @@ export default {
           },
           202,
         );
-      } else if (get && /^\/api\/jobs\/[^/]+$/.test(url.pathname))
+      } else if (get && /^\/api\/jobs\/[^/]+$/.test(url.pathname)) {
+        // Each poll can spend one upstream BFL call, so it needs its own ceiling.
+        await rateLimit(env, "poll", session);
         response = json(
           await poll(env, url.pathname.split("/").at(-1)!, session, key),
         );
-      else if (post && url.pathname === "/api/uploads") {
+      } else if (post && url.pathname === "/api/uploads") {
         await new BflClient().credits(key!);
         response = json({ source: await upload(request, env, session) }, 201);
       } else if (
         (get || request.method === "HEAD") &&
         /^\/api\/clips\/[^/]+$/.test(url.pathname)
       ) {
-        const source = await sourceObject(
+        await rateLimit(env, "media", session);
+        // Library clips are static assets under /media; this route is private.
+        const { key: objectKey } = await sessionSource(
           env,
           url.pathname.split("/").at(-1)!,
           session,
         );
-        response = await serveMedia(request, env, source.key);
+        response = await serveMedia(request, env, objectKey);
       } else if (
         (get || request.method === "HEAD") &&
         /^\/api\/input\/[0-9a-f-]{72}$/.test(url.pathname)
       ) {
+        const token = url.pathname.split("/").at(-1)!;
+        // A capability link carries no cookie, so the token itself is the identity.
+        await rateLimit(env, "media", token);
         const share = await env.DB.prepare(
           "SELECT object_key FROM shares WHERE token=? AND expires>?",
         )
-          .bind(url.pathname.split("/").at(-1)!, Date.now())
+          .bind(token, Date.now())
           .first<{ object_key: string }>();
         if (!share) throw new AppError(404, "Video link expired.");
         response = await serveMedia(request, env, share.object_key);
@@ -152,5 +167,13 @@ export default {
       if (cookie) response.headers.append("Set-Cookie", cookie);
       return response;
     }
+  },
+  /**
+   * The Workers deployment (wrangler.jsonc) drives the sweep from cron. Pages
+   * has no cron trigger, so the same work also runs from the request path
+   * above; `sweep` claims its turn either way and never runs twice.
+   */
+  async scheduled(_controller, env) {
+    await sweep(env);
   },
 } satisfies ExportedHandler<Env>;

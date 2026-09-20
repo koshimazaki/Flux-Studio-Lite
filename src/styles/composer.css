@@ -28,6 +28,12 @@ main {
   margin: auto;
 }
 .composer {
+  /* The upscale panel and the toolbar under it are separate rows, so their
+     columns are derived from these instead of stopping at unrelated places.
+     --col-mode sizes the Precise/Creative pair and the drop target together. */
+  --col-model: calc(150 * var(--unit));
+  --col-fader: calc(174 * var(--unit));
+  --col-mode: calc(144 * var(--unit));
   position: relative;
   border: var(--space-1) solid var(--border-strong);
   background: var(--surface);

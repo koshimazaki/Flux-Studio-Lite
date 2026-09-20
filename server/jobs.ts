@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { canonicalInput } from "../shared/idempotency";
+import { expireStaleJob } from "../shared/lifecycle";
 import {
   composePrompt,
   estimateUpscaleUsd,
   estimateVideoUsd,
-  presets,
 } from "../shared/presets";
 import {
   isTerminal,
@@ -36,24 +37,8 @@ const providerStatuses = new Set<JobStatus>([
 ]);
 
 function checkDuplicate(existing: StoredJob, input: GenerateInput) {
-  const comparable = (value: GenerateInput) =>
-    Object.fromEntries(
-      (Object.keys(input) as (keyof GenerateInput)[]).map((key) => {
-        if (key === "aspectRatio") return [key, value.aspectRatio ?? "16:9"];
-        if (key === "upscaleCreativity")
-          return [key, value.upscaleCreativity ?? 0];
-        if (key === "cameraText")
-          return [
-            key,
-            value.cameraText ??
-              presets.find((preset) => preset.id === value.presetId)?.clause,
-          ];
-        return [key, value[key]];
-      }),
-    );
-  if (
-    JSON.stringify(comparable(existing)) !== JSON.stringify(comparable(input))
-  )
+  // Both backends answer a replay with shared/idempotency.ts, never a local rule.
+  if (canonicalInput(existing) !== canonicalInput(input))
     throw new AppError(
       409,
       "That request identifier was already used with different settings.",
@@ -310,6 +295,18 @@ export class JobService {
     job.updatedAt = new Date().toISOString();
     await this.store.save();
     return job;
+  }
+
+  /**
+   * The local mirror of the Worker sweep: nothing may stay non-terminal
+   * forever, whichever backend recorded it. Retention and media deletion stay a
+   * cloud concern — the local store is a developer's own work and keeps it.
+   */
+  async sweep(now = Date.now()) {
+    let changed = false;
+    for (const job of this.store.data.jobs)
+      if (expireStaleJob(job, Date.parse(job.createdAt), now)) changed = true;
+    if (changed) await this.store.save();
   }
 
   async resumeServerJobs() {

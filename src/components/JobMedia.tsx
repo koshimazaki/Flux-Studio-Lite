@@ -26,6 +26,7 @@ export default function JobMedia({ job }: { job: Job }) {
   const [mediaError, setMediaError] = useState(false);
   const [now, setNow] = useState(Date.now());
   const waiting = !isTerminal(job.status);
+  const unavailable = job.status === "Ready" && job.mediaAvailable === false;
   useEffect(() => {
     if (!waiting) return;
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -40,7 +41,7 @@ export default function JobMedia({ job }: { job: Job }) {
   }, []);
   return (
     <div className="job-placeholder">
-      {job.status === "Ready" && job.resultUrl && (
+      {!unavailable && job.status === "Ready" && job.resultUrl && (
         <video
           ref={video}
           src={job.resultUrl}
@@ -59,22 +60,27 @@ export default function JobMedia({ job }: { job: Job }) {
           }
         />
       )}
-      {(waiting || (!revealed && !mediaError && job.status === "Ready")) && (
-        <WaitField
-          active={waiting || !decoded}
-          onDone={() => setRevealed(true)}
-        />
-      )}
-      {(waiting || job.status !== "Ready" || mediaError) && (
+      {!unavailable &&
+        (waiting || (!revealed && !mediaError && job.status === "Ready")) && (
+          <WaitField
+            active={waiting || !decoded}
+            onDone={() => setRevealed(true)}
+          />
+        )}
+      {(waiting || job.status !== "Ready" || mediaError || unavailable) && (
         <div className="job-message" role="status">
           {!waiting && <span className="status-dot" />}
           {!waiting && (
             <strong>
-              {mediaError ? "Video could not load" : statusLabel(job.status)}
+              {unavailable
+                ? "Video no longer stored"
+                : mediaError
+                  ? "Video could not load"
+                  : statusLabel(job.status)}
             </strong>
           )}
           <p>
-            {mediaError
+            {mediaError && !unavailable
               ? "Your saved clip is still available. Try loading it again."
               : job.error ||
                 (job.status === "copying"
@@ -95,7 +101,7 @@ export default function JobMedia({ job }: { job: Job }) {
                 : "you can keep exploring"}
             </span>
           )}
-          {mediaError && (
+          {mediaError && !unavailable && (
             <button
               className="text-button"
               onClick={() => {

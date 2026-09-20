@@ -16,18 +16,31 @@ export default function FeaturedVideo({
 }) {
   const [viewing, setViewing] = useState<ViewingClip | null>(null);
   const url =
-    job?.status === "Ready" ? job.resultUrl : !job ? source?.url : undefined;
+    job?.status === "Ready" && job.mediaAvailable !== false
+      ? job.resultUrl
+      : !job
+        ? source?.url
+        : undefined;
   return (
     <section id="main-video" className="featured-video" aria-label="Main video">
       <div className="featured-media">
         {job ? (
           <JobMedia key={job.id} job={job} />
         ) : source ? (
+          // Same contract as a gallery card: hover previews, play opens the
+          // lightbox. Passing onOpen is what switches Clip into that mode.
           <Clip
             key={source.id}
             url={source.url}
             poster={source.poster}
             label={source.label}
+            onOpen={() =>
+              setViewing({
+                url: source.url,
+                label: source.label,
+                prompt: source.setup?.prompt,
+              })
+            }
           />
         ) : (
           <div className="job-message">
@@ -52,7 +65,8 @@ export default function FeaturedVideo({
               setViewing({
                 url,
                 label: job?.description || source?.label || "Video",
-                prompt: job?.prompt,
+                // A catalogue clip carries the prompt that produced it.
+                prompt: job?.prompt ?? source?.setup?.prompt,
               })
             }
           >
@@ -62,7 +76,11 @@ export default function FeaturedVideo({
       </div>
       <div className="featured-caption">
         <span>
-          {job ? statusLabel(job.status) : source?.label || "Studio preview"}
+          {job
+            ? job.mediaAvailable === false
+              ? "Video no longer stored"
+              : statusLabel(job.status)
+            : source?.label || "Studio preview"}
         </span>
         {job && isTerminal(job.status) && job.status !== "Ready" ? (
           <button className="text-button" onClick={() => onRetry(job)}>

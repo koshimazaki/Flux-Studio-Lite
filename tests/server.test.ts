@@ -6,6 +6,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createApp } from "../server/app";
 import { BflClient, type ProviderSubmission } from "../server/bfl";
 import { AppError } from "../server/errors";
+import { JOB_MAX_AGE_MS } from "../shared/lifecycle";
+import { RATE_LIMITS } from "../shared/limits";
 import { presets } from "../shared/presets";
 
 const input = {
@@ -66,7 +68,7 @@ afterEach(async () => {
   for (const cleanup of cleanups.splice(0).reverse()) await cleanup();
 });
 
-async function setup() {
+async function setup(publicDirectory?: string) {
   const temporary = await mkdtemp(
     path.join(os.tmpdir(), "flux-studio-lite-test-"),
   );
@@ -75,7 +77,7 @@ async function setup() {
   const bfl = new FakeBfl();
   const created = await createApp({
     directory,
-    publicDirectory: directory,
+    publicDirectory: publicDirectory ?? directory,
     serverKey: "test-server-key",
     bfl,
   });
@@ -382,6 +384,10 @@ describe("local job API", () => {
       upscaleCreativity: 0,
     });
     expect(changedReplay.status).toBe(409);
+    // Omitting a field that was submitted is a change too. This replay used to
+    // pass here and conflict in the Worker; shared/idempotency.ts settles it.
+    const { upscalePrompt: _dropped, ...withoutPrompt } = request;
+    expect((await post("creative-upscale", withoutPrompt)).status).toBe(409);
   });
 
   it("forwards edited camera text and real video settings, prices them, and normalises drafts", async () => {
@@ -469,5 +475,63 @@ describe("local job API", () => {
     expect((await blank.json()).job.prompt).toBe("A ceramic vessel.");
     expect((await post("blank-video", input)).status).toBe(409);
     expect(bfl.submissions).toBe(2);
+  });
+  it("ages out a job the browser never came back for", async () => {
+    const { post, base, cookie, store, service } = await setup();
+    const { job } = await (
+      await post("abandoned", input, { "x-byo-key": "private-visitor-key" })
+    ).json();
+    expect(store.data.jobs[0].status).toBe("Pending");
+    // The tab closes; nothing else can advance a visitor-key job.
+    store.data.jobs[0].createdAt = new Date(
+      Date.now() - JOB_MAX_AGE_MS - 1000,
+    ).toISOString();
+    await service.sweep();
+    expect(store.data.jobs[0].status).toBe("expired");
+    const read = await (
+      await fetch(`${base}/api/jobs/${job.id}`, { headers: { cookie } })
+    ).json();
+    expect(read.job.status).toBe("expired");
+    expect(read.job.error).toContain("30-minute");
+  });
+
+  it("gives read routes a ceiling here too, not only paid writes", async () => {
+    const { base, cookie } = await setup();
+    const seen = new Set<number>();
+    for (let attempt = 0; attempt <= RATE_LIMITS.history; attempt++)
+      seen.add(
+        (await fetch(`${base}/api/history`, { headers: { cookie } })).status,
+      );
+    // Everything up to the ceiling was served; the request past it was not.
+    expect(seen).toEqual(new Set([200, 429]));
+  });
+
+  it("offers the bundled library to a first-time local visitor", async () => {
+    const { base, cookie } = await setup(path.resolve("public"));
+    const history = await (
+      await fetch(`${base}/api/history`, { headers: { cookie } })
+    ).json();
+    expect(history.jobs).toEqual([]);
+    expect(history.sources.map((source: { id: string }) => source.id)).toEqual([
+      "library-01",
+      "library-02",
+      "library-03",
+      "library-04",
+    ]);
+    expect(JSON.stringify(history.sources)).not.toContain("bytes");
+  });
+
+  it("upscales a library clip locally from its own catalogue entry", async () => {
+    const { post, bfl } = await setup(path.resolve("public"));
+    const response = await post("library-upscale", {
+      ...input,
+      generator: "upscale",
+      sourceId: "library-02",
+    });
+    expect(response.status).toBe(202);
+    // Priced from the real file the catalogue points at, inspected on the server.
+    expect((await response.json()).job.costEstimateUsd).toBe(0.69);
+    expect(bfl.requests[0]).toMatchObject({ generator: "upscale" });
+    expect(typeof bfl.requests[0].body.input_video).toBe("string");
   });
 });

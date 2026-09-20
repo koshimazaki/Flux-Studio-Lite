@@ -1,8 +1,12 @@
 {
   "extends": "../tsconfig.json",
-  "compilerOptions": { "types": [], "lib": ["ES2022"] },
+  "compilerOptions": {
+    "types": [],
+    "lib": ["ES2022"]
+  },
   "include": [
     "./**/*.ts",
+    "../observability/**/*.ts",
     "../shared/**/*.ts",
     "../server/bfl.ts",
     "../server/errors.ts",

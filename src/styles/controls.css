@@ -6,7 +6,7 @@
   min-width: 0;
 }
 .generation-controls__model {
-  width: calc(150 * var(--unit));
+  width: var(--col-model);
 }
 .generation-controls__duration {
   width: calc(70 * var(--unit));

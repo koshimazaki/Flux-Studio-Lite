@@ -5,6 +5,8 @@ import path from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { promisify } from "node:util";
+import { MAX_RESULT_BYTES } from "../shared/lifecycle";
+import { parseLibrary } from "../shared/library";
 import type { Source } from "../shared/types";
 import { AppError } from "./errors";
 
@@ -67,36 +69,15 @@ export async function validateUpscaleSource(file: string) {
 
 export async function loadSamples(publicDirectory: string): Promise<Source[]> {
   try {
-    const value: unknown = JSON.parse(
-      await readFile(path.join(publicDirectory, "media/gallery.json"), "utf8"),
+    // The Worker imports the same catalogue at build time; one parser validates both.
+    return parseLibrary(
+      JSON.parse(
+        await readFile(
+          path.join(publicDirectory, "media/gallery.json"),
+          "utf8",
+        ),
+      ),
     );
-    if (!Array.isArray(value)) return [];
-    return value
-      .filter(
-        (item) =>
-          item &&
-          /^[a-zA-Z0-9_-]{1,80}$/.test(item.id) &&
-          typeof item.url === "string" &&
-          item.url.startsWith("/media/") &&
-          [item.width, item.height, item.duration].every(
-            (n) => Number.isFinite(n) && n > 0,
-          ),
-      )
-      .map((item) => ({
-        id: item.id,
-        label: String(item.label)
-          .replace(/[\x00-\x1f\x7f]/g, " ")
-          .trim()
-          .slice(0, 160),
-        url: item.url,
-        width: item.width,
-        height: item.height,
-        duration: item.duration,
-        origin: "sample",
-        ...(typeof item.poster === "string" && item.poster.startsWith("/media/")
-          ? { poster: item.poster }
-          : {}),
-      }));
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
     throw error;
@@ -118,7 +99,7 @@ export async function saveDownload(
   response: Response,
   destination: string,
 ): Promise<void> {
-  const maxBytes = 250_000_000;
+  const maxBytes = MAX_RESULT_BYTES;
   if (Number(response.headers.get("content-length")) > maxBytes)
     throw new AppError(
       502,
