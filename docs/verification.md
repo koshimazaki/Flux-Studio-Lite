@@ -76,8 +76,12 @@ plus a second job guarding the cloud boundary.
   asset bindings without contacting the API, so it needs no credentials.
 - The D1 migrations replay in order against a scratch SQLite database.
 
-CI does not deploy. It uploads the frontend build as a short-lived review
-artifact; a live Pages release stays an explicit `npm run deploy:pages`.
+Pull-request CI cannot deploy and is never given production credentials; it
+uploads the frontend build as a short-lived review artifact. After both jobs
+pass on a push to `main`, a separate production job builds the Pages bundle,
+applies pending D1 migrations, deploys to Pages and checks `/api/health`,
+reading its credentials from GitHub's `production` environment. See
+[Cloudflare](cloudflare.md) for that configuration.
 
 ## Library clips as evidence
 
