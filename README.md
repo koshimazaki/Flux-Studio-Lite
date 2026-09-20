@@ -14,12 +14,10 @@ Try the live version at **[fluxstudio.pages.dev](https://fluxstudio.pages.dev)**
 
 Hide any of your cards with × and restore it later. Hiding a run does not stop it; the studio keeps checking for its result.
 
-
 <div align="center">
   <video src="https://github.com/user-attachments/assets/e50be815-ec5b-441d-959f-c85aac24f37d" width="640" autoplay loop muted></video>
   <em>FLUX 3 Studio Lite Camera Control </em>
 </div>
-
 
 ## Run locally
 
