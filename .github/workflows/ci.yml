@@ -40,17 +40,6 @@ jobs:
         run: npm run lint
       - name: Types
         run: npm run typecheck
-      # README: "Requires Node 22+ and `ffprobe` from FFmpeg." The server
-      # shells out to ffprobe to inspect MP4s, so without it the upload
-      # verifier returns 400 and a job never leaves `copying`. Not on the
-      # runner image by default. Installed here rather than with the other
-      # setup so a formatting or type error still reports in seconds.
-      - name: Install ffprobe
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends ffmpeg
-          ffprobe -version | head -1
-
       - name: Tests
         run: npm test
       - name: Build

@@ -1,68 +1,62 @@
-import { execFile } from "node:child_process";
-import { readFile, realpath, rename, stat, unlink } from "node:fs/promises";
+import {
+  open,
+  readFile,
+  realpath,
+  rename,
+  stat,
+  unlink,
+} from "node:fs/promises";
 import { createWriteStream } from "node:fs";
 import path from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { promisify } from "node:util";
 import { MAX_RESULT_BYTES } from "../shared/lifecycle";
 import { parseLibrary } from "../shared/library";
+import { MAX_INPUT_BYTES, checkUpscaleLimits, inspectMp4 } from "../shared/mp4";
 import type { Source } from "../shared/types";
 import { AppError } from "./errors";
 
-const execute = promisify(execFile);
-export const MAX_INPUT_BYTES = 50_000_000;
+export { MAX_INPUT_BYTES };
 
+/**
+ * Inspect an MP4 with the same bounded reader the Worker uses. This used to
+ * shell out to ffprobe, which meant two implementations of one job: they
+ * disagreed on duration, and the binary is absent from a stock CI runner.
+ * One reader keeps local and hosted estimates equal by construction.
+ */
 export async function probeVideo(
   file: string,
 ): Promise<Pick<Source, "width" | "height" | "duration">> {
+  let handle;
   try {
-    const { stdout } = await execute(
-      "ffprobe",
-      [
-        "-v",
-        "error",
-        "-select_streams",
-        "v:0",
-        "-show_entries",
-        "stream=width,height:format=duration,format_name",
-        "-of",
-        "json",
-        file,
-      ],
-      { timeout: 15_000, maxBuffer: 100_000 },
-    );
-    const value = JSON.parse(stdout);
-    const width = Number(value.streams?.[0]?.width);
-    const height = Number(value.streams?.[0]?.height);
-    const duration = Number(value.format?.duration);
-    if (
-      !String(value.format?.format_name).includes("mp4") ||
-      ![width, height, duration].every((n) => Number.isFinite(n) && n > 0)
-    )
-      throw new Error("Invalid media");
-    return { width, height, duration };
+    handle = await open(file, "r");
   } catch {
-    throw new AppError(
-      400,
-      "This file is not a readable MP4 video. Local video inspection requires ffprobe.",
-    );
+    // The callers hand this a file the server just wrote or received, so a
+    // file it cannot open is its own problem, not a bad upload.
+    throw new AppError(500, "The server could not open the stored video.");
+  }
+  try {
+    const { size } = await handle.stat();
+    return await inspectMp4(size, async (offset, length) => {
+      const bytes = new Uint8Array(length);
+      const { bytesRead } = await handle.read(bytes, 0, length, offset);
+      return bytes.buffer.slice(0, bytesRead);
+    });
+  } catch {
+    throw new AppError(400, "This file is not a readable MP4 video.");
+  } finally {
+    await handle.close();
   }
 }
 
 export async function validateUpscaleSource(file: string) {
   const metadata = await probeVideo(file);
-  const { width, height, duration } = metadata;
-  if (
-    (await stat(file)).size > MAX_INPUT_BYTES ||
-    duration > 20 ||
-    width * height > 2560 * 1440 ||
-    Math.max(width, height) > 2560
-  ) {
-    throw new AppError(
-      400,
-      "Use an MP4 up to 20 seconds, 50 MB, and 2560 × 1440 pixels.",
-    );
+  try {
+    // shared/mp4.ts holds the one copy of these ceilings, so an upload is
+    // judged by the same rule whichever adapter received it.
+    checkUpscaleLimits(metadata, (await stat(file)).size);
+  } catch (error) {
+    throw new AppError(400, (error as Error).message);
   }
   return metadata;
 }
