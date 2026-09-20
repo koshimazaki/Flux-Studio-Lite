@@ -285,5 +285,3 @@ export async function poll(
   }
   return { job };
 }
-
-/** Stop our tracking, not the provider's paid work. Keep the replay reservation. */

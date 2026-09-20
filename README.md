@@ -1,16 +1,18 @@
-# FLUX Studio
+# FLUX Studio Lite
 
 [![CI](https://github.com/koshimazaki/Flux-Studio-Lite/actions/workflows/ci.yml/badge.svg)](https://github.com/koshimazaki/Flux-Studio-Lite/actions/workflows/ci.yml)
 
-Describe a scene, combine a shot size, angle and movement, generate a FLUX 3 video, then upscale it 1.5× to 3× in Precise or Creative mode. An independent experiment, not affiliated with Black Forest Labs.
+A compact studio for FLUX 3 video, focused on camera control. Adapted from the larger [FLUX API Control Surface](https://github.com/koshimazaki/flux-api-control-surface), it brings scene prompting, editable camera directions, generation and upscaling into one workspace.
+
+An independent experiment, not affiliated with Black Forest Labs.
 
 <!-- Add the walkthrough video here after uploading it as a GitHub attachment. -->
 
 ## Live demo
 
-**[fluxstudio.pages.dev](https://fluxstudio.pages.dev)** — four library clips ship with the app, so the first screen works before any key is connected. To generate, connect your own BFL key and keep the tab open until the clip is saved.
+Try the live version at **[fluxstudio.pages.dev](https://fluxstudio.pages.dev)**. Explore four library clips without a key, or connect your own BFL key to generate. Keep the tab open until your clip is saved.
 
-A run cannot be called off once sent — BFL has no cancel endpoint — so the studio does not pretend otherwise and keeps collecting what you have paid for. Any card can be hidden with × and restored from the gallery; hiding is a view filter, so a hidden run still finishes and saves.
+Hide any of your cards with × and restore it later. Hiding a run does not stop it; the studio keeps checking for its result.
 
 ## Run locally
 
@@ -25,7 +27,7 @@ Enter a BFL key in the connection dialogue, or set `BFL_API_KEY` in the server e
 
 ## What makes it different
 
-**Camera language you can see and edit.** Shot size, angle and movement are three independent sections covering 24 terms. Each contributes a colour-coded clause to the prompt that you can edit in place, and the 3D diagram illustrates the named combination rather than predicting what the model will do. Every term is exploratory: a successful request verifies the plumbing, not camera behaviour across subjects.
+**Camera guidance you can explore.** An interactive panel pairs editable camera directions with an educational Three.js diagram of shot size, angle and movement. Its terminology follows [BFL’s camera prompting guide](https://docs.bfl.ai/guides/prompting_video_camera_terms); the studio turns each selection into a colour-coded prompt clause you can refine before generating. The diagram illustrates camera concepts, not a prediction of the result.
 
 **A library that takes itself apart.** Every clip on the first screen is a real run of this studio, shipped with the prompt, camera terms, settings and provider-confirmed cost that produced it. Click a title to reuse its prompt, or Recreate to restore the whole setup and change one thing. Switching to Upscale picks up your newest generation, so improving what you just made takes one click.
 

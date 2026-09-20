@@ -19,14 +19,14 @@ Standard, non-fragmented MP4s with one video track are supported. Uploads: 50 MB
 
 Submissions, credits, job polling, history and private media have per-minute limits. The health endpoint is not rate-limited by the application. `shared/limits.ts` holds the numbers once; the Worker counts them in D1 so all isolates share a window, and the local Express server counts the same buckets in memory.
 
-| Bucket        | Per minute              | Route                                                            |
-| ------------- | ----------------------- | ---------------------------------------------------------------- |
-| `submit`      | 8 per session           | `POST /api/jobs`, `POST /api/uploads`, `POST /api/jobs/:id/stop` |
-| `submitPerIp` | 20 per IP               | the same writes, hashed client IP (Worker only)                  |
-| `credits`     | 20 per session          | `GET /api/credits`                                               |
-| `poll`        | 120 per session         | `GET /api/jobs/:id`                                              |
-| `history`     | 60 per session          | `GET /api/history`                                               |
-| `media`       | 600 per session or link | `GET`/`HEAD /api/clips/:id`, `/api/input/:token`                 |
+| Bucket        | Per minute              | Route                                            |
+| ------------- | ----------------------- | ------------------------------------------------ |
+| `submit`      | 8 per session           | `POST /api/jobs`, `POST /api/uploads`            |
+| `submitPerIp` | 20 per IP               | the same writes, hashed client IP (Worker only)  |
+| `credits`     | 20 per session          | `GET /api/credits`                               |
+| `poll`        | 120 per session         | `GET /api/jobs/:id`                              |
+| `history`     | 60 per session          | `GET /api/history`                               |
+| `media`       | 600 per session or link | `GET`/`HEAD /api/clips/:id`, `/api/input/:token` |
 
 These bound this deployment's own Worker, D1 and R2 usage. They are not a spending control: generation is charged to the visitor's own BFL key, which the pre-submission balance check covers separately.
 
