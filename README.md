@@ -6,9 +6,13 @@ A compact studio for moving images: describe a scene, combine a shot size, angle
 
 This repository contains the local prototype and a Cloudflare Worker adapter. Both support text-to-video and video upscale; the hosted app uses your own BFL key, D1 job history and R2 media. It is an independent experiment and is not affiliated with Black Forest Labs.
 
-## Cloudflare
+## Live demo
 
 [Open the Cloudflare studio](https://fluxstudio.pages.dev). See [deployment and hosted behavior](docs/cloudflare.md). Connect your own key to check your balance and generate. Keep the tab open until the result is saved.
+
+<!-- Add the walkthrough video here after uploading it as a GitHub attachment. -->
+
+This hosted studio is a focused adaptation of the author's broader [FLUX API Control Surface](https://github.com/koshimazaki/flux-api-control-surface), a local-first workbench for FLUX image and video workflows. FLUX Studio narrows that system to camera-aware text-to-video, video upscale and a reproducible first-run library, then adds a Cloudflare boundary for a public demo.
 
 ## Run locally
 
@@ -67,6 +71,10 @@ Disconnect clears the active key from page state. The installation then returns 
 ## Read the code
 
 See the [architecture and cloud boundary](docs/architecture.md), [deployment guide](docs/cloudflare.md), and [review checklist](docs/review-checklist.md) for maintainers and agents. [Verification](docs/verification.md) records tested behaviour and remaining checks. [`observability/`](observability/README.md) is the whole of what this deployment measures about its own use.
+
+## BFL references
+
+The implementation follows Black Forest Labs' official documentation for [FLUX 3 video generation](https://docs.bfl.ai/api-reference/utility/generate-a-video-with-flux-3), [video upscale](https://docs.bfl.ai/flux_tools/flux_video_upscale), [camera prompting](https://docs.bfl.ai/guides/prompting_video_camera_terms), and [API pricing](https://docs.bfl.ai/quick_start/pricing). The camera guide supplies the public terminology; this studio's editable wording, diagrams and examples are its own interpretation. See [camera wording and sources](docs/camera-wording.md) for that boundary.
 
 ## Scaling boundary
 
