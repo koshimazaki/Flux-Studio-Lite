@@ -44,14 +44,21 @@ Visitor keys stay in page and request memory and are never persisted.
 
 ## Paid provider calls
 
-Two, both during local development: one text-to-video and one precise upscale
-through the local adapter. The source was 1280 × 704 at 5.042 s; the upscale
-returned 2560 × 1408 at the same duration. Every other provider interaction in
-the suite is mocked, so the checks above spend nothing.
+Live paid generation is verified on both adapters.
+
+Two early runs went through the local Express adapter: one text-to-video and
+one precise upscale, the source 1280 × 704 at 5.042 s and the upscale 2560 ×
+1408 at the same duration. The four catalogue clips are hosted runs on Pages,
+and each ships the cost BFL confirmed for it — $1.70, $0.85, $1.70 and $0.30,
+$4.55 in total. Later review sessions added further hosted runs.
+
+Every provider interaction in the automated suite is mocked, so the checks
+above spend nothing.
 
 ## Not verified
 
-- Live paid generation beyond those two runs.
+- Reliability at scale. Generation is verified to work, not measured
+  across repeated runs of the same setup.
 - Native-device playback on Safari and iOS.
 - Load and concurrency testing.
 - An independent stranger test.

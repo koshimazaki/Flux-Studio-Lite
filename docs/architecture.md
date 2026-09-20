@@ -33,10 +33,14 @@ Errors, moderation and expiry are terminal, as is the retired `stopped` state th
 BFL can return HTTP 500 with a terminal task error. The client recognizes `status: Error` only when the response names the requested task; generic outages remain retryable. This prevents a failed job from keeping its last Planning state.
 
 There is no way to call off a run, and that is deliberate. BFL publishes no
-cancel, abort or delete endpoint for an in-progress task, and credits are spent
-on success, so a control here could not stop the work or the charge — only the
-collection of a result already paid for. Its best possible outcome was to do
-nothing and its worst was to discard a clip you had bought, so it was removed.
+cancel, abort or delete endpoint for an in-progress task, and its
+[billing policy](https://help.bfl.ai/articles/5950329591-what-are-the-flux-tools)
+is that "you are only charged for successful results. Failed or moderated
+requests do not consume credits." A control here could therefore stop neither
+the work nor the charge, only the collection of a result already paid for. Its
+best outcome was to do nothing and its worst was to discard a clip you had
+bought, so it was removed.
+
 Any card can instead be hidden and restored in this browser. Hiding is a view
 filter over the job list rather than a change to it, so a hidden run keeps
 being polled, saved and charged exactly as a visible one does.
