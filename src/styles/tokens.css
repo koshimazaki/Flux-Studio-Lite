@@ -57,6 +57,10 @@
   --badge-border: #d2e2bf22;
   --play-border: #eff4e36b;
   --play-bg: #171a1ed9;
+  --clip-hide-bg: #00000040;
+  --clip-hide-hover-bg: #00000070;
+  --clip-hide-border: #ffffff26;
+  --clip-hide-ink: #ffffffe0;
   --status-bg: #10131699;
   --camera-shot: #cfb897;
   --camera-angle: var(--intel);
