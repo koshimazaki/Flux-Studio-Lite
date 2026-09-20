@@ -1,5 +1,7 @@
 # FLUX Studio
 
+[![CI](https://github.com/koshimazaki/Flux-Studio-Lite/actions/workflows/ci.yml/badge.svg)](https://github.com/koshimazaki/Flux-Studio-Lite/actions/workflows/ci.yml)
+
 A compact studio for moving images: describe a scene, combine a shot size, angle and movement, generate a FLUX 3 video, then upscale the result from 1.5× to 3× in Precise or Creative mode. The main video sits above a compact centred composer, with the gallery underneath.
 
 This repository contains the local prototype and a Cloudflare Worker adapter. Both support text-to-video and video upscale; the hosted app uses your own BFL key, D1 job history and R2 media. It is an independent experiment and is not affiliated with Black Forest Labs.
@@ -77,6 +79,32 @@ Generation budget and provider concurrency are the first constraints. The local 
 3. Extend the recorded library into a same-subject grid, so the catalogue compares movements rather than illustrating four of them.
 
 Free camera dragging, image input, video editing, extra generators, batch jobs and authentication are outside this prototype.
+
+## Checks
+
+Every push to `main` and every pull request runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+
+```sh
+npm run format:check   # prettier
+npm run lint           # eslint, typescript-eslint, react-hooks
+npm run typecheck      # tsc --noEmit
+npm test               # vitest
+npm run build          # tsc --noEmit && vite build
+```
+
+A second job guards the cloud boundary and runs only on a tree that carries
+Wrangler config, so it is a clean skip until the Cloudflare port lands:
+
+- `npm run check:worker` compiles `shared/` and the portable server modules
+  under `"types": []`, so a Node-only import in the layer that is meant to move
+  to Workers fails here while every other check stays green.
+- `wrangler deploy --dry-run` bundles the Worker and validates its D1, R2 and
+  asset bindings without contacting the API, so it needs no credentials.
+- The D1 migrations are replayed in order against a scratch SQLite database.
+
+CI does not deploy. As the scaling boundary below explains, a hosted version
+needs a dedicated cloud adapter; the build output is uploaded as an artifact
+rather than shipped.
 
 ## Design notes
 
