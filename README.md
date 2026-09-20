@@ -25,7 +25,7 @@ Enter a BFL key in the connection dialogue, or set `BFL_API_KEY` in the server e
 
 **Camera language you can see and edit.** Shot size, angle and movement are three independent sections covering 24 terms. Each contributes a colour-coded clause to the prompt that you can edit in place, and the 3D diagram illustrates the named combination rather than predicting what the model will do. Every term is exploratory: a successful request verifies the plumbing, not camera behaviour across subjects.
 
-**A library that takes itself apart.** Every clip on the first screen is a real run of this studio, shipped with the prompt, camera terms, settings and provider-confirmed cost that produced it. Click a title to reuse its prompt, or Recreate to restore the whole setup and change one thing.
+**A library that takes itself apart.** Every clip on the first screen is a real run of this studio, shipped with the prompt, camera terms, settings and provider-confirmed cost that produced it. Click a title to reuse its prompt, or Recreate to restore the whole setup and change one thing. Switching to Upscale picks up your newest generation, so improving what you just made takes one click.
 
 **Your key is never stored.** A visitor key lives in page memory and is sent as a header when needed — never to sessionStorage, localStorage, IndexedDB, cookies, caches, job files, media or logs. Reloading disconnects it. Session ownership is a random HttpOnly cookie, not an account.
 

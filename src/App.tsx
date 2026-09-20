@@ -3,7 +3,7 @@ import { isTerminal } from "../shared/types";
 import GenerateButton from "./components/GenerateButton";
 import type { Job, Source } from "../shared/types";
 import { usePageKey } from "./usePageKey";
-import { useComposer, composerInput } from "./useComposer";
+import { useComposer, composerInput, upscaleSource } from "./useComposer";
 import AccountBalance from "./components/AccountBalance";
 import FeaturedVideo from "./components/FeaturedVideo";
 import {
@@ -34,7 +34,6 @@ export default function App() {
     duration,
     aspectRatio,
     resolution,
-    sourceId,
     upscalePrompt,
     upscaleFactor,
     upscaleCreativity,
@@ -77,7 +76,8 @@ export default function App() {
       .then((h) => setHasServerKey(h.hasServerKey))
       .catch(() => setError("The studio connection is unavailable."));
   }, [setError]);
-  const source = sources.find((s) => s.id === sourceId);
+  const source = upscaleSource(state.sourceId, jobs, sources);
+  const sourceId = source?.id ?? "";
   const upscaleMode = upscaleCreativity === 0 ? "Precise" : "Creative";
   const estimate =
     generator === "video"
@@ -116,7 +116,7 @@ export default function App() {
     setSubmitting(true);
     try {
       await generate({
-        ...composerInput(state),
+        ...composerInput({ ...state, sourceId }),
         description:
           generator === "video" ? description : source?.label || "Upscale",
       });
