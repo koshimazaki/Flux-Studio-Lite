@@ -89,9 +89,11 @@ export default function App() {
   function saveKey(value: string) {
     setKey(value);
     try {
-      value
-        ? sessionStorage.setItem("flux-studio-lite-key", value)
-        : sessionStorage.removeItem("flux-studio-lite-key");
+      if (value) {
+        sessionStorage.setItem("flux-studio-lite-key", value);
+      } else {
+        sessionStorage.removeItem("flux-studio-lite-key");
+      }
     } catch {
       setError(
         "Your browser could not retain the key for refresh. It remains in memory for this page.",

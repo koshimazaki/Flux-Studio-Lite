@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A force-push or a quick follow-up commit should not leave two runs racing.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Format, lint, types, tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` over `npm install`: the lockfile is committed, so CI installs
+      # the exact tree the author tested against.
+      - name: Install
+        run: npm ci
+
+      # Ordered cheapest-first, so an obvious failure reports in seconds
+      # rather than after a full build.
+      - name: Format
+        run: npm run format:check
+      - name: Lint
+        run: npm run lint
+      - name: Types
+        run: npm run typecheck
+      - name: Tests
+        run: npm test
+      - name: Build
+        run: npm run build
+
+      # Not a deploy. The README is explicit that a hosted version needs a
+      # dedicated cloud adapter, so this publishes the reviewable bundle
+      # instead of pretending to ship it.
+      - name: Upload build output
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist-${{ github.sha }}
+          path: dist
+          retention-days: 7
+
+  cloudflare:
+    name: Cloudflare boundary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      # The Cloudflare port lands on a branch. Detecting it here means this
+      # job is a clean skip on a tree without it and switches itself on with
+      # no workflow edit the moment wrangler config arrives.
+      - name: Detect Cloudflare port
+        id: detect
+        run: |
+          if [ -f wrangler.jsonc ] || [ -f wrangler.toml ] || [ -f wrangler.json ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+            echo "Wrangler config found — running boundary checks."
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "No Wrangler config on this ref — skipping."
+          fi
+
+      - name: Install
+        if: steps.detect.outputs.present == 'true'
+        run: npm ci
+
+      # The real portability gate. worker/tsconfig.json compiles shared/ and
+      # the three portable server modules under "types": [] and lib ES2022 —
+      # no Node, no DOM. A stray `node:fs` in the portable layer fails here
+      # while every other check stays green.
+      - name: Worker types (portable layer stays portable)
+        if: steps.detect.outputs.present == 'true'
+        run: npm run check:worker
+
+      # The Worker serves ./dist through its ASSETS binding, so wrangler
+      # refuses to bundle without it ("assets.directory ... does not exist").
+      # Building here keeps this job independent of `verify` rather than
+      # chaining the two through an artifact.
+      - name: Build assets for the Worker
+        if: steps.detect.outputs.present == 'true'
+        run: npm run build
+
+      # --dry-run bundles the Worker and validates bindings, compatibility
+      # flags and asset config without contacting the API, so it needs no
+      # credentials and cannot deploy from a pull request.
+      - name: Wrangler config and bundle
+        if: steps.detect.outputs.present == 'true'
+        run: npx wrangler deploy --dry-run --outdir "${RUNNER_TEMP}/wrangler-dry-run"
+
+      # D1 is SQLite. Replaying the migrations in order against a scratch
+      # database catches bad DDL and ordering mistakes before they reach a
+      # real database, where partially-applied migrations are expensive.
+      - name: D1 migrations replay
+        if: steps.detect.outputs.present == 'true'
+        run: |
+          if [ ! -d migrations ]; then
+            echo "No migrations directory — nothing to replay."
+            exit 0
+          fi
+          db="${RUNNER_TEMP}/d1-replay.sqlite"
+          rm -f "$db"
+          for migration in $(ls migrations/*.sql | sort); do
+            echo "Applying ${migration}"
+            sqlite3 "$db" < "$migration"
+          done
+          echo "Resulting schema:"
+          sqlite3 "$db" ".tables"
