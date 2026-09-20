@@ -1,4 +1,10 @@
 import { execFileSync } from "node:child_process";
+const accountId = process.env.CLOUDFLARE_ACCOUNT_ID?.trim();
+if (!accountId) {
+  throw new Error(
+    "Set CLOUDFLARE_ACCOUNT_ID before deploying FLUX Studio to Pages.",
+  );
+}
 const head = execFileSync("git", ["rev-parse", "HEAD"], {
   encoding: "utf8",
 }).trim();
@@ -21,7 +27,7 @@ execFileSync(
     stdio: "inherit",
     env: {
       ...process.env,
-      CLOUDFLARE_ACCOUNT_ID: "da207e184a404c2be5debcd3368d3e74",
+      CLOUDFLARE_ACCOUNT_ID: accountId,
     },
   },
 );
