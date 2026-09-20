@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import type { Job } from "../../shared/types";
 import { isTerminal } from "../../shared/types";
 import { WaitField } from "./WaitField";
+import Clip from "./Clip";
+import { generationProgress } from "../generation-progress";
 
 export const statusLabel = (status: string) =>
   (
@@ -18,46 +20,42 @@ export const statusLabel = (status: string) =>
     }) as Record<string, string>
   )[status] || status;
 
-export default function JobMedia({ job }: { job: Job }) {
-  const video = useRef<HTMLVideoElement>(null);
+export default function JobMedia({
+  job,
+  onOpen,
+}: {
+  job: Job;
+  /** Passing this gives a finished job the same contract as a library clip:
+   * a play button that opens the lightbox rather than inline controls. */
+  onOpen?: () => void;
+}) {
   const arrivedHere = useRef(job.status !== "Ready");
   const [decoded, setDecoded] = useState(false);
   const [revealed, setRevealed] = useState(!arrivedHere.current);
   const [mediaError, setMediaError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [now, setNow] = useState(Date.now());
   const waiting = !isTerminal(job.status);
+  const progress = generationProgress(job);
   const unavailable = job.status === "Ready" && job.mediaAvailable === false;
   useEffect(() => {
     if (!waiting) return;
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, [waiting]);
-  useEffect(() => {
-    const pause = () => {
-      if (document.hidden) video.current?.pause();
-    };
-    document.addEventListener("visibilitychange", pause);
-    return () => document.removeEventListener("visibilitychange", pause);
-  }, []);
   return (
     <div className="job-placeholder">
       {!unavailable && job.status === "Ready" && job.resultUrl && (
-        <video
-          ref={video}
-          src={job.resultUrl}
+        <Clip
+          // Remounting is how "Reload video" retries: one element, one source.
+          key={attempt}
+          url={job.resultUrl}
+          label={job.description || "Your latest generation"}
+          // The reveal waits on the first frame, which metadata alone is not.
           preload="auto"
-          muted
-          playsInline
-          loop
-          controls={decoded}
-          aria-label={job.description}
-          onLoadedData={() => setDecoded(true)}
+          onReady={() => setDecoded(true)}
           onError={() => setMediaError(true)}
-          onPlay={() =>
-            document.querySelectorAll("video").forEach((item) => {
-              if (item !== video.current) item.pause();
-            })
-          }
+          onOpen={onOpen}
         />
       )}
       {!unavailable &&
@@ -89,8 +87,24 @@ export default function JobMedia({ job }: { job: Job }) {
                     ? "Bringing out the finer details."
                     : "Your scene is taking shape.")}
           </p>
+          {waiting && progress !== undefined && (
+            // Real progress from the provider. Absent, the elapsed seconds
+            // below stay the only honest thing to show.
+            <div
+              className="job-progress"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(progress * 100)}
+            >
+              <span style={{ width: `${progress * 100}%` }} />
+            </div>
+          )}
           {waiting && (
             <span className="elapsed">
+              {progress !== undefined
+                ? `${Math.round(progress * 100)}% · `
+                : ""}
               {Math.max(
                 0,
                 Math.floor((now - new Date(job.createdAt).getTime()) / 1000),
@@ -106,7 +120,7 @@ export default function JobMedia({ job }: { job: Job }) {
               className="text-button"
               onClick={() => {
                 setMediaError(false);
-                video.current?.load();
+                setAttempt((value) => value + 1);
               }}
             >
               Reload video

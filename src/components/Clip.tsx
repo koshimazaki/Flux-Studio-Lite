@@ -5,11 +5,18 @@ export default function Clip({
   poster,
   label,
   onOpen,
+  preload,
+  onReady,
+  onError,
 }: {
   url: string;
   poster?: string;
   label: string;
   onOpen?: () => void;
+  /** A caller revealing this clip needs the first frame, not just metadata. */
+  preload?: "none" | "metadata" | "auto";
+  onReady?: () => void;
+  onError?: () => void;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -59,12 +66,14 @@ export default function Clip({
         ref={ref}
         src={url}
         poster={poster}
-        preload={poster ? "none" : "metadata"}
+        preload={preload ?? (poster ? "none" : "metadata")}
         muted
         playsInline
         loop
         controls={!onOpen && playing}
         aria-label={label}
+        onLoadedData={onReady}
+        onError={onError}
         onPause={() => setPlaying(false)}
         onPlay={() => setPlaying(true)}
       />
