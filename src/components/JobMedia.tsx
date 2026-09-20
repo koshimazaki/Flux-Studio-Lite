@@ -14,6 +14,7 @@ export const statusLabel = (status: string) =>
       Generating: "Generating",
       copying: "Saving your clip",
       expired: "Result expired",
+      stopped: "Cancelled",
       Error: "Could not finish",
       "Request Moderated": "Prompt moderated",
       "Content Moderated": "Result moderated",

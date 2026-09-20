@@ -137,6 +137,13 @@ export async function createApp(options: AppOptions) {
         .json({ job: publicJob(job) });
     },
   );
+  app.post("/api/jobs/:id/stop", async (request, response) => {
+    response.json({
+      job: publicJob(
+        await service.stop(request.params.id, response.locals.sessionId),
+      ),
+    });
+  });
   app.get("/api/jobs/:id", async (request, response) => {
     limit("poll", response.locals.sessionId);
     const byoKey =

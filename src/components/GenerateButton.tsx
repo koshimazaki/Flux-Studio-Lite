@@ -11,6 +11,7 @@ export default function GenerateButton({
   disabled,
   onSubmit,
   onResume,
+  onCancel,
 }: {
   generator: Generator;
   submitting: boolean;
@@ -19,6 +20,7 @@ export default function GenerateButton({
   disabled: boolean;
   onSubmit: () => void;
   onResume: () => void;
+  onCancel: () => void;
 }) {
   const waiting = activeJob && !isTerminal(activeJob.status);
   const needsKey = waiting && activeJob.keyMode === "byo" && !hasKey;
@@ -41,17 +43,30 @@ export default function GenerateButton({
           ? "Generate"
           : "Upscale";
   return (
-    <button
-      className={`generate-button${busy ? " is-generating" : ""}`}
-      onClick={needsKey ? onResume : onSubmit}
-      disabled={busy || (!needsKey && disabled)}
-      aria-busy={busy}
-      title={needsKey ? "Reconnect your key to finish this job" : undefined}
-    >
-      <span>{label}</span>
-      <span className="generate-button-icon" aria-hidden="true">
-        {busy ? <GenerationIndicator /> : <Icon name="arrow" size={18} />}
-      </span>
-    </button>
+    <>
+      <button
+        className={`generate-button${busy ? " is-generating" : ""}`}
+        onClick={needsKey ? onResume : waiting ? onCancel : onSubmit}
+        disabled={submitting || (!waiting && !needsKey && disabled)}
+        aria-busy={busy}
+        title={
+          needsKey
+            ? "Reconnect your key to finish this job"
+            : waiting
+              ? "Stop tracking this run"
+              : undefined
+        }
+      >
+        <span>{label}</span>
+        <span className="generate-button-icon" aria-hidden="true">
+          {busy ? <GenerationIndicator /> : <Icon name="arrow" size={18} />}
+        </span>
+      </button>
+      {needsKey && (
+        <button className="text-button" onClick={onCancel}>
+          Cancel run
+        </button>
+      )}
+    </>
   );
 }

@@ -83,6 +83,20 @@
   color: var(--text);
   pointer-events: none;
 }
+.clip-hide-button {
+  position: absolute;
+  z-index: 2;
+  top: var(--space-10);
+  right: var(--space-10);
+  width: var(--space-24);
+  height: var(--space-24);
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  background: var(--badge-bg);
+  border: var(--space-1) solid var(--badge-border);
+  border-radius: var(--radius-round);
+}
 .clip-play {
   position: absolute;
   left: 50%;

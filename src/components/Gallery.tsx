@@ -13,6 +13,9 @@ export default function Gallery({
   onRetry,
   onSelect,
   onLibrarySetup,
+  onHide,
+  hiddenCount,
+  onRestoreHidden,
 }: {
   jobs: Job[];
   sources: Source[];
@@ -21,6 +24,9 @@ export default function Gallery({
   onSelect: (id: string) => void;
   /** Loads a catalogue clip's recorded run: the whole setup, or its prompt only. */
   onLibrarySetup: (source: Source, full: boolean) => void;
+  onHide: (id: string) => void;
+  hiddenCount: number;
+  onRestoreHidden: () => void;
 }) {
   const [viewing, setViewing] = useState<ViewingClip | null>(null);
   const [filter, setFilter] = useState<"all" | "session">("all");
@@ -42,6 +48,11 @@ export default function Gallery({
           </h2>
         </div>
         <div className="gallery-filters" aria-label="Gallery filter">
+          {hiddenCount > 0 && (
+            <button onClick={onRestoreHidden}>
+              Restore hidden ({hiddenCount})
+            </button>
+          )}
           <button
             className={filter === "all" ? "active" : ""}
             onClick={() => setFilter("all")}
@@ -60,6 +71,16 @@ export default function Gallery({
         {jobs.map((job) => (
           <article className="clip-card" key={job.id}>
             <div className="clip-media">
+              {isTerminal(job.status) && (
+                <button
+                  className="clip-hide-button"
+                  onClick={() => onHide(job.id)}
+                  aria-label={`Hide ${job.description || "untitled study"}`}
+                  title="Hide from this browser gallery"
+                >
+                  <Icon name="close" size={14} />
+                </button>
+              )}
               {job.status === "Ready" &&
               job.mediaAvailable !== false &&
               job.resultUrl ? (

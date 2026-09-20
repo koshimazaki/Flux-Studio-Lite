@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { canonicalInput } from "../shared/idempotency";
-import { expireStaleJob } from "../shared/lifecycle";
+import { expireStaleJob, stopJob } from "../shared/lifecycle";
 import {
   composePrompt,
   estimateUpscaleUsd,
@@ -202,12 +202,14 @@ export class JobService {
             user: sessionId,
           };
       const response = await this.bfl.submit(input.generator, body, key);
+      if (isTerminal(job.status)) return job;
       job.providerId = response.id;
       job.pollingUrl = response.polling_url;
       job.status = "Pending";
       if (typeof response.cost === "number" && Number.isFinite(response.cost))
         job.costActualUsd = response.cost / 100;
     } catch (error) {
+      if (isTerminal(job.status)) return job;
       job.status = "Error";
       job.error =
         error instanceof AppError
@@ -234,11 +236,22 @@ export class JobService {
     return { job: await promise };
   }
 
+  async stop(id: string, sessionId: string) {
+    const job = this.owned(id, sessionId);
+    if (stopJob(job)) {
+      delete job.pollingUrl;
+      delete job.resultRemoteUrl;
+      await this.store.save();
+    }
+    return job;
+  }
+
   private async pollOnce(job: StoredJob, key: string) {
     job.lastPolledAt = Date.now();
     try {
       if (job.status !== "copying" || !job.resultRemoteUrl) {
         const result = await this.bfl.poll(job.pollingUrl!, key);
+        if (isTerminal(job.status)) return job;
         if (typeof result.cost === "number" && Number.isFinite(result.cost))
           job.costActualUsd = result.cost / 100;
         if (
@@ -268,6 +281,7 @@ export class JobService {
         const file = path.join(this.store.directory, "media", `${job.id}.mp4`);
         await saveDownload(await this.bfl.download(job.resultRemoteUrl), file);
         const metadata = await probeVideo(file);
+        if (isTerminal(job.status)) return job;
         job.resultUrl = `/api/clips/${job.id}`;
         if (!this.store.data.sources.some((source) => source.id === job.id))
           this.store.data.sources.push({
@@ -284,6 +298,7 @@ export class JobService {
         delete job.resultRemoteUrl;
       }
     } catch (error) {
+      if (isTerminal(job.status)) return job;
       // Poll and copy failures are retryable; never repeat the generation request.
       job.error =
         error instanceof AppError

@@ -90,8 +90,9 @@ async function expireAbandonedJobs(env: Env, now: number) {
     updates.push(
       // Clearing both links keeps a closed job from ever reaching BFL again.
       env.DB.prepare(
-        "UPDATE jobs SET data=?, polling_url=NULL, remote_url=NULL WHERE id=? AND session=?",
-      ).bind(JSON.stringify(job), row.id, row.session),
+        `UPDATE jobs SET data=?, polling_url=NULL, remote_url=NULL WHERE id=? AND session=?
+         AND json_extract(data,'$.status') NOT IN (${unfinished})`,
+      ).bind(JSON.stringify(job), row.id, row.session, ...terminalStatuses),
     );
   }
   if (updates.length) await env.DB.batch(updates);

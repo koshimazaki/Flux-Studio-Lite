@@ -11,7 +11,7 @@ export const RATE_WINDOW_MS = 60_000;
 
 /** Requests per window, per browser session unless noted. */
 export const RATE_LIMITS = {
-  /** POST /api/jobs and /api/uploads: paid work, so the tightest ceiling. */
+  /** POST /api/jobs, /api/uploads and /api/jobs/:id/stop: state-changing requests. */
   submit: 8,
   /** The same writes counted per client IP, bounding one visitor's many sessions. */
   submitPerIp: 20,

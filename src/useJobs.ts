@@ -2,6 +2,21 @@ import { isTerminal } from "../shared/types";
 import { selectedJob, cleanJobUrl, jobHistoryState } from "./job-links";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Job, Source, GenerateInput } from "../shared/types";
+export function preserveStoppedJobs(current: Job[], incoming: Job[]): Job[] {
+  const stopped = new Map(
+    current
+      .filter((job) => job.status === "stopped")
+      .map((job) => [job.id, job]),
+  );
+  const merged = incoming.map((job) => stopped.get(job.id) ?? job);
+  for (const job of stopped.values())
+    if (!merged.some((candidate) => candidate.id === job.id)) merged.push(job);
+  return merged;
+}
+
+function preserveStoppedUpdate(current: Job, incoming: Job): Job {
+  return current.status === "stopped" ? current : incoming;
+}
 export async function request<T>(
   path: string,
   options: RequestInit = {},
@@ -55,7 +70,7 @@ export function useJobs(key: string) {
         );
       }
     }
-    setJobs(data.jobs);
+    setJobs((current) => preserveStoppedJobs(current, data.jobs));
     setSources(data.sources);
   }, []);
   useEffect(() => {
@@ -80,7 +95,11 @@ export function useJobs(key: string) {
             );
             if (cancelled) return;
             setJobs((current) =>
-              current.map((j) => (j.id === result.job.id ? result.job : j)),
+              current.map((j) =>
+                j.id === result.job.id
+                  ? preserveStoppedUpdate(j, result.job)
+                  : j,
+              ),
             );
             // A poll that recovers retracts its own banner. Errors raised
             // elsewhere stay until their own owner clears them.
@@ -163,6 +182,17 @@ export function useJobs(key: string) {
     selectJob(job.id);
     return job;
   }
+  async function stop(id: string) {
+    setError("");
+    const { job } = await request<{ job: Job }>(
+      `/api/jobs/${encodeURIComponent(id)}/stop`,
+      { method: "POST" },
+    );
+    setJobs((current) =>
+      current.map((candidate) => (candidate.id === job.id ? job : candidate)),
+    );
+    return job;
+  }
   return {
     jobs,
     sources,
@@ -171,6 +201,7 @@ export function useJobs(key: string) {
     needsKey,
     refresh,
     generate,
+    stop,
     selectJob,
     selectedId,
     featuredJob: jobs.find((job) => job.id === selectedId) ?? jobs[0],

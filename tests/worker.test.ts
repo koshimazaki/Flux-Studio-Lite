@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import {
   Miniflare,
   convertV4MiniflareOptions,
@@ -23,8 +23,13 @@ import {
 let mf: Miniflare;
 let submissions = 0;
 let failSubmit = false;
+let failPoll = false;
 let lastSubmission: Record<string, unknown> = {};
 let cookie = "";
+let testIp = 0;
+beforeEach(() => {
+  testIp++;
+});
 const input = {
   generator: "video" as const,
   description: "A ceramic vessel.",
@@ -45,7 +50,11 @@ const call = (
 ) =>
   mf.dispatchFetch(`https://studio.test${path}`, {
     ...init,
-    headers: { cookie, ...init.headers },
+    headers: {
+      cookie,
+      "cf-connecting-ip": `192.0.2.${testIp}`,
+      ...init.headers,
+    },
   });
 /** Writes are rate limited per session, so cases that can stand alone get their own. */
 const newSession = () => `camera_session=${randomUUID()}`;
@@ -130,6 +139,15 @@ beforeAll(async () => {
             cost: 85,
           });
         }
+        if (
+          url.hostname === "api.bfl.ai" &&
+          url.pathname === "/v1/get_result" &&
+          failPoll
+        )
+          return MFResponse.json(
+            { id: "provider-test", status: "Error", result: null },
+            { status: 500 },
+          );
         if (url.hostname === "api.bfl.ai" && url.pathname === "/v1/get_result")
           return MFResponse.json({
             id: "provider-test",
@@ -181,6 +199,116 @@ afterAll(async () => {
 });
 
 describe("Cloudflare adapter in workerd with isolated D1/R2 and fake BFL", () => {
+  it("persists a task-specific provider HTTP 500 as terminal instead of Planning", async () => {
+    const session = newSession();
+    const { job } = (await (
+      await post("terminal-error-fixture", input, session)
+    ).json()) as { job: Job };
+    failPoll = true;
+    try {
+      const result = (await (
+        await call(`/api/jobs/${job.id}`, {
+          headers: { cookie: session, "x-byo-key": "test-only-key" },
+        })
+      ).json()) as { job: Job };
+      expect(result.job.status).toBe("Error");
+      const history = (await (
+        await call("/api/history", { headers: { cookie: session } })
+      ).json()) as { jobs: Job[] };
+      expect(history.jobs.find((item) => item.id === job.id)?.status).toBe(
+        "Error",
+      );
+    } finally {
+      failPoll = false;
+    }
+  });
+  it("stops without a key and preserves cancellation against late poll writes and replays", async () => {
+    const session = newSession();
+    const before = submissions;
+    const { job } = (await (
+      await post("stop-worker-fixture", input, session)
+    ).json()) as { job: Job };
+    expect(
+      (
+        await call(`/api/jobs/${job.id}/stop`, {
+          method: "POST",
+          headers: { cookie: newSession() },
+        })
+      ).status,
+    ).toBe(404);
+    expect(
+      (
+        await call(`/api/jobs/${job.id}/stop`, {
+          method: "POST",
+          headers: { cookie: session, origin: "https://other.test" },
+        })
+      ).status,
+    ).toBe(403);
+    const stopped = (await (
+      await call(`/api/jobs/${job.id}/stop`, {
+        method: "POST",
+        headers: { cookie: session },
+      })
+    ).json()) as { job: Job };
+    expect(stopped.job.status).toBe("stopped");
+    const db = await mf.getD1Database("DB");
+    const stale = JSON.stringify({
+      ...job,
+      status: "Ready",
+      resultUrl: `/api/clips/${job.id}`,
+    });
+    const saved = await db
+      .prepare(SAVE_JOB_SQL)
+      .bind(
+        stale,
+        MEDIA_UNAVAILABLE_MESSAGE,
+        stale,
+        "https://api.bfl.ai/v1/get_result?id=provider-test",
+        "https://delivery.bfl.ai/clip.mp4",
+        job.id,
+        session.slice(15),
+      )
+      .first<{ data: string }>();
+    expect(JSON.parse(saved!.data).status).toBe("stopped");
+    const row = await db
+      .prepare("SELECT polling_url, remote_url FROM jobs WHERE id=?")
+      .bind(job.id)
+      .first();
+    expect(row).toMatchObject({ polling_url: null, remote_url: null });
+    expect(
+      (
+        (await (
+          await call(`/api/jobs/${job.id}`, { headers: { cookie: session } })
+        ).json()) as { job: Job }
+      ).job.status,
+    ).toBe("stopped");
+    expect(
+      (
+        (await (await post("stop-worker-fixture", input, session)).json()) as {
+          job: Job;
+        }
+      ).job.status,
+    ).toBe("stopped");
+    expect(submissions).toBe(before + 1);
+  });
+  it("leaves completed clips intact when a stop request arrives late", async () => {
+    const session = newSession();
+    const { job } = (await (
+      await post("stop-complete-fixture", input, session)
+    ).json()) as { job: Job };
+    await call(`/api/jobs/${job.id}`, {
+      headers: { cookie: session, "x-byo-key": "test-only-key" },
+    });
+    const result = (await (
+      await call(`/api/jobs/${job.id}/stop`, {
+        method: "POST",
+        headers: { cookie: session },
+      })
+    ).json()) as { job: Job };
+    expect(result.job.status).toBe("Ready");
+    expect(result.job.resultUrl).toBeTruthy();
+  });
+
   it("requires a key and rejects cross-origin writes", async () => {
     expect(
       (await call("/api/jobs", { method: "POST", body: "{}" })).status,
