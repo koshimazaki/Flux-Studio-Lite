@@ -10,7 +10,7 @@ Describe a scene, combine a shot size, angle and movement, generate a FLUX 3 vid
 
 **[fluxstudio.pages.dev](https://fluxstudio.pages.dev)** — four library clips ship with the app, so the first screen works before any key is connected. To generate, connect your own BFL key and keep the tab open until the clip is saved.
 
-Click the active generation button to cancel tracking, with confirmation. BFL may still finish and charge for the run. Finished or failed cards can be hidden with × and restored from the gallery; hiding does not delete media.
+A run cannot be called off once sent — BFL has no cancel endpoint — so the studio does not pretend otherwise and keeps collecting what you have paid for. Any card can be hidden with × and restored from the gallery; hiding is a view filter, so a hidden run still finishes and saves.
 
 ## Run locally
 

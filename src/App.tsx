@@ -22,7 +22,6 @@ import UpscaleControls from "./components/UpscaleControls";
 import GenerationControls from "./components/GenerationControls";
 import ThemePicker from "./components/ThemePicker";
 import SourceInput from "./components/SourceInput";
-import CancelRunDialog from "./components/CancelRunDialog";
 import { useHiddenJobs } from "./useHiddenJobs";
 export default function App() {
   const { state, set, dispatch } = useComposer();
@@ -48,10 +47,7 @@ export default function App() {
     [hasServerKey, setHasServerKey] = useState(false),
     [keyVerified, setKeyVerified] = useState(false),
     [submitting, setSubmitting] = useState(false),
-    [uploading, setUploading] = useState(false),
-    [cancellingJob, setCancellingJob] = useState<Job | null>(null),
-    [stopping, setStopping] = useState(false),
-    [cancelError, setCancelError] = useState("");
+    [uploading, setUploading] = useState(false);
   const composerRef = useRef<HTMLDivElement>(null);
   const {
     jobs,
@@ -61,7 +57,6 @@ export default function App() {
     needsKey,
     refresh,
     generate,
-    stop,
     selectJob,
     selectedId,
   } = useJobs(key);
@@ -314,16 +309,6 @@ export default function App() {
                   }
                   onSubmit={() => void submit()}
                   onResume={() => setShowKey(true)}
-                  onCancel={() => {
-                    const active = jobs.find(
-                      (job) =>
-                        job.generator === generator && !isTerminal(job.status),
-                    );
-                    if (active) {
-                      setCancelError("");
-                      setCancellingJob(active);
-                    }
-                  }}
                 />
               </div>
             </div>
@@ -421,27 +406,6 @@ export default function App() {
           onSave={saveKey}
           onClose={() => setShowKey(false)}
           serverKey={hasServerKey}
-        />
-      )}
-      {cancellingJob && (
-        <CancelRunDialog
-          stopping={stopping}
-          error={cancelError}
-          onKeepWaiting={() => setCancellingJob(null)}
-          onCancelRun={() => {
-            setCancelError("");
-            setStopping(true);
-            void stop(cancellingJob.id)
-              .then(() => setCancellingJob(null))
-              .catch((error) =>
-                setCancelError(
-                  error instanceof Error
-                    ? error.message
-                    : "The run could not be cancelled.",
-                ),
-              )
-              .finally(() => setStopping(false));
-          }}
         />
       )}
     </>

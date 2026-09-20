@@ -42,17 +42,6 @@ export const SWEEP_BATCH = 100;
 
 export const STALE_JOB_MESSAGE = `This generation ran past the studio's ${JOB_MAX_AGE_MS / 60_000}-minute window. Check your BFL usage before starting another.`;
 
-export const STOPPED_JOB_MESSAGE =
-  "You stopped waiting for this run. BFL may still finish it and charge for it. Check your BFL usage before starting another.";
-
-export function stopJob(job: Job) {
-  if (isTerminal(job.status)) return false;
-  job.status = "stopped";
-  job.error = STOPPED_JOB_MESSAGE;
-  job.updatedAt = new Date().toISOString();
-  return true;
-}
-
 /**
  * Ages an abandoned job out to `expired`. Returns true when the job changed, so
  * callers only write the rows they actually touched.

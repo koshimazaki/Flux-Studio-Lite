@@ -71,16 +71,16 @@ export default function Gallery({
         {jobs.map((job) => (
           <article className="clip-card" key={job.id}>
             <div className="clip-media">
-              {isTerminal(job.status) && (
-                <button
-                  className="clip-hide-button"
-                  onClick={() => onHide(job.id)}
-                  aria-label={`Hide ${job.description || "untitled study"}`}
-                  title="Hide from this browser gallery"
-                >
-                  <Icon name="close" size={14} />
-                </button>
-              )}
+              {/* Available while a run is in flight too: hiding is a view
+                  filter, so the poller keeps collecting and saving it. */}
+              <button
+                className="clip-hide-button"
+                onClick={() => onHide(job.id)}
+                aria-label={`Hide ${job.description || "untitled study"}`}
+                title="Hide from this browser gallery"
+              >
+                <Icon name="close" size={14} />
+              </button>
               {job.status === "Ready" &&
               job.mediaAvailable !== false &&
               job.resultUrl ? (

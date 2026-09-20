@@ -3,7 +3,7 @@ import { AppError, requireKey } from "../server/errors";
 import { validateIdempotencyKey, validateInput } from "../server/validation";
 import { history, rateLimit, sessionSource } from "./storage";
 import { serveMedia, upload } from "./media";
-import { poll, submit, stop } from "./jobs";
+import { poll, submit } from "./jobs";
 import { sweep } from "./sweep";
 
 const json = (data: unknown, status = 200) =>
@@ -37,11 +37,10 @@ export default {
         cookie = `camera_session=${session}; HttpOnly; SameSite=Strict; Path=/; Max-Age=2592000${url.protocol === "https:" ? "; Secure" : ""}`;
       const get = request.method === "GET";
       const post = request.method === "POST";
-      const stopping = post && /^\/api\/jobs\/[^/]+\/stop$/.test(url.pathname);
       const keyHeader = request.headers.get("x-byo-key");
       const key = keyHeader ? requireKey(keyHeader) : undefined;
       if (post) {
-        if (!key && !stopping)
+        if (!key)
           throw new AppError(400, "Connect your BFL key first.", "invalid_key");
         const ip = request.headers.get("cf-connecting-ip") || "local";
         const hash = await crypto.subtle.digest(
@@ -119,8 +118,6 @@ export default {
         response = json(
           await poll(env, url.pathname.split("/").at(-1)!, session, key),
         );
-      } else if (stopping) {
-        response = json(await stop(env, url.pathname.split("/")[3], session));
       } else if (post && url.pathname === "/api/uploads") {
         await new BflClient().credits(key!);
         response = json({ source: await upload(request, env, session) }, 201);

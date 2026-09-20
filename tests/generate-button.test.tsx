@@ -17,7 +17,6 @@ const render = (
       disabled={disabled}
       onSubmit={() => {}}
       onResume={() => {}}
-      onCancel={() => {}}
     />,
   );
 describe("generation button lifecycle", () => {
@@ -30,7 +29,6 @@ describe("generation button lifecycle", () => {
       "copying",
     ] as const) {
       const html = render({ status, keyMode: "byo" });
-      expect(html).not.toContain('disabled=""');
       expect(html).toContain("generation-indicator");
     }
     for (const status of [
@@ -46,6 +44,7 @@ describe("generation button lifecycle", () => {
       expect(html).not.toContain("generation-indicator");
     }
   });
+
   it("offers enabled credential resume instead of a new submission when a pending BYO job loses its key", () => {
     const html = render(
       { status: "Generating", keyMode: "byo" },
@@ -56,15 +55,26 @@ describe("generation button lifecycle", () => {
     expect(html).toContain("Resume");
     expect(html).not.toContain('disabled=""');
     expect(html).not.toContain("generation-indicator");
-    expect(html).toContain("Cancel run");
-    expect(
-      render({ status: "Generating", keyMode: "server" }, false),
-    ).not.toContain('disabled=""');
   });
-  it("keeps sending disabled, then makes an accepted run cancellable", () => {
+
+  // BFL exposes no way to call off a task, and credits are spent on success,
+  // so a control here could only stop collecting a result already paid for.
+  // The button goes quiet instead; the gallery's hide control is the way out.
+  it("offers no way to call off a run that is already in flight", () => {
+    for (const status of [
+      "Pending",
+      "Reasoning",
+      "Generating",
+      "copying",
+    ] as const) {
+      const html = render({ status, keyMode: "byo" });
+      expect(html).toContain('disabled=""');
+      expect(html).not.toMatch(/cancel/i);
+      expect(html).not.toMatch(/stop/i);
+    }
+  });
+
+  it("keeps sending disabled while a submission is in flight", () => {
     expect(render(undefined, true, true)).toContain('disabled=""');
-    const html = render({ status: "Pending", keyMode: "byo" });
-    expect(html).not.toContain('disabled=""');
-    expect(html).toContain("Stop tracking this run");
   });
 });

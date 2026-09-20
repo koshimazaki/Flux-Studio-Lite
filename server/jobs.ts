@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { canonicalInput } from "../shared/idempotency";
-import { expireStaleJob, stopJob } from "../shared/lifecycle";
+import { expireStaleJob } from "../shared/lifecycle";
 import {
   composePrompt,
   estimateUpscaleUsd,
@@ -234,16 +234,6 @@ export class JobService {
     );
     this.locks.set(id, promise);
     return { job: await promise };
-  }
-
-  async stop(id: string, sessionId: string) {
-    const job = this.owned(id, sessionId);
-    if (stopJob(job)) {
-      delete job.pollingUrl;
-      delete job.resultRemoteUrl;
-      await this.store.save();
-    }
-    return job;
   }
 
   private async pollOnce(job: StoredJob, key: string) {
