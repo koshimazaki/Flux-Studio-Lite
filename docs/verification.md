@@ -8,20 +8,23 @@ Express adapter remains the local development path.
 
 ## Automated checks
 
-| Check                       | Result                                                      |
-| --------------------------- | ----------------------------------------------------------- |
-| `npm test`                  | 84 tests across 11 files                                    |
-| `npm run typecheck`         | clean                                                       |
-| `npm run lint`              | 0 errors, 3 hook-dependency warnings                        |
-| `npm run format:check`      | clean                                                       |
-| `npm run build`             | clean production build                                      |
-| `npm run check:worker`      | portable layer compiles with no Node and no DOM types       |
-| `wrangler deploy --dry-run` | bundle, bindings and asset config valid                     |
-| D1 migrations               | all three replay in order against a scratch SQLite database |
+Counts go stale; what each command guarantees does not.
 
-Coverage includes camera geometry across all 729 selection combinations,
-prompt composition and restore, idempotent replay across both adapters,
-session ownership, rate limits, storage ceilings and lifecycle expiry.
+| Command                     | What a pass means                                                |
+| --------------------------- | ---------------------------------------------------------------- |
+| `npm test`                  | Every rule below still holds on both adapters                    |
+| `npm run typecheck`         | No type errors                                                   |
+| `npm run lint`              | No errors (three known hook-dependency warnings remain)          |
+| `npm run format:check`      | Formatting is unchanged                                          |
+| `npm run build`             | The production bundle builds                                     |
+| `npm run check:worker`      | The portable layer compiles with no Node and no DOM types        |
+| `wrangler deploy --dry-run` | Bundle, bindings and asset config are valid, without an API call |
+| D1 migration replay         | Every migration applies in order to a scratch SQLite database    |
+
+The suite covers camera geometry across all 729 selection combinations, prompt
+composition and restore, idempotent replay across both adapters, session
+ownership, rate limits, storage ceilings, lifecycle expiry, and that the two
+MP4 readers agree so an upscale cannot be priced differently on each adapter.
 
 ## Browser checks
 
@@ -77,11 +80,10 @@ plus a second job guarding the cloud boundary.
 - The D1 migrations replay in order against a scratch SQLite database.
 
 Pull-request CI cannot deploy and is never given production credentials; it
-uploads the frontend build as a short-lived review artifact. After both jobs
-pass on a push to `main`, a separate production job builds the Pages bundle,
-applies pending D1 migrations, deploys to Pages and checks `/api/health`,
-reading its credentials from GitHub's `production` environment. See
-[Cloudflare](cloudflare.md) for that configuration.
+uploads the frontend build as a short-lived review artifact. The production job
+runs only on a push to `main`, and this deployment holds no credential for it,
+so it skips: releases are run by hand. See [Cloudflare](cloudflare.md) for why,
+and for the two secrets that would enable it.
 
 ## Library clips as evidence
 

@@ -8,92 +8,63 @@ React composer → same-origin /api/* ──┤
                     └──────── BFL submit / poll ───────┘
 ```
 
-`shared/` owns model inputs, camera wording, pricing, lifecycle, replay rules, rate limits and catalogue validation. The browser and both adapters use the same composer and contracts. Each adapter validates every input again and never accepts a user URL or arbitrary upstream endpoint. Upscale uses a validated library entry or a session-owned clip id. Express inspects the local MP4 with the same MP4Box reader and sends base64 bytes to BFL; the Worker inspects R2 ranges with MP4Box and gives BFL a public library URL or a short-lived object-specific capability URL.
+`shared/` owns model inputs, camera wording, pricing, lifecycle, replay rules, rate limits and catalogue validation. The browser and both adapters use the same composer and contracts, and each adapter validates every input again rather than trusting the last one. Neither accepts a user-supplied URL or an arbitrary upstream endpoint: an upscale takes a validated library entry or a session-owned clip id, and the live contracts are `fetch` calls to two fixed BFL endpoints.
 
-The live contracts are native `fetch` calls to `/v1/flux-3-video` and `/v1/flux-tools/video-upscale-v1`. Return `cost` values are credits, converted to USD by dividing by 100. Estimates and confirmed charges have separate fields. BFL's optional progress is not replaced with a fabricated percentage.
+`npm run check:worker` compiles `shared/` and the portable server modules with `"types": []` and no DOM, so a Node-only import in the layer meant to run on Workers fails there while every other check stays green. That gate is what keeps the boundary honest.
 
-The prompt is a single visual editing surface with a scene textarea and up to three section-coloured camera textareas. Keeping the fields separate preserves colouring, native editing, paste and selection without a rich-text dependency. Per-term edits stay in a small React reducer; disabling the camera omits only that field. `composePrompt` uses the ordered edited camera text, including an intentionally empty value, identically in preview and submission. The diagram still illustrates the named combination; it does not parse custom text.
+## Paid requests
 
-Upscale accepts a finite factor from 1.5 to 3 and `upscaleCreativity` of 0 (Precise) or 1 (Creative). The provider receives both settings and an optional `upscalePrompt` mapped to its `prompt` field. Empty prompts are omitted; legacy jobs default to an empty prompt. The compact editor gives source selection/upload and the auto-growing prompt equal surfaces, accepts click or drag-and-drop MP4 input, validates text at 1,200 characters and restores it from saved jobs. Precise costs $0.07 per output MP-second; Creative costs $0.10. Shared estimates cap output at 13.75 MP and preserve aspect ratio; displayed dimensions are approximate because the provider controls final rounding. The server reserves the selected mode's cost using inspected source metadata. Earlier requests without the mode default to Precise; retry restores both controls.
+Everything here exists because a request costs the visitor real money.
 
-Video generation validates whole-second durations from 5 to 20, seven explicit ratios and four resolution classes. Prices are per second: HD $0.17, Full HD $0.29, QHD $0.40, UHD $0.80; draft is HD at $0.06. Draft disables the resolution menu and preserves the preferred selection in the browser, while both client and server submit HD. Missing aspect ratios on earlier jobs default to 16:9.
+A submission is persisted with its idempotency key and budget reservation **before** the API call. An uncertain POST is never automatically repeated — polling and copying may retry, submission may not — and an interrupted `submitting` job becomes an explicit error asking the operator to check their BFL usage rather than quietly trying again.
 
-`SelectMenu` is a small shared listbox for model, ratio, resolution, source and theme. Whole triggers and chevrons share the same button; arrow keys, Home/End, Enter, Escape and focus restoration work without a UI library. Native range inputs retain keyboard behaviour beneath an instrument-style ruler. Theme tokens switch using `data-theme`; only the theme choice is persisted in localStorage.
+A replay of an existing idempotency key is answered by one function for both backends (`shared/idempotency.ts`): fields are read in a fixed order, gaps left by older jobs receive the defaults a new request would get, and nested camera selections compare by value rather than key order. Omitting a field the original carried counts as a change, not a match. This mattered: the two backends previously disagreed, so dropping a field passed locally and conflicted in production.
+
+In the Worker, D1's unique `(session, idempotency)` constraint reserves a request before its single paid submission, and an existing request id cannot be reused for different settings. This prevents duplicate submissions; it does not reserve funds in the visitor's BFL account, where BFL remains authoritative for the final charge. Costs returned as credits convert to USD at one credit per cent, and estimates and confirmed charges stay separate fields.
+
+Both adapters measure an uploaded MP4 with the same bounded reader (`shared/mp4.ts`), reading metadata in 128 KiB ranges and skipping the media payload, so an upscale estimate cannot differ between local and hosted. Dimensions come from the stored object, never from a browser query parameter, because the price depends on them.
 
 ## Job lifecycle
 
 `submitting → Pending → Reasoning / Generating → copying → Ready`
 
-Errors, moderation and expiration are terminal. A submission is persisted with its idempotency key and budget reservation before the API call. An uncertain POST is never automatically repeated. On process restart, an interrupted `submitting` job becomes an explicit error asking the operator to check BFL usage.
+Errors, moderation and expiry are terminal. `Ready` means the file and its measured metadata exist, not merely that the provider returned a URL. Downloads use a bounded stream, a temporary file and an atomic rename, and only documented BFL hosts are allowed — redirects are rejected, and no key is sent to media delivery.
 
-No state is open-ended. A job still non-terminal 30 minutes after creation becomes `expired` (`shared/lifecycle.ts`), whether a returning tab reads it or the background sweep finds it first. `expired` rather than `Error`: the studio stopped watching, which is not a claim that BFL failed, and a paid request is still never retried on the visitor's behalf.
+No state is open-ended. A job still running 30 minutes after creation becomes `expired` (`shared/lifecycle.ts`), whether a returning tab reads it first or the background sweep does. `expired` rather than `Error`, because the studio stopped watching, which is not a claim that BFL failed.
 
-A replay of an existing idempotency key is answered by one rule for both backends (`shared/idempotency.ts`): fields are read in a fixed order, gaps left by older jobs get the defaults a new request would receive, and nested camera selections compare by value rather than key order. Omitting a field the original carried is a change, not a match.
+Quota eviction removes media without deleting the generation row or its idempotency reservation, so the row keeps its outcome and cost while marking playback unavailable. A successful generation is not reclassified as a failure because its file aged out.
 
-Cloud quota eviction removes media without deleting the generation row or its idempotency reservation. The row retains its outcome and cost for daily aggregation, but has no playback URL and marks media unavailable. `Ready` records a successful generation; media availability is a separate field. Normal 30-day job retention ends this replay-protection window.
+The sweep ages out abandoned jobs, deletes closed capability links and drops records with their objects at 30 days. Workers runs it on a five-minute cron trigger; Pages has none, so there the same function runs in the background from `/api/health` and `/api/history` — routes a page load hits once each, deliberately not the four-second poll. A conditional D1 write claims the interval so the two triggers never duplicate work. On Pages this means housekeeping scales with visits rather than with time.
 
-Poll and copy are retryable and protected by a per-job in-flight lock. `Ready` means the local file and measured metadata exist, not merely that the provider returned a URL. Downloads use a bounded stream, temporary file and atomic rename. Only documented HTTPS BFL poll/delivery hosts are allowed; redirects are rejected and no key is sent to media delivery.
+## Keys, and what follows from them
 
-The server sweeps its own-key jobs every five seconds, even after the browser closes, and ages out abandoned jobs on the same tick. BYO jobs are polled by the page every four seconds with a fresh key header. Browser polling pauses when hidden and never creates overlapping timer loops. New-tab restoration needs a key again. Retention and media deletion stay a cloud concern; the local store keeps a developer's own work.
+The deployment accepts visitor keys only. No shared BFL key or secret is deployed.
 
-## Deliberate library choices
+A key is held in live page state, sent as a header when needed, and cleared on navigation and page restoration. Legacy Web Storage credentials are deleted without being read. Browser and server persistence were both rejected, and a native Keychain helper was prototyped and removed before commit: an operator cannot honestly offer operator-blind keys using a secret they themselves control.
 
-- **React reducer:** composer settings, per-term edits and retry restoration live in `useComposer`; one screen does not need a global store. Job polling lives in one hook, shared business rules outside React.
-- **Raw Three.js:** one isolated, finite procedural scene. No controls, assets, rigging, shadows or React renderer dependency. Geometry/materials, animation and listeners are disposed. R3F would become useful as the scene grows.
-- **CSS / native animation:** short panel transitions and a 1.6-second camera path do not need Anime.js. The decorative canvas uses 30 fps, pauses offscreen/hidden and respects reduced motion.
-- **Plain CSS:** token groups plus small component styles, no utility framework or component kit. Vite splits Three into a lazy chunk. Fonts have no runtime third-party requests.
-- **Express locally:** readable same-origin endpoints, secure ownership boundary, established byte-range responses. Node's filesystem and process APIs are the local adapter, not Cloudflare-compatible code.
+That choice has a visible consequence, and the interface states it rather than hiding it. Only a browser holding the key can advance a job, so the runtime genuinely cannot finish one after the tab closes. Keep the tab open until the clip is saved; after a refresh, re-enter the key to resume. A durable background runner would require key custody this deployment deliberately does not have.
 
-`shared/camera.ts` defines the section order, term IDs, clauses and pose parameters. Validation checks section membership and bounded edits; glyphs and the Three preview read the same data. Old job IDs have a separate compatibility adapter. Finished states come from one shared predicate. The selected job is retained in tab history while the address stays clean. Old ?job links are read and migrated; selection and settings restore on reload under the existing session boundary. Selecting a clip title switches to its generator and loads only its subject/camera text (or its optional upscale prompt), preserving the current source and output settings. Recreate restores the full saved setup. Explicit title selection bypasses the full restoration effect used for reload/legacy links; neither action submits a request.
+Upscaling a private clip mints a random, two-hour, object-specific capability URL; ordinary media routes require the session cookie. Upscaling a library clip lends BFL the public asset URL instead, so no token exists to leak or expire. Neither keys nor signed URLs appear in public job records.
 
-`tokens.css` owns colours, spacing, radii, animation timing and scene materials. The composer uses a 90% unit scale while mobile textareas remain at least 1rem; CSS zoom is not used. `FeaturedVideo` owns the selected job’s waiting/reveal/video state. Gallery thumbnails preview on hover; play opens a native-dialog lightbox. Starting any player pauses the others.
+## Decisions
 
-## Cloudflare adapter
+- **A React reducer, not a store.** Composer settings, per-term edits and retry restoration live in `useComposer`; one screen does not need Zustand, and job polling lives in one hook with the shared rules outside React.
+- **Raw Three.js.** One isolated, finite procedural scene with no controls, assets or rigging, disposed on teardown. R3F would earn its place as the scene grows.
+- **Plain CSS and native controls.** Token groups plus small component styles, native range and select elements kept keyboard-operable, and Three split into a lazy chunk. No utility framework or component kit.
+- **Express locally.** Readable same-origin endpoints and established byte-range responses. Node's filesystem and process APIs are the local adapter, not Cloudflare-compatible code.
 
-The Worker serves built assets, same-origin JSON endpoints, D1 job records and R2 media. It accepts visitor keys only. No shared BFL key or secret is deployed. D1's unique `(session, idempotency)` constraint reserves a request before its single paid submission. Existing request IDs cannot be reused for different settings. This guards against duplicate submissions; it does not reserve funds in the user's BFL account. BFL remains authoritative for the final charge.
+### Rejected, and why
 
-`shared/mp4.ts` uses MP4Box to read up to 4 MiB of metadata in 128 KiB ranges, skipping the MP4 media payload. Width, height and duration come from the saved object, not browser query parameters. Standard non-fragmented MP4s with one video track are supported; incomplete, fragmented, ambiguous or oversized metadata is rejected with an error. The same source limits and upscale cost formula apply locally and in the Worker. Both adapters call it, so an upscale estimate cannot differ between them. This avoids Python, FFmpeg, transcode services and extra paid video inspection.
+- **Free camera dragging.** No continuous model control has been demonstrated. Named, optional terms are honest and inspectable.
+- **A seed parameter.** Neither FLUX 3 video nor video upscale documents one, so run-to-run variation is the provider's own and there is nothing to record. Sending an unknown field risks a 422 on every generation.
+- **A public community feed.** Every platform running one has accounts: an owner who accepted terms, who can be banned, and who can delete their own work. This app is deliberately anonymous, so a published clip would have no one to attribute, ban or honour a takedown from.
+- **A CI deployment token.** Cloudflare's Pages and D1 permissions are account-scoped, so the narrowest token would still expose every project in the account to a public repository's CI. Releases stay manual.
+- **Presenting a library clip as a camera finding.** Existing media previews the pipeline; it is not a controlled comparison.
 
-Uploads require a valid BFL key. Generated downloads stream to R2 with a known byte length and a 250 MB ceiling. R2 commits the object before the source record and Ready state. Poll/copy work uses a recoverable D1 lease. Upscaling a private session clip receives a random, two-hour, object-specific HTTPS capability URL; ordinary media routes require the session cookie. Upscaling a library clip lends BFL the public asset URL instead, so no token exists to leak or expire, and its metadata comes from the catalogue that `shared/library.ts` limit-checked at load rather than from the browser. Range, suffix ranges, HEAD and If-Range are supported. Neither BFL keys nor signed delivery URLs appear in public job records.
+## Limits
 
-**Foreground contract:** visitor-key jobs advance while the page is visible and has the key. Keep the tab open until the result is saved. After a refresh, re-enter or autofill the key in the same browser session to resume. Closing the page for longer than BFL's delivery-link lifetime can lose an uncaptured result. There is no durable background runner or server-held key. A lost submission response is marked uncertain and never resubmitted automatically.
+Generation budget and provider concurrency are the first constraints. Stored state is bounded — 250 MB per session, 3 GB per deployment, with per-route rate limits from `shared/limits.ts` and a sweep capped per run so no single invocation pays for a backlog.
 
-The Worker enforces exact-origin checks, HttpOnly Secure SameSite session cookies, bounded bodies and balance checks before generation. Submissions, credits, polling, history and private media use limits from `shared/limits.ts`; the health endpoint has no application rate limit. `worker/sweep.ts` ages out abandoned jobs, deletes closed capability links and rate-limit windows, and drops records and their R2 objects once they are 30 days old. Job/media cleanup selects at most 100 rows per step; expired link/window deletion and daily aggregation are not row-bounded. It runs from a five-minute cron trigger on the Workers deployment and, because Pages has no cron trigger, from `/api/health` and `/api/history` in the background there; a conditional D1 write means only one of them does the work. Static assets receive a Content Security Policy. Session cookies provide anonymous isolation, not accounts or cross-device sync. No load-test or durable background completion claim is made.
+One run per camera combination shows the pipeline working; it is not a reliability measurement. Session cookies provide anonymous isolation, not accounts or cross-device sync. No load-test claim is made, and there is no durable background completion.
 
-See [Cloudflare operations](cloudflare.md) for setup, migrations, static library assets and limitations.
-
-## Primary references checked 19 September 2026
-
-- [Generate FLUX 3 video](https://docs.bfl.ai/api-reference/utility/generate-a-video-with-flux-3)
-- [Video upscale, constraints and pricing](https://docs.bfl.ai/flux_tools/flux_video_upscale)
-- [BFL pricing](https://docs.bfl.ai/quick_start/pricing)
-- [Cloudflare context lifetime](https://developers.cloudflare.com/workers/runtime-apis/context/)
-- [R2 pricing](https://developers.cloudflare.com/r2/pricing/)
-
-## Account balance and camera disclosure
-
-`CameraPanel` keeps disclosure state separate from the composer selection; `CameraPresetGrid` uses native scrolling, responsive columns, keyboard focus and small navigation arrows. `CameraPanelExpanded` retains the previous layout for local comparison via `?camera-layout=expanded`.
-
-`GET /api/credits` resolves the same BYO/server key precedence as generation and calls [BFL’s credits endpoint](https://docs.bfl.ai/api-reference/get-the-users-credits). It validates the numeric response, disables caching and never stores the key or forwards raw provider errors. `AccountBalance` cancels stale requests when the key changes and refreshes on key availability, job-status changes, returning to the page or explicit refresh. USD display uses the documented [one credit equals $0.01](https://docs.bfl.ai/quick_start/pricing); the original credit count and check time are available in the tooltip. A checked balance is not a spending reservation or a replacement for the server’s demo cap.
-
-## Credential persistence correction
-
-`usePageKey` starts disconnected, holds a key only in live page state, deletes legacy Web Storage credentials without reading them, and clears the key on navigation/page restoration. Account state uses an opaque connection marker rather than retaining the raw key as an owner identifier. API requests use `cache: no-store`. The key form reads the submitted DOM value via FormData so password-manager autofill need not emit React change events. Native Keychain integration was explicitly superseded by temporary key entry.
-
-`GenerateButton` follows submission and the current generator's unfinished job: Sending, Queued, Planning, Generating/Upscaling and Saving. While active, its arrow becomes a small accent-coloured pixel ring; a faint glow and an eight-second travelling highlight trace the button border. The busy button prevents another submission in that mode. `GenerationIndicator` uses Canvas 2D at up to 30 fps, pauses offscreen/hidden and renders a still frame for reduced motion. It represents activity, not measured progress. A missing visitor key shows Resume instead. The main waiting area keeps its dither shader and descriptive text without repeating the button status; terminal states restore the button arrow.
-
-The public catalogue ships four clips as static assets, so a first-time visitor never meets an empty hero and gallery and desktop fills its four-column row exactly. Each is a real run of this studio on the hosted deployment. The catalogue records the exact description, camera selection and per-term wording, composed prompt, duration/resolution/aspect/draft and provider-confirmed cost needed to inspect and recreate its setup, while provider identifiers and internal file hashes remain private. One of the four is the composer's own default prompt; one is a draft-mode run, which is why it costs $0.30 against $1.70 for a full ten seconds. One run per camera combination shows the pipeline working and is not a reliability measurement for the catalogue. `shared/library.ts` validates every entry once at load and drops anything malformed or outside an upload's own limits, so a bad catalogue cannot price an upscale. Each entry also ships the run that produced it, so a library clip offers Recreate, prompt reuse and the saved prompt in its lightbox exactly as one of the visitor's own generations does: `src/library.ts` presents that record as a `Job`, and the existing restore paths take it unchanged. A catalogue clip is never selected as the featured job, because its id names a catalogue entry rather than a row in this browser's session. A test checks that every shipped setup is still a request the studio would accept and that `composePrompt` rebuilds its recorded prompt exactly. Camera directions flow inline in the composer and remain separate editable coloured lines in Camera controls. Enlarged playback renders the exact saved job prompt beneath the media with Copy and Download actions.
-
-The desktop layout uses three horizontal sections with a shared spacing rhythm: preview, composer and gallery. A 56px header reduces top whitespace without shrinking connection controls. The main preview and composer share a bounded fluid width from 846px to 1376px; the normal laptop view keeps the preview at a 340px height limit, while very wide displays allow it to grow against viewport height up to 560px. The library uses a separate bounded width from 1096px to 2016px and four columns on desktop, two on compact screens and one on phones. Desktop thumbnails use near-2:1 crops while their full video remains unchanged. At very wide sizes, scoped units enlarge the composer controls, gallery type and card details without changing the mobile scale. A 24px heading gap lets the images read as a separate shelf. Ready clips show only their cost beside Recreate, Download and Upscale. Connection state remains in the header, and the decorative page footer has been removed so it cannot create a wide empty band on large displays.
-
-## Scaling boundary
-
-Generation budget and provider concurrency are the first constraints. The local
-JSON store has one process owner. The Cloudflare adapter uses D1 idempotency
-reservations, per-route rate limits and R2 Range-aware delivery, and its stored
-state is bounded: a five-minute sweep ages out abandoned jobs and expires
-records with their media, capped per run so no single invocation pays for a
-backlog. On Pages, where there is no cron trigger, that sweep rides the request
-path, so housekeeping scales with visits. BYO jobs need the page open until the
-video is saved; a durable background runner would need key custody this
-deployment deliberately does not have. No load-test claim is made.
+See [Cloudflare operations](cloudflare.md) for deployment, migrations and hosted limitations, and [`observability/`](../observability/README.md) for the whole of what this deployment measures about its own use.
