@@ -61,7 +61,38 @@ npx wrangler d1 migrations apply flux-studio-lite --local
 npx wrangler dev
 ```
 
-For another account, edit the account ID in `scripts/deploy-pages.mjs` and database/bucket bindings in `wrangler.pages.json`. The original Workers target still uses `wrangler.jsonc`. The earlier catalogue kept its clips in R2 under `library/`. Those objects are now unreferenced: the app serves library clips as static assets, and the sweep only collects keys it can derive from a job, so they will not be cleaned up automatically. Delete them by hand once the new catalogue is live:
+## Continuous deployment
+
+The GitHub Actions production job runs only for a push to `main` and only after
+the full verification and Cloudflare boundary jobs pass. Pull requests cannot
+read deployment credentials and never publish preview or production builds.
+
+Create a GitHub environment named `production` and add these environment
+secrets:
+
+- `CLOUDFLARE_API_TOKEN`: a scoped token limited to this account with **Account
+  → Cloudflare Pages → Edit** and **Account → D1 → Edit**.
+- `CLOUDFLARE_ACCOUNT_ID`: the account that owns the `fluxstudio` Pages project,
+  `flux-studio-lite` D1 database and `flux-studio-lite-media` R2 bucket.
+
+The credential is exposed only to the migration and deployment steps, never to
+pull-request CI, dependency installation or the build. The workflow's external
+actions are pinned to immutable commit SHAs, and its GitHub token is read-only
+except for recording the production deployment.
+
+The job builds first, applies pending migrations with Wrangler, deploys that
+exact Pages bundle and then requests `/api/health`. Production deployments are
+serialized and an in-progress `main` run is never cancelled. Restrict the
+environment's deployment branch to `main`. Configure required reviewers if
+production should pause for approval after CI; without that protection, a
+successful `main` push deploys automatically.
+
+D1 migrations run before the new bundle while the previous deployment is still
+serving traffic. Keep production migrations additive and backward-compatible.
+Wrangler captures a D1 backup and rolls back a migration that errors; a failed
+migration stops the deployment.
+
+For another account, set `CLOUDFLARE_ACCOUNT_ID` and update the database/bucket bindings in `wrangler.pages.json`. The original Workers target still uses `wrangler.jsonc`. The earlier catalogue kept its clips in R2 under `library/`. Those objects are now unreferenced: the app serves library clips as static assets, and the sweep only collects keys it can derive from a job, so they will not be cleaned up automatically. Delete them by hand once the new catalogue is live:
 
 ```sh
 npx wrangler r2 object delete flux-studio-lite-media/library/library-01.mp4 --remote
@@ -89,4 +120,4 @@ Finished videos and job records remain in D1/R2 under the anonymous browser cook
 
 ## Pages deployment details
 
-Run `npm run deploy:pages`. `scripts/build-pages.mjs` builds `.pages/_worker.js` and writes the standard configuration into ignored `.pages-project/`; Pages rejects custom configuration paths and `account_id` in its config. The deployment script supplies the account through the CLI environment. Local Pages smoke check: `npx wrangler pages dev ../.pages --cwd .pages-project --port 4322` after `npm run build:pages`.
+Set `CLOUDFLARE_ACCOUNT_ID` and run `npm run deploy:pages`. `scripts/build-pages.mjs` builds `.pages/_worker.js` and writes the standard configuration into ignored `.pages-project/`; Pages rejects custom configuration paths and `account_id` in its config. The deployment script supplies the account through the CLI environment. Local Pages smoke check: `npx wrangler pages dev ../.pages --cwd .pages-project --port 4322` after `npm run build:pages`.

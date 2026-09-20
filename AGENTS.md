@@ -77,5 +77,9 @@ Two environment facts are easy to miss:
   same change as behaviour. Say what was actually run and distinguish local
   evidence from deployed behaviour.
 - Preserve existing worktree changes and keep edits scoped to the request.
-- Local verification does not authorize a paid call, remote migration,
+- Pull requests never deploy. A merge to `main` authorizes the protected
+  production workflow to apply pending migrations and publish after CI. Keep
+  migrations additive so the previous deployment can run against the updated
+  schema while Pages switches versions.
+- Local verification does not authorize a paid call, manual remote migration,
   deployment or publication. Follow the operator's requested scope.

@@ -111,10 +111,12 @@ repository:
   asset bindings without contacting the API, so it needs no credentials.
 - The D1 migrations are replayed in order against a scratch SQLite database.
 
-CI does not deploy. It uploads the frontend build as a short-lived review
-artifact and validates the existing Worker adapter without credentials. A live
-Pages release remains the explicit `npm run deploy:pages` operation described
-below.
+Pull-request CI does not deploy or receive production credentials. After both
+CI jobs pass on a push to `main`, the production job builds the Pages bundle,
+applies pending D1 migrations, deploys to Cloudflare Pages and checks the live
+health endpoint. It reads `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID` from GitHub's `production` environment; configure that
+environment before merging a change that should deploy.
 
 ## Design notes
 
@@ -138,6 +140,6 @@ See [design decisions](docs/process.md) and [verification](docs/verification.md)
 
 ## FLUX Studio on Pages
 
-`npm run deploy:pages` builds the compact studio and deploys to the `fluxstudio` Cloudflare Pages project, using the existing D1/R2 resources. Apply D1 migrations first with `npx wrangler d1 migrations apply flux-studio-lite --remote`. The original Workers deployment command is retained.
+`npm run deploy:pages` builds the compact studio and deploys to the `fluxstudio` Cloudflare Pages project, using the existing D1/R2 resources. Set `CLOUDFLARE_ACCOUNT_ID` in the shell and apply D1 migrations first with `npx wrangler d1 migrations apply flux-studio-lite --remote`. The original Workers deployment command is retained. Normal production releases are performed by CI after a successful `main` run.
 
 Camera controls open over the composer and apply with Done. Paste a BFL key for the open page only; refresh or Disconnect clears it. Finished clips remain in the anonymous browser library and can be downloaded. No paid test is part of deployment.
