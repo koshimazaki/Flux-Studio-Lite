@@ -2,6 +2,11 @@
 
 This is a public-safe summary of product direction, implementation decisions and visual corrections. Private reference paths, credentials and provider identifiers are omitted.
 
+This document is chronological. Earlier decisions and deferred items remain as
+design history even when a later section supersedes them. For the active
+contracts, start with the [README](../README.md), [architecture](architecture.md),
+[Cloudflare operations](cloudflare.md) and [read-through](read-through.md).
+
 ## Initial build and refinements
 
 | Operator asked for                             | What was built                                                                                         |

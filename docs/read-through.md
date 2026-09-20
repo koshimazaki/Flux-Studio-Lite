@@ -46,8 +46,8 @@ build while every other check stays green.
 15. `server/app.ts` — loopback/origin checks, anonymous session cookie, rate limit, route ownership.
 16. `server/jobs.ts` — reserve, persist, submit once, poll, copy, inspect, mark Ready. Budget
     reservations are conservative.
-17. `server/bfl.ts` — exactly two endpoints; allowlisted polling and delivery hosts; fixed error
-    messages; no blind POST retry. Shared with the Worker.
+17. `server/bfl.ts` — the two submission endpoints, credits check, allowlisted polling and delivery
+    hosts, fixed error messages and no blind POST retry. Shared with the Worker.
 18. `server/store.ts` — atomic local snapshots and interrupted-submit handling. `publicJob` removes
     provider and internal data.
 19. `server/media.ts` — byte bounds and atomic download. `ffprobe` is why this adapter is local, and

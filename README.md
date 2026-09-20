@@ -100,8 +100,9 @@ npm test               # vitest
 npm run build          # tsc --noEmit && vite build
 ```
 
-A second job guards the cloud boundary and runs only on a tree that carries
-Wrangler config, so it is a clean skip until the Cloudflare port lands:
+The second job guards the cloud boundary. It activates when Wrangler config is
+present, which means it runs for every pull request and `main` push in this
+repository:
 
 - `npm run check:worker` compiles `shared/` and the portable server modules
   under `"types": []`, so a Node-only import in the layer that is meant to move
@@ -110,9 +111,10 @@ Wrangler config, so it is a clean skip until the Cloudflare port lands:
   asset bindings without contacting the API, so it needs no credentials.
 - The D1 migrations are replayed in order against a scratch SQLite database.
 
-CI does not deploy. As the scaling boundary below explains, a hosted version
-needs a dedicated cloud adapter; the build output is uploaded as an artifact
-rather than shipped.
+CI does not deploy. It uploads the frontend build as a short-lived review
+artifact and validates the existing Worker adapter without credentials. A live
+Pages release remains the explicit `npm run deploy:pages` operation described
+below.
 
 ## Design notes
 

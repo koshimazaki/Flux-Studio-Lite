@@ -1,14 +1,14 @@
 # Architecture and the cloud boundary
 
 ```text
-React composer → same-origin local API → BFL submit / poll
-                       ↓                       ↓
-                atomic JSON jobs ← copied MP4 + inspected metadata
-                       ↓
-                session-owned history / byte-range playback
+                                      ┌─ Express → JSON + files + ffprobe
+React composer → same-origin /api/* ──┤
+                                      └─ Pages Worker → D1 + R2 + MP4Box
+                    │                                  │
+                    └──────── BFL submit / poll ───────┘
 ```
 
-`shared/` owns model inputs, camera wording and pricing. The browser and server use the same composer. The server validates every input again and never accepts a user URL or arbitrary upstream endpoint. Upscale uses a session-owned clip id; the server inspects its real MP4 metadata and sends its base64 bytes to BFL.
+`shared/` owns model inputs, camera wording, pricing, lifecycle, replay rules, rate limits and catalogue validation. The browser and both adapters use the same composer and contracts. Each adapter validates every input again and never accepts a user URL or arbitrary upstream endpoint. Upscale uses a validated library entry or a session-owned clip id. Express inspects the local MP4 with ffprobe and sends base64 bytes to BFL; the Worker inspects R2 ranges with MP4Box and gives BFL a public library URL or a short-lived object-specific capability URL.
 
 The live contracts are native `fetch` calls to `/v1/flux-3-video` and `/v1/flux-tools/video-upscale-v1`. Return `cost` values are credits, converted to USD by dividing by 100. Estimates and confirmed charges have separate fields. BFL's optional progress is not replaced with a fabricated percentage.
 
@@ -74,7 +74,7 @@ See [Cloudflare operations](cloudflare.md) for setup, migrations, static library
 
 `CameraPanel` keeps disclosure state separate from the composer selection; `CameraPresetGrid` uses native scrolling, responsive columns, keyboard focus and small navigation arrows. `CameraPanelExpanded` retains the previous layout for local comparison via `?camera-layout=expanded`.
 
-`GET /api/credits` resolves the same BYO/server key precedence as generation and calls [BFL’s credits endpoint](https://docs.bfl.ml/api-reference/get-the-users-credits). It validates the numeric response, disables caching and never stores the key or forwards raw provider errors. `AccountBalance` cancels stale requests when the key changes and refreshes on key availability, job-status changes, returning to the page or explicit refresh. USD display uses [100 credits per dollar](https://docs.bfl.ml/quick_start/get_started); the original credit count and check time are available in the tooltip. A checked balance is not a spending reservation or a replacement for the server’s demo cap.
+`GET /api/credits` resolves the same BYO/server key precedence as generation and calls [BFL’s credits endpoint](https://docs.bfl.ai/api-reference/get-the-users-credits). It validates the numeric response, disables caching and never stores the key or forwards raw provider errors. `AccountBalance` cancels stale requests when the key changes and refreshes on key availability, job-status changes, returning to the page or explicit refresh. USD display uses the documented [one credit equals $0.01](https://docs.bfl.ai/quick_start/pricing); the original credit count and check time are available in the tooltip. A checked balance is not a spending reservation or a replacement for the server’s demo cap.
 
 ## Credential persistence correction
 

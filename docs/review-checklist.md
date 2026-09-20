@@ -52,13 +52,16 @@ isolated test database; remote migration is a separate operation.
 ## Verification and documentation
 
 ```sh
+npm run format:check
+npm run lint
+npm run typecheck
 npm test
 npm run build:pages
-npx prettier --check src shared server worker observability tests docs README.md AGENTS.md
 git diff --check
 ```
 
-Worker tests use isolated D1/R2 and a fake provider; they do not verify live paid
+`build:pages` includes the frontend build and Worker portability check. Worker
+tests use isolated D1/R2 and a fake provider; they do not verify live paid
 generation. Browser-check changed user flows separately. Keep generated Worker
 typings excluded from formatting. CI workflow configuration is the source for
 which checks run on a pull request; do not claim CI passed from local results.

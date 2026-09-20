@@ -1,6 +1,28 @@
-# Verification — 19 September 2026
+# Verification
 
-## Initial build (before this review pass)
+## Current verified state — 20 September 2026
+
+- The active hosted architecture is Cloudflare Pages with an advanced-mode
+  Worker, D1 job state, R2 private media and a four-clip static first-run
+  library. The Express adapter remains the local development path.
+- 79 automated tests pass across 10 files. Formatting, lint, TypeScript, the
+  Vite production build, Worker portability check, Pages bundle, Wrangler dry
+  run and an ordered replay of all three D1 migrations pass. Lint reports no
+  errors and three existing hook-dependency warnings.
+- Browser checks cover the first-run library, title-based prompt reuse,
+  full-setting Recreate, lightbox prompt/download actions, explicit unavailable
+  media, and responsive desktop/mobile layouts.
+- Public media contains recreate inputs and confirmed costs without provider job
+  identifiers or private provenance. Visitor keys remain in page/request memory
+  and are not persisted.
+- No paid provider request, remote migration or deployment was performed by the
+  final cleanup and documentation passes. Live paid generation, native-device
+  playback and load/concurrency testing remain separate checks.
+
+The sections below are a chronological evidence record. Counts and deferred
+items describe the named pass; later sections supersede earlier milestones.
+
+## Initial build — 19 September 2026
 
 - Production TypeScript/Vite build.
 - 24 tests across camera paths, domain validation/pricing, local jobs and media delivery.
@@ -61,8 +83,7 @@ Build output is approximately 82 KB gzip for the app and 123 KB gzip for the laz
 - Browser checks: all three selections appear as separate colours in the prompt; edited movement text survives switching; None removes that section; Camera off removes camera phrases and canvas; themes update the 3D camera; Upscale hides camera controls. Creative 3× for the library source shows 2880 × 1584 and $4.37. Draft locks to HD then restores Full HD.
 - Browser generation check used an isolated mock provider with a real bundled MP4 and the real job API. Observed queued/waiting field, Ready, decoded video (`readyState=4`, width 960), overlay removed, one main job player, successful job-link reload, and a clear fallback for an unavailable job. No paid call was made. A first fixture used relative file paths, causing playback failure; the fixture was corrected to match production's absolute paths, then the flow passed.
 - Wide layout measured 1045 CSS pixels of content with no page overflow; composer and main video both measured approximately 846px. Prompt text measured 16.2px, exactly 90% of the previous 18px. Narrow layout measured 500 CSS pixels with no page overflow; textareas retained 16px and the three tile rows scrolled independently. The browser viewport override did not hold the requested 390px, so this pass makes no new 390px-device claim.
-- Portable local evidence is kept outside Git in `.dr-morph-review/desktop-main.png`, `desktop-camera.png` and `portrait-camera.png`. The desktop result uses a mock-returned library clip, not a newly generated finding. No console errors were recorded in the isolated result test.
-- MORPHKIT lab validation, engine build and registry check pass. Human visual review was completed in later UI passes.
+- The desktop result uses a mock-returned library clip, not a newly generated finding. No console errors were recorded in the isolated result test. Human visual review was completed in later UI passes.
 
 Cloudflare/D1/R2, a paid same-subject findings grid, exact-input cache, real BYO/device tests and a stranger test remain deferred. Architecture notes document HTTPS object input and the trusted-metadata requirement for the future Worker adapter; that adapter is not implemented here. This entry records the earlier local-only milestone; later sections cover the implemented hosted adapter.
 

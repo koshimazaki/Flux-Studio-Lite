@@ -53,9 +53,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Not a deploy. The README is explicit that a hosted version needs a
-      # dedicated cloud adapter, so this publishes the reviewable bundle
-      # instead of pretending to ship it.
+      # Not a deploy. Publish the reviewable frontend bundle; the live Pages
+      # release remains an explicit operator action.
       - name: Upload build output
         uses: actions/upload-artifact@v7
         with:
@@ -73,9 +72,8 @@ jobs:
           node-version: 22
           cache: npm
 
-      # The Cloudflare port lands on a branch. Detecting it here means this
-      # job is a clean skip on a tree without it and switches itself on with
-      # no workflow edit the moment wrangler config arrives.
+      # Keep the workflow reusable on a tree without the adapter. Wrangler
+      # config is present in this repository, so this runs on every PR/main push.
       - name: Detect Cloudflare port
         id: detect
         run: |
