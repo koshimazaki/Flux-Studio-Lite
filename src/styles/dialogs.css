@@ -61,3 +61,9 @@
   padding: var(--space-10) var(--space-14);
   font-size: var(--space-11);
 }
+.cancel-run-dialog h2 {
+  margin-top: 0;
+}
+.cancel-run-dialog .cancel-run-error {
+  color: var(--error-text);
+}

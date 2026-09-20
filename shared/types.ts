@@ -14,6 +14,7 @@ export type JobStatus =
   | "Ready"
   | "Error"
   | "expired"
+  | "stopped"
   | "Request Moderated"
   | "Content Moderated";
 
@@ -81,6 +82,7 @@ export const terminalStatuses: readonly JobStatus[] = [
   "Ready",
   "Error",
   "expired",
+  "stopped",
   "Request Moderated",
   "Content Moderated",
 ];

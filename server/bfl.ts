@@ -96,6 +96,29 @@ export class BflClient {
       signal: AbortSignal.timeout(20_000),
       redirect: "manual",
     });
+    // BFL can report a terminal task error with HTTP 500. Only accept a
+    // task-shaped response for this exact polling ID; generic outages retry.
+    if (response.status >= 500) {
+      const result = (await response
+        .clone()
+        .json()
+        .catch(() => null)) as ProviderResult | null;
+      if (
+        result?.status === "Error" &&
+        typeof result.id === "string" &&
+        result.id.length > 0 &&
+        result.id === url.searchParams.get("id")
+      )
+        return {
+          id: result.id,
+          status: "Error",
+          ...(typeof result.cost === "number" &&
+          Number.isFinite(result.cost) &&
+          result.cost >= 0
+            ? { cost: result.cost }
+            : {}),
+        };
+    }
     return this.readJson<ProviderResult>(response);
   }
 

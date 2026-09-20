@@ -28,7 +28,11 @@ Both adapters measure an uploaded MP4 with the same bounded reader (`shared/mp4.
 
 `submitting → Pending → Reasoning / Generating → copying → Ready`
 
-Errors, moderation and expiry are terminal. `Ready` means the file and its measured metadata exist, not merely that the provider returned a URL. Downloads use a bounded stream, a temporary file and an atomic rename, and only documented BFL hosts are allowed — redirects are rejected, and no key is sent to media delivery.
+Errors, moderation, expiry and user-stopped tracking are terminal. `Ready` means the file and its measured metadata exist, not merely that the provider returned a URL. Downloads use a bounded stream, a temporary file and an atomic rename, and only documented BFL hosts are allowed — redirects are rejected, and no key is sent to media delivery.
+
+BFL can return HTTP 500 with a terminal task error. The client recognizes `status: Error` only when the response names the requested task; generic outages remain retryable. This prevents a failed job from keeping its last Planning state.
+
+Clicking the active generation button opens a cancellation confirmation. `POST /api/jobs/:id/stop` ends tracking under the owning session, preserving costs and replay protection against late writes. It does not cancel BFL work or promise a refund. Finished cards can be hidden and restored in this browser without deleting media or changing costs.
 
 No state is open-ended. A job still running 30 minutes after creation becomes `expired` (`shared/lifecycle.ts`), whether a returning tab reads it first or the background sweep does. `expired` rather than `Error`, because the studio stopped watching, which is not a claim that BFL failed.
 

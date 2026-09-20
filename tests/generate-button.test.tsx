@@ -17,6 +17,7 @@ const render = (
       disabled={disabled}
       onSubmit={() => {}}
       onResume={() => {}}
+      onCancel={() => {}}
     />,
   );
 describe("generation button lifecycle", () => {
@@ -29,13 +30,14 @@ describe("generation button lifecycle", () => {
       "copying",
     ] as const) {
       const html = render({ status, keyMode: "byo" });
-      expect(html).toContain('disabled=""');
+      expect(html).not.toContain('disabled=""');
       expect(html).toContain("generation-indicator");
     }
     for (const status of [
       "Ready",
       "Error",
       "expired",
+      "stopped",
       "Request Moderated",
       "Content Moderated",
     ] as const) {
@@ -54,8 +56,15 @@ describe("generation button lifecycle", () => {
     expect(html).toContain("Resume");
     expect(html).not.toContain('disabled=""');
     expect(html).not.toContain("generation-indicator");
+    expect(html).toContain("Cancel run");
     expect(
       render({ status: "Generating", keyMode: "server" }, false),
-    ).toContain('disabled=""');
+    ).not.toContain('disabled=""');
+  });
+  it("keeps sending disabled, then makes an accepted run cancellable", () => {
+    expect(render(undefined, true, true)).toContain('disabled=""');
+    const html = render({ status: "Pending", keyMode: "byo" });
+    expect(html).not.toContain('disabled=""');
+    expect(html).toContain("Stop tracking this run");
   });
 });

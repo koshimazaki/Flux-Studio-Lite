@@ -1,7 +1,11 @@
 import { BflClient, providerUrl } from "../server/bfl";
 import { AppError } from "../server/errors";
 import { canonicalInput } from "../shared/idempotency";
-import { expireStaleJob, MAX_RESULT_BYTES } from "../shared/lifecycle";
+import {
+  expireStaleJob,
+  MAX_RESULT_BYTES,
+  STOPPED_JOB_MESSAGE,
+} from "../shared/lifecycle";
 import {
   composePrompt,
   estimateUpscaleUsd,
@@ -12,6 +16,7 @@ import {
   type GenerateInput,
   type Job,
   type JobStatus,
+  terminalStatuses,
 } from "../shared/types";
 import {
   inspectObject,
@@ -237,6 +242,7 @@ export async function poll(
           "BFL no longer has this job. Check your usage before starting another.";
       }
     }
+    if (job.status === "stopped") return { job };
     if (row.remote_url) {
       const objectKey = `${session}/${job.id}.mp4`;
       if (!(await env.MEDIA.head(objectKey))) {
@@ -283,4 +289,24 @@ export async function poll(
       .run();
   }
   return { job };
+}
+
+/** Stop our tracking, not the provider's paid work. Keep the replay reservation. */
+export async function stop(env: Env, id: string, session: string) {
+  await ownedJob(env, id, session);
+  const terminal = terminalStatuses.map(() => "?").join(",");
+  await env.DB.prepare(
+    `UPDATE jobs SET data=json_set(data,'$.status','stopped','$.error',?,'$.updatedAt',?),
+     polling_url=NULL,remote_url=NULL,lease_until=0
+     WHERE id=? AND session=? AND json_extract(data,'$.status') NOT IN (${terminal})`,
+  )
+    .bind(
+      STOPPED_JOB_MESSAGE,
+      new Date().toISOString(),
+      id,
+      session,
+      ...terminalStatuses,
+    )
+    .run();
+  return { job: publicJob(await ownedJob(env, id, session)) };
 }

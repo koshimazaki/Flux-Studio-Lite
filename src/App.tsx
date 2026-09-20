@@ -22,6 +22,8 @@ import UpscaleControls from "./components/UpscaleControls";
 import GenerationControls from "./components/GenerationControls";
 import ThemePicker from "./components/ThemePicker";
 import SourceInput from "./components/SourceInput";
+import CancelRunDialog from "./components/CancelRunDialog";
+import { useHiddenJobs } from "./useHiddenJobs";
 export default function App() {
   const { state, set, dispatch } = useComposer();
   const {
@@ -46,7 +48,10 @@ export default function App() {
     [hasServerKey, setHasServerKey] = useState(false),
     [keyVerified, setKeyVerified] = useState(false),
     [submitting, setSubmitting] = useState(false),
-    [uploading, setUploading] = useState(false);
+    [uploading, setUploading] = useState(false),
+    [cancellingJob, setCancellingJob] = useState<Job | null>(null),
+    [stopping, setStopping] = useState(false),
+    [cancelError, setCancelError] = useState("");
   const composerRef = useRef<HTMLDivElement>(null);
   const {
     jobs,
@@ -56,10 +61,15 @@ export default function App() {
     needsKey,
     refresh,
     generate,
-    featuredJob,
+    stop,
     selectJob,
     selectedId,
   } = useJobs(key);
+  const { hiddenIds, hide, restoreAll } = useHiddenJobs();
+  const visibleJobs = jobs.filter((job) => !hiddenIds.has(job.id));
+  const featuredJob =
+    visibleJobs.find((job) => job.id === selectedId) ?? visibleJobs[0];
+  const hiddenCount = jobs.filter((job) => hiddenIds.has(job.id)).length;
   const restoredSelection = useRef<string | null>(null);
   useEffect(() => {
     if (
@@ -304,6 +314,16 @@ export default function App() {
                   }
                   onSubmit={() => void submit()}
                   onResume={() => setShowKey(true)}
+                  onCancel={() => {
+                    const active = jobs.find(
+                      (job) =>
+                        job.generator === generator && !isTerminal(job.status),
+                    );
+                    if (active) {
+                      setCancelError("");
+                      setCancellingJob(active);
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -381,7 +401,7 @@ export default function App() {
           )}
         </div>
         <Gallery
-          jobs={jobs}
+          jobs={visibleJobs}
           sources={sources}
           onUpscale={chooseUpscale}
           onRetry={retry}
@@ -390,6 +410,9 @@ export default function App() {
             if (job) applyPrompt(job);
           }}
           onLibrarySetup={applyLibrarySetup}
+          onHide={hide}
+          hiddenCount={hiddenCount}
+          onRestoreHidden={restoreAll}
         />
       </main>
       {showKey && (
@@ -398,6 +421,27 @@ export default function App() {
           onSave={saveKey}
           onClose={() => setShowKey(false)}
           serverKey={hasServerKey}
+        />
+      )}
+      {cancellingJob && (
+        <CancelRunDialog
+          stopping={stopping}
+          error={cancelError}
+          onKeepWaiting={() => setCancellingJob(null)}
+          onCancelRun={() => {
+            setCancelError("");
+            setStopping(true);
+            void stop(cancellingJob.id)
+              .then(() => setCancellingJob(null))
+              .catch((error) =>
+                setCancelError(
+                  error instanceof Error
+                    ? error.message
+                    : "The run could not be cancelled.",
+                ),
+              )
+              .finally(() => setStopping(false));
+          }}
         />
       )}
     </>
