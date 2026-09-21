@@ -23,6 +23,8 @@ import GenerationControls from "./components/GenerationControls";
 import ThemePicker from "./components/ThemePicker";
 import SourceInput from "./components/SourceInput";
 import { useHiddenJobs } from "./useHiddenJobs";
+import { heroMedia } from "./hero";
+import { generators } from "./generators";
 export default function App() {
   const { state, set, dispatch } = useComposer();
   const {
@@ -40,6 +42,15 @@ export default function App() {
     upscaleCreativity,
   } = state;
   const [showCamera, setShowCamera] = useState(false);
+  /**
+   * The catalogue clip Recreate or a title click just loaded, given the main
+   * view while the composer holds its run. It lasts until the visitor picks or
+   * creates a run of their own, so the scene on screen is always the one whose
+   * prompt and camera direction are being edited below it.
+   */
+  const [recreatedSourceId, setRecreatedSourceId] = useState<string | null>(
+    null,
+  );
   const [showPrompt, setShowPrompt] = useState(false),
     [copied, setCopied] = useState(false);
   const [key, setKey] = usePageKey();
@@ -64,8 +75,14 @@ export default function App() {
   const visibleJobs = jobs.filter((job) => !hiddenIds.has(job.id));
   const featuredJob =
     visibleJobs.find((job) => job.id === selectedId) ?? visibleJobs[0];
+  const samples = sources.filter((source) => source.origin === "sample");
+  const hero = heroMedia(featuredJob, samples, recreatedSourceId);
   const hiddenCount = jobs.filter((job) => hiddenIds.has(job.id)).length;
   const restoredSelection = useRef<string | null>(null);
+  useEffect(() => {
+    // Selecting a run of your own ends a catalogue clip's turn in the main view.
+    if (selectedId) setRecreatedSourceId(null);
+  }, [selectedId]);
   useEffect(() => {
     if (
       selectedId &&
@@ -134,24 +151,28 @@ export default function App() {
     }
   }
   function retry(job: Job) {
+    setRecreatedSourceId(null);
     restoredSelection.current = job.id;
     dispatch({ type: "restore", job });
     selectJob(job.id);
   }
   function applyPrompt(job: Job) {
     // This explicit choice must not trigger the full reload/legacy-link restore.
+    setRecreatedSourceId(null);
     restoredSelection.current = job.id;
     dispatch({ type: "restore-prompt", job });
     selectJob(job.id);
   }
   /**
-   * A library clip restores its recorded run into the composer, but is never
-   * selected as the featured job: its id names a catalogue entry, so polling or
-   * linking it would look for a session job that does not exist.
+   * A library clip restores its recorded run into the composer and takes over
+   * the main view, so the clip and the prompt describing it are the same run.
+   * It is still never selected as a job: its id names a catalogue entry, so
+   * polling or linking it would look for a session job that does not exist.
    */
   function applyLibrarySetup(source: Source, full: boolean) {
     const job = librarySetupJob(source);
     if (!job) return;
+    setRecreatedSourceId(source.id);
     dispatch({ type: full ? "restore" : "restore-prompt", job });
     composerRef.current?.scrollIntoView({
       behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -163,13 +184,14 @@ export default function App() {
   return (
     <>
       <header className="topbar">
-        <a href="/" className="wordmark" aria-label="FLUX Studio home">
+        <a href="/" className="wordmark" aria-label="FLUX Studio Lite home">
           <span className="brand-mark">
             <i />
             <i />
             <i />
           </span>
-          flux studio<span className="brand-beta">FLUX 3 · Camera control</span>
+          flux studio lite
+          <span className="brand-beta">FLUX 3 · Camera control</span>
         </a>
         <div className="topbar-right">
           <AccountBalance
@@ -213,19 +235,13 @@ export default function App() {
         />
       )}
       <main>
-        <FeaturedVideo
-          job={featuredJob}
-          source={sources.find((s) => s.origin === "sample")}
-          onRetry={retry}
-        />
+        <FeaturedVideo job={hero.job} source={hero.source} onRetry={retry} />
         <div className="studio" ref={composerRef}>
           <section className="composer" aria-label="Video composer">
             <div className="composer-top">
               <div className="mode-badge" aria-live="polite">
-                {generator === "video" && <Icon name="camera" size={17} />}
-                <span>
-                  {generator === "video" ? "Text to video" : "Video upscale"}
-                </span>
+                <Icon name={generators[generator].icon} size={17} />
+                <span>{generators[generator].label}</span>
               </div>
               {generator === "video" && (
                 <button
@@ -331,7 +347,7 @@ export default function App() {
             <span>
               {generator === "video"
                 ? "FLUX 3 · no audio"
-                : `FLUX Video Upscale · ${upscaleMode.toLowerCase()}`}
+                : `${generators.upscale.label} · ${upscaleMode.toLowerCase()}`}
               <i />
               Session ${total.toFixed(2)}
             </span>

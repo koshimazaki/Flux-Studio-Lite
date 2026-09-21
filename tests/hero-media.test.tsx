@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import JobMedia from "../src/components/JobMedia";
 import Clip from "../src/components/Clip";
-import type { Job } from "../shared/types";
+import { heroMedia } from "../src/hero";
+import type { Job, Source } from "../shared/types";
 
 const finished = {
   id: "job-1",
@@ -64,5 +65,49 @@ describe("the hero treats a finished job like a library clip", () => {
     );
     expect(gone).not.toContain("clip-play");
     expect(gone).toContain("Video no longer stored");
+  });
+});
+
+describe("the main view follows the run the composer holds", () => {
+  const clip = (id: string): Source => ({
+    id,
+    label: id,
+    url: `/media/${id}.mp4`,
+    width: 960,
+    height: 528,
+    duration: 5,
+    origin: "sample",
+  });
+  const clips = [clip("library-01"), clip("library-03")];
+  const mine = { ...finished, id: "job-mine" } as Job;
+
+  it("opens on the first catalogue clip while the session has nothing of its own", () => {
+    expect(heroMedia(undefined, clips, null)).toEqual({ source: clips[0] });
+  });
+
+  it("gives a recreated catalogue clip the view over the visitor's own run", () => {
+    // The clip Recreate loaded is the one whose prompt is in the composer, so
+    // leaving the visitor's newest run here would show a different scene.
+    expect(heroMedia(mine, clips, "library-03")).toEqual({ source: clips[1] });
+  });
+
+  it("keeps the visitor's own run when they have not recreated anything", () => {
+    expect(heroMedia(mine, clips, null)).toEqual({ job: mine });
+  });
+
+  it("never presents a catalogue id as a job, even an unknown one", () => {
+    // A catalogue id is not a session row: showing it as a job would start a
+    // poll and a link for something this browser does not own.
+    const gone = heroMedia(mine, clips, "library-09");
+    expect(gone).toEqual({ job: mine });
+    expect(gone.job?.id).toBe("job-mine");
+    expect(heroMedia(undefined, [], "library-01")).toEqual({
+      source: undefined,
+    });
+  });
+
+  it("keeps the catalogue clip out of the job it replaces", () => {
+    const hero = heroMedia(mine, clips, "library-03");
+    expect(hero.job).toBeUndefined();
   });
 });

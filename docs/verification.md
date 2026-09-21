@@ -1,6 +1,6 @@
 # Verification
 
-What has been tested, and what has not. Current as of 20 September 2026.
+What has been tested, and what has not. Current as of 22 September 2026.
 
 The architecture under test is Cloudflare Pages with an advanced-mode Worker,
 D1 job state, R2 private media and a four-clip static first-run library. The
@@ -22,15 +22,26 @@ Counts go stale; what each command guarantees does not.
 | D1 migration replay         | Every migration applies in order to a scratch SQLite database    |
 
 The suite covers camera geometry across all 729 selection combinations, prompt
-composition and restore, idempotent replay across both adapters, session
-ownership, rate limits, storage ceilings, lifecycle expiry, and that the two
-MP4 readers agree so an upscale cannot be priced differently on each adapter.
+composition and restore, which run the main view shows, idempotent replay across
+both adapters, session ownership, rate limits, storage ceilings, lifecycle
+expiry, and that the two MP4 readers agree so an upscale cannot be priced
+differently on each adapter.
 
 ## Browser checks
 
 First-run library, title-based prompt reuse, full-setting Recreate, lightbox
 prompt and download actions, explicit unavailable-media messaging, and
 responsive desktop and mobile layouts.
+
+A later pass in headless Chrome against the local adapter at 1440 × 980, and
+across viewport widths from 320 to 1440, checked that the composer and the main
+view stay on one run: the studio opens with the first catalogue clip's own scene
+under that clip, Recreate and a clip-title click move the clip whose prompt was
+loaded into the main view (its lightbox carrying the same recorded prompt), and
+a finished run of the visitor's own takes the main view back when they select it
+again. It also checked that the two generator names and their icons read the same
+in the model menu, the mode badge and the composer foot, and that the rim light
+on Camera controls travels with the animation on and rests under reduced motion.
 
 Generation was exercised against an isolated mock provider with a real bundled
 MP4 and the real job API: queued and waiting states, Ready, decoded playback,

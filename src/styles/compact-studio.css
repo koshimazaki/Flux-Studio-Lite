@@ -74,8 +74,59 @@ main {
 .prompt-editor {
   padding-block: 13px;
 }
+/* The one control in this row that opens something, so it carries the accent
+   the mode badge beside it used to, and the generate button's own rim sweep
+   slowed down and narrowed. The pill itself is unoutlined: at rest there is
+   nothing to see but the accent label, and the light passing the rim is what
+   draws the shape. Under reduced motion the arc rests as a static highlight. */
+@property --camera-open-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
 .camera-open {
-  color: var(--soft);
+  position: relative;
+  isolation: isolate;
+  color: var(--accent);
+  padding: var(--space-5) var(--space-11);
+  /* Transparent, not absent: it holds the box the sweep travels along. */
+  border: var(--space-1) solid transparent;
+  border-radius: var(--radius-control);
+}
+.camera-open::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--space-1);
+  pointer-events: none;
+  background: conic-gradient(
+    from var(--camera-open-angle),
+    transparent 0deg 250deg,
+    var(--accent-ghost) 300deg,
+    var(--accent) 330deg,
+    transparent 360deg
+  );
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .camera-open::before {
+    animation: camera-open-sweep 7s linear infinite;
+  }
+  /* The outline appears on approach instead of sitting there. */
+  .camera-open:hover {
+    color: var(--accent-strong);
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    background: var(--hover-wash);
+  }
+}
+@keyframes camera-open-sweep {
+  to {
+    --camera-open-angle: 360deg;
+  }
 }
 .camera-sentences {
   display: block;
@@ -234,6 +285,10 @@ main {
   .camera-open {
     font-size: 11px;
     gap: 4px;
+    padding: var(--space-4) var(--space-9);
+    /* The control keeps one line: wrapped onto two it grew taller than the
+       mode badge it sits beside. */
+    white-space: nowrap;
   }
 }
 

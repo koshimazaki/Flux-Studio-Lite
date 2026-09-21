@@ -45,6 +45,11 @@ isolated test database; remote migration is a separate operation.
 - Does a clip-title click switch to the matching generator and restore only its
   prompt/camera text while preserving current settings? Does Recreate restore
   the full saved setup without submitting it?
+- Do the composer and the main view stay on the same run: does the studio open
+  on the featured clip's own scene, and does a Recreate or title click move that
+  clip to the main view instead of leaving another run's video under it? The
+  clip is presented as a catalogue source there, so it must still stay out of
+  session-job selection and polling.
 - Do both directions between video and Upscale work? Do library clips stay out
   of session-job polling and saved-job selection?
 - Does every shipped library setup still validate and reproduce its recorded

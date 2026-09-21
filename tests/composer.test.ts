@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { readFile } from "node:fs/promises";
 import {
   cameraSections,
   cameraTerms,
   emptyCamera,
   type CameraTermId,
 } from "../shared/camera";
+import { parseLibrary } from "../shared/library";
 import { composePrompt } from "../shared/presets";
 import {
   composerInput,
@@ -235,6 +237,19 @@ describe("section camera contract", () => {
       composerReducer(restored, { type: "update", patch: { draft: false } })
         .resolution,
     ).toBe("fhd");
+  });
+});
+
+describe("the composer opens on the run the studio features", () => {
+  it("starts on the scene of the first catalogue clip", async () => {
+    const shipped = parseLibrary(
+      JSON.parse(await readFile("public/media/gallery.json", "utf8")),
+    );
+    // The main view opens on the first catalogue clip, so the scene text has to
+    // be that clip's. Anything else shows a prompt and a video of two
+    // different runs, and reordering the catalogue has to be a deliberate
+    // change to this constant rather than a silent mismatch.
+    expect(shipped[0]?.setup?.description).toBe(initialComposer.description);
   });
 });
 
