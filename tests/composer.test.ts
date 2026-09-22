@@ -14,6 +14,7 @@ import {
   initialComposer,
 } from "../src/useComposer";
 import { validateInput } from "../server/validation";
+import { librarySetupJob } from "../src/library";
 import {
   jobIdFromUrl,
   selectedJob,
@@ -166,7 +167,10 @@ describe("section camera contract", () => {
       [],
       { orbit: "x".repeat(601) },
       { orbit: 1 },
-      { pan: "Not selected" },
+      // A term the composer does not have selected, so it must not reach the
+      // provider. `orbit` is not part of the opening camera; the opening clip's
+      // own terms are checked to be selected in the test below.
+      { orbit: "Not selected" },
     ])
       expect(() => validateInput({ ...input, cameraEdits })).toThrow();
   });
@@ -188,7 +192,9 @@ describe("section camera contract", () => {
     expect(composerInput(state).cameraEdits).not.toHaveProperty("orbit");
     state = composerReducer(state, {
       type: "update",
-      patch: { camera: initialComposer.camera },
+      // The subject here is the reducer's own edit handling, so the camera is
+      // stated instead of taken from whatever the studio happens to open on.
+      patch: { camera: { ...emptyCamera, movements: "orbit" } },
     });
     expect(composePrompt(composerInput(state))).toContain("Custom orbit.");
     state = composerReducer(state, editCamera("orbit", ""));
@@ -203,7 +209,13 @@ describe("section camera contract", () => {
     };
     const restored = composerReducer(state, {
       type: "restore",
-      job: { ...composerInput(initialComposer), cameraEdits: {} } as Job,
+      job: {
+        ...composerInput({
+          ...initialComposer,
+          camera: { ...emptyCamera, movements: "orbit" },
+        }),
+        cameraEdits: {},
+      } as Job,
     });
     expect(composePrompt(composerInput(restored))).toContain(
       "Slow orbit around the subject.",
@@ -241,15 +253,42 @@ describe("section camera contract", () => {
 });
 
 describe("the composer opens on the run the studio features", () => {
-  it("starts on the scene of the first catalogue clip", async () => {
+  it("starts on the whole run of the first catalogue clip, not just its scene", async () => {
     const shipped = parseLibrary(
       JSON.parse(await readFile("public/media/gallery.json", "utf8")),
     );
-    // The main view opens on the first catalogue clip, so the scene text has to
-    // be that clip's. Anything else shows a prompt and a video of two
-    // different runs, and reordering the catalogue has to be a deliberate
-    // change to this constant rather than a silent mismatch.
-    expect(shipped[0]?.setup?.description).toBe(initialComposer.description);
+    const featured = shipped[0];
+    // The main view opens on the first catalogue clip, so the composer's first
+    // state has to be that clip's run: scene, camera clauses, duration, ratio,
+    // resolution and draft. A scene text that merely matches is not the same
+    // run, and shows a clip over a prompt that made something else — the
+    // motorbike clip used to sit above a five-second orbit that never made it.
+    // Reordering the catalogue is therefore a deliberate change to what the
+    // studio opens on, not a silent mismatch.
+    const setup = featured?.setup;
+    expect(setup).toBeDefined();
+    expect(composerInput(initialComposer)).toMatchObject({
+      generator: setup!.generator,
+      description: setup!.description,
+      camera: setup!.camera,
+      cameraEdits: setup!.cameraEdits,
+      cameraEnabled: setup!.cameraEnabled,
+      duration: setup!.duration,
+      resolution: setup!.resolution,
+      aspectRatio: setup!.aspectRatio,
+      draft: setup!.draft,
+    });
+    // The strongest form of the same claim: what the composer would submit on
+    // first paint is the prompt the featured clip recorded verbatim.
+    expect(composePrompt(composerInput(initialComposer))).toBe(setup!.prompt);
+    // And the composer holds what the clip's own run restores, as Recreate does
+    // it, rather than a second copy of the same numbers.
+    expect(initialComposer).toEqual(
+      composerReducer(initialComposer, {
+        type: "restore",
+        job: librarySetupJob(featured!)!,
+      }),
+    );
   });
 });
 

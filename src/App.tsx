@@ -20,13 +20,14 @@ import Icon from "./components/Icon";
 import PromptInput from "./components/PromptInput";
 import UpscaleControls from "./components/UpscaleControls";
 import GenerationControls from "./components/GenerationControls";
+import ModeBadge from "./components/ModeBadge";
 import ThemePicker from "./components/ThemePicker";
 import SourceInput from "./components/SourceInput";
 import { useHiddenJobs } from "./useHiddenJobs";
-import { heroMedia } from "./hero";
-import { generators } from "./generators";
+import { heroMedia, activeRunId } from "./hero";
+import { generatorFoot } from "./generators";
 export default function App() {
-  const { state, set, dispatch } = useComposer();
+  const { state, set, dispatch, edited } = useComposer();
   const {
     generator,
     description,
@@ -43,12 +44,16 @@ export default function App() {
   } = state;
   const [showCamera, setShowCamera] = useState(false);
   /**
-   * The catalogue clip Recreate or a title click just loaded, given the main
-   * view while the composer holds its run. It lasts until the visitor picks or
-   * creates a run of their own, so the scene on screen is always the one whose
-   * prompt and camera direction are being edited below it.
+   * The catalogue clip a Recreate or a title click loaded, while the composer
+   * holds its run. `heroMedia` gives it the main view until one of the visitor's
+   * own runs becomes what the composer holds, so the scene on screen is always
+   * the one whose prompt and camera direction are being edited below it.
+   *
+   * It is the only piece of state about what the view shows: the run on screen
+   * is derived from what the composer is operating on, not kept in step with it
+   * by a second flag.
    */
-  const [recreatedSourceId, setRecreatedSourceId] = useState<string | null>(
+  const [activeCatalogueId, setActiveCatalogueId] = useState<string | null>(
     null,
   );
   const [showPrompt, setShowPrompt] = useState(false),
@@ -73,32 +78,40 @@ export default function App() {
   } = useJobs(key);
   const { hiddenIds, hide, restoreAll } = useHiddenJobs();
   const visibleJobs = jobs.filter((job) => !hiddenIds.has(job.id));
-  const featuredJob =
-    visibleJobs.find((job) => job.id === selectedId) ?? visibleJobs[0];
+  // The run the screen holds: the linked one, otherwise the newest visible run.
+  const selectedRun = visibleJobs.find(
+    (job) => job.id === activeRunId(selectedId, visibleJobs),
+  );
   const samples = sources.filter((source) => source.origin === "sample");
-  const hero = heroMedia(featuredJob, samples, recreatedSourceId);
+  const source = upscaleSource(state.sourceId, jobs, sources);
+  const hero = heroMedia({
+    generator,
+    catalogueId: activeCatalogueId,
+    upscale: source,
+    selected: selectedRun,
+    runs: visibleJobs,
+    samples,
+  });
   const hiddenCount = jobs.filter((job) => hiddenIds.has(job.id)).length;
-  const restoredSelection = useRef<string | null>(null);
+  const restoredRun = useRef<string | null>(null);
   useEffect(() => {
     // Selecting a run of your own ends a catalogue clip's turn in the main view.
-    if (selectedId) setRecreatedSourceId(null);
+    if (selectedId) setActiveCatalogueId(null);
   }, [selectedId]);
   useEffect(() => {
-    if (
-      selectedId &&
-      featuredJob?.id === selectedId &&
-      restoredSelection.current !== selectedId
-    ) {
-      restoredSelection.current = selectedId;
-      dispatch({ type: "restore", job: featuredJob });
-    }
-  }, [selectedId, featuredJob, dispatch]);
+    // The composer opens on the run the main view shows — the linked run, or the
+    // newest visible one — so the two cannot open on different runs. It stops
+    // once the visitor changes a control here: that edit is theirs to keep.
+    if (activeCatalogueId || edited.current || !selectedRun) return;
+    if (restoredRun.current === selectedRun.id) return;
+    restoredRun.current = selectedRun.id;
+    dispatch({ type: "restore", job: selectedRun });
+  }, [activeCatalogueId, edited, selectedRun, dispatch]);
   useEffect(() => {
     request<{ hasServerKey: boolean }>("/api/health")
       .then((h) => setHasServerKey(h.hasServerKey))
       .catch(() => setError("The studio connection is unavailable."));
   }, [setError]);
-  const source = upscaleSource(state.sourceId, jobs, sources);
   const sourceId = source?.id ?? "";
   const upscaleMode = upscaleCreativity === 0 ? "Precise" : "Creative";
   const estimate =
@@ -151,15 +164,15 @@ export default function App() {
     }
   }
   function retry(job: Job) {
-    setRecreatedSourceId(null);
-    restoredSelection.current = job.id;
+    setActiveCatalogueId(null);
+    restoredRun.current = job.id;
     dispatch({ type: "restore", job });
     selectJob(job.id);
   }
   function applyPrompt(job: Job) {
     // This explicit choice must not trigger the full reload/legacy-link restore.
-    setRecreatedSourceId(null);
-    restoredSelection.current = job.id;
+    setActiveCatalogueId(null);
+    restoredRun.current = job.id;
     dispatch({ type: "restore-prompt", job });
     selectJob(job.id);
   }
@@ -172,7 +185,7 @@ export default function App() {
   function applyLibrarySetup(source: Source, full: boolean) {
     const job = librarySetupJob(source);
     if (!job) return;
-    setRecreatedSourceId(source.id);
+    setActiveCatalogueId(source.id);
     dispatch({ type: full ? "restore" : "restore-prompt", job });
     composerRef.current?.scrollIntoView({
       behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -239,10 +252,7 @@ export default function App() {
         <div className="studio" ref={composerRef}>
           <section className="composer" aria-label="Video composer">
             <div className="composer-top">
-              <div className="mode-badge" aria-live="polite">
-                <Icon name={generators[generator].icon} size={17} />
-                <span>{generators[generator].label}</span>
-              </div>
+              <ModeBadge generator={generator} />
               {generator === "video" && (
                 <button
                   className="camera-open text-button"
@@ -345,9 +355,7 @@ export default function App() {
               />
             </button>
             <span>
-              {generator === "video"
-                ? "FLUX 3 · no audio"
-                : `${generators.upscale.label} · ${upscaleMode.toLowerCase()}`}
+              {generatorFoot(generator, upscaleMode)}
               <i />
               Session ${total.toFixed(2)}
             </span>

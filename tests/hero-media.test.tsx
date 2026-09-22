@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import JobMedia from "../src/components/JobMedia";
 import Clip from "../src/components/Clip";
-import { heroMedia } from "../src/hero";
+import { heroMedia, activeRunId } from "../src/hero";
 import type { Job, Source } from "../shared/types";
 
 const finished = {
@@ -68,46 +68,167 @@ describe("the hero treats a finished job like a library clip", () => {
   });
 });
 
+const clip = (id: string, origin: Source["origin"] = "sample"): Source => ({
+  id,
+  label: id,
+  url: `/media/${id}.mp4`,
+  width: 960,
+  height: 528,
+  duration: 5,
+  origin,
+});
+const clips = [clip("library-01"), clip("library-03")];
+const mine = { ...finished, id: "job-mine" } as Job;
+/** The upscale source the server publishes for `mine`. */
+const myClip = { ...clip("job-mine", "generated"), label: "My motorbike" };
+
 describe("the main view follows the run the composer holds", () => {
-  const clip = (id: string): Source => ({
-    id,
-    label: id,
-    url: `/media/${id}.mp4`,
-    width: 960,
-    height: 528,
-    duration: 5,
-    origin: "sample",
-  });
-  const clips = [clip("library-01"), clip("library-03")];
-  const mine = { ...finished, id: "job-mine" } as Job;
-
   it("opens on the first catalogue clip while the session has nothing of its own", () => {
-    expect(heroMedia(undefined, clips, null)).toEqual({ source: clips[0] });
+    expect(
+      heroMedia({
+        generator: "video",
+        catalogueId: null,
+        runs: [],
+        samples: clips,
+      }),
+    ).toEqual({ source: clips[0] });
   });
 
-  it("gives a recreated catalogue clip the view over the visitor's own run", () => {
+  it("gives a loaded catalogue clip the view over the visitor's own run", () => {
     // The clip Recreate loaded is the one whose prompt is in the composer, so
     // leaving the visitor's newest run here would show a different scene.
-    expect(heroMedia(mine, clips, "library-03")).toEqual({ source: clips[1] });
+    expect(
+      heroMedia({
+        generator: "video",
+        catalogueId: "library-03",
+        selected: mine,
+        runs: [mine],
+        samples: clips,
+      }),
+    ).toEqual({ source: clips[1] });
   });
 
-  it("keeps the visitor's own run when they have not recreated anything", () => {
-    expect(heroMedia(mine, clips, null)).toEqual({ job: mine });
+  it("keeps the visitor's own run when they have loaded no catalogue clip", () => {
+    expect(
+      heroMedia({
+        generator: "video",
+        catalogueId: null,
+        selected: mine,
+        runs: [mine],
+        samples: clips,
+      }),
+    ).toEqual({ job: mine });
   });
 
   it("never presents a catalogue id as a job, even an unknown one", () => {
     // A catalogue id is not a session row: showing it as a job would start a
     // poll and a link for something this browser does not own.
-    const gone = heroMedia(mine, clips, "library-09");
+    const gone = heroMedia({
+      generator: "video",
+      catalogueId: "library-09",
+      selected: mine,
+      runs: [mine],
+      samples: clips,
+    });
     expect(gone).toEqual({ job: mine });
     expect(gone.job?.id).toBe("job-mine");
-    expect(heroMedia(undefined, [], "library-01")).toEqual({
-      source: undefined,
-    });
+    expect(
+      heroMedia({
+        generator: "video",
+        catalogueId: "library-01",
+        runs: [],
+        samples: [],
+      }),
+    ).toEqual({ source: undefined });
   });
 
   it("keeps the catalogue clip out of the job it replaces", () => {
-    const hero = heroMedia(mine, clips, "library-03");
+    const hero = heroMedia({
+      generator: "video",
+      catalogueId: "library-03",
+      selected: mine,
+      runs: [mine],
+      samples: clips,
+    });
     expect(hero.job).toBeUndefined();
+  });
+});
+
+describe("Upscale follows the clip the composer is upscaling", () => {
+  it("shows the selected upscale source over the catalogue clip still in the composer", () => {
+    // Recreating library-03 and then upscaling library-01 used to leave the
+    // recreated clip on screen while the composer upscaled another one.
+    expect(
+      heroMedia({
+        generator: "upscale",
+        catalogueId: "library-03",
+        upscale: clips[0],
+        selected: mine,
+        runs: [mine],
+        samples: clips,
+      }),
+    ).toEqual({ source: clips[0] });
+  });
+
+  it("shows the run itself when the clip being upscaled is one of the visitor's own", () => {
+    // Its id is a session row, so it is the run — not a clip from the library.
+    expect(
+      heroMedia({
+        generator: "upscale",
+        catalogueId: null,
+        upscale: myClip,
+        selected: mine,
+        runs: [mine],
+        samples: clips,
+      }),
+    ).toEqual({ job: mine });
+  });
+
+  it("shows the clip alone when the visitor has hidden the run that made it", () => {
+    expect(
+      heroMedia({
+        generator: "upscale",
+        catalogueId: null,
+        upscale: myClip,
+        runs: [],
+        samples: clips,
+      }),
+    ).toEqual({ source: myClip });
+  });
+
+  it("falls back to the run on screen when nothing is chosen to upscale yet", () => {
+    expect(
+      heroMedia({
+        generator: "upscale",
+        catalogueId: "library-03",
+        selected: mine,
+        runs: [mine],
+        samples: clips,
+      }),
+    ).toEqual({ source: clips[1] });
+    expect(
+      heroMedia({
+        generator: "upscale",
+        catalogueId: null,
+        selected: mine,
+        runs: [mine],
+        samples: clips,
+      }),
+    ).toEqual({ job: mine });
+  });
+});
+
+describe("the run the screen holds", () => {
+  const runs = [{ id: "job-new" }, { id: "job-old" }] as Job[];
+  // The history API returns newest first, on both adapters, so the first
+  // visible run is the newest one.
+  it("is the linked or chosen run when there is one", () => {
+    expect(activeRunId("job-old", runs)).toBe("job-old");
+  });
+  it("otherwise the newest visible run, so a returning session opens on it", () => {
+    expect(activeRunId(null, runs)).toBe("job-new");
+  });
+  it("is nothing when the session has no visible runs", () => {
+    expect(activeRunId(null, [])).toBeNull();
   });
 });

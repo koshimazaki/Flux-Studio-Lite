@@ -46,10 +46,16 @@ isolated test database; remote migration is a separate operation.
   prompt/camera text while preserving current settings? Does Recreate restore
   the full saved setup without submitting it?
 - Do the composer and the main view stay on the same run: does the studio open
-  on the featured clip's own scene, and does a Recreate or title click move that
-  clip to the main view instead of leaving another run's video under it? The
-  clip is presented as a catalogue source there, so it must still stay out of
-  session-job selection and polling.
+  on the featured clip's own scene _and settings_ (the composed prompt should
+  read back as the prompt that clip shipped with), and does a Recreate or title
+  click move that clip to the main view instead of leaving another run's video
+  under it? The clip is presented as a catalogue source there, so it must still
+  stay out of session-job selection and polling.
+- Does the main view show the clip the composer is upscaling, including when a
+  different catalogue clip was just recreated, and does it return to the run the
+  composer holds when the model switches back to video? Does a returning session
+  with no explicit selection open the composer on the same run the main view
+  shows, without a later arrival overwriting an edit the visitor has made?
 - Do both directions between video and Upscale work? Do library clips stay out
   of session-job polling and saved-job selection?
 - Does every shipped library setup still validate and reproduce its recorded

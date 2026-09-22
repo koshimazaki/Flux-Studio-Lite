@@ -10,7 +10,33 @@ import type { Generator } from "../shared/types";
  * which BFL documents under that name. The icon is an `Icon` name so each
  * caller can size it for its own row.
  */
-export const generators: Record<Generator, { label: string; icon: string }> = {
-  video: { label: "FLUX 3 · Text to video", icon: "camera" },
-  upscale: { label: "FLUX Video Upscale", icon: "expand" },
+export const generators: Record<
+  Generator,
+  { model: string; label: string; icon: string }
+> = {
+  video: {
+    model: "FLUX 3",
+    label: "FLUX 3 · Text to video",
+    icon: "camera",
+  },
+  upscale: {
+    model: "FLUX Video Upscale",
+    label: "FLUX Video Upscale",
+    icon: "expand",
+  },
 };
+
+/**
+ * The composer foot's line for whichever generator is selected: the same name
+ * the menu and the badge show, plus what the run will and will not carry. The
+ * foot used to spell the video model itself, so the one place that named the
+ * generators did not in fact name all of them.
+ */
+export function generatorFoot(
+  generator: Generator,
+  upscaleMode: "Precise" | "Creative",
+): string {
+  return generator === "video"
+    ? `${generators.video.model} · no audio`
+    : `${generators.upscale.label} · ${upscaleMode.toLowerCase()}`;
+}

@@ -28,8 +28,12 @@ build while every other check stays green.
    without ever reading it back.
 9. `src/useJobs.ts` — initial history load, per-request keys, one polling loop and submission.
    `src/job-links.ts` and `src/library.ts` resolve a linked or catalogue job without bypassing
-   ownership checks. `src/hero.ts` decides which run the main view shows, and `src/generators.ts`
-   names the two generators once for the model menu, the mode badge and the composer foot.
+   ownership checks. `src/library.ts` also carries the catalogue clip the studio opens on, which
+   `initialComposer` is built from. `src/hero.ts` derives the run the main view shows from what the
+   composer is operating on — the clip being upscaled, a catalogue clip the visitor loaded, or the
+   linked-or-newest run (`activeRunId`) — instead of a second flag kept in step by hand.
+   `src/generators.ts` names the two generators once for the model menu, the mode badge and the
+   composer foot.
 10. `src/components/` — `PromptInput` edits the scene and coloured camera text; `GenerationControls`
     owns model, duration, ratio, resolution and draft; `UpscaleControls` owns amount and mode.
     `SelectMenu`, `TickFader` and `ThemePicker` keep shared interactions small. Upscale replaces the

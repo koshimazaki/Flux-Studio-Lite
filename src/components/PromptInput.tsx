@@ -5,15 +5,6 @@ import {
 } from "../../shared/camera";
 import PromptField from "./PromptField";
 
-/**
- * The scene the composer opens on. It is the description of the catalogue clip
- * the main view features, so the first screen shows a run and the prompt that
- * made it instead of two different clips. `tests/composer.test.ts` pins the two
- * together against `public/media/gallery.json`.
- */
-export const DEFAULT_PROMPT =
-  "A rough BMW 70's motorbike in the woods. Reflections in the chrome, golden hour.";
-
 export default function PromptInput({
   description,
   onChange,

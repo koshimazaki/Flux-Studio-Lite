@@ -27,6 +27,14 @@ both adapters, session ownership, rate limits, storage ceilings, lifecycle
 expiry, and that the two MP4 readers agree so an upscale cannot be priced
 differently on each adapter.
 
+The composer and the main view are pinned to one run: the opening composer is
+built from the first catalogue clip's recorded setup and is asserted to compose
+that clip's prompt verbatim, `heroMedia` is asserted across the transitions that
+used to leave the two apart (a loaded catalogue clip, an upscale choice over it,
+a generated clip presented as the run it is), and `activeRunId` is asserted to
+fall back to the newest visible run. `src/App.tsx` itself is not rendered in the
+suite; the browser checks below cover the wiring.
+
 ## Browser checks
 
 First-run library, title-based prompt reuse, full-setting Recreate, lightbox
@@ -42,6 +50,20 @@ a finished run of the visitor's own takes the main view back when they select it
 again. It also checked that the two generator names and their icons read the same
 in the model menu, the mode badge and the composer foot, and that the rim light
 on Camera controls travels with the animation on and rests under reduced motion.
+
+A later pass in the same setup checked the transitions where the two runs used to
+drift apart. In a browser session with nothing of its own: the main view showed
+`library-01.mp4` and the composer held that clip's own run — its scene, its three
+camera clauses, 10s, HD, 16:9, draft off — with the composed prompt reading back
+as the prompt `public/media/gallery.json` records for it. Recreate on library-03
+moved that clip to the main view with its recorded prompt in the lightbox.
+Clicking Upscale on library-01 put library-01 on screen, with the foot reading
+`FLUX Video Upscale · precise`; switching the model back to video returned the
+main view to library-03, the run the composer still held. And a returning session
+with an existing finished run and no explicit selection opened with that run in
+the main view and the composer on that same run (its scene, camera terms, 5s and
+draft on), where it previously opened on the run under an untouched opening
+composer.
 
 Generation was exercised against an isolated mock provider with a real bundled
 MP4 and the real job API: queued and waiting states, Ready, decoded playback,
