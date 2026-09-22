@@ -38,6 +38,11 @@ main {
   --col-model: calc(168 * var(--unit));
   --col-fader: calc(174 * var(--unit));
   --col-mode: calc(144 * var(--unit));
+  /* One inset for the panel's own rows: the mode badge and Camera controls sit
+     above the prompt on the same vertical lines as the model column and the
+     generate button below them, so the pill closes where the button closes
+     rather than a few units inside it. */
+  --composer-inset: var(--space-18);
   position: relative;
   border: var(--space-1) solid var(--border-strong);
   background: var(--surface);
@@ -50,7 +55,7 @@ main {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-14) var(--space-22) var(--space-9);
+  padding: var(--space-14) var(--composer-inset) var(--space-9);
   border-bottom: var(--space-1) solid var(--border);
 }
 .mode-badge {
@@ -118,7 +123,7 @@ main {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-16);
-  padding: var(--space-15) var(--space-18);
+  padding: var(--space-15) var(--composer-inset);
   border-top: var(--space-1) solid var(--border);
   background: var(--sunken);
   border-radius: 0 0 var(--radius-panel) var(--radius-panel);

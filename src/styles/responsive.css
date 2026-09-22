@@ -84,8 +84,11 @@
   main {
     padding: 0 var(--space-14);
   }
+  .composer {
+    --composer-inset: var(--space-13);
+  }
   .composer-top {
-    padding: var(--space-15) var(--space-15) var(--space-5);
+    padding: var(--space-15) var(--composer-inset) var(--space-5);
   }
   .model-picker {
     font-size: var(--space-11);
@@ -111,7 +114,7 @@
   }
   .composer-toolbar {
     flex-wrap: wrap;
-    padding: var(--space-11) var(--space-13);
+    padding: var(--space-11) var(--composer-inset);
     gap: var(--space-12);
   }
   .parameters {

@@ -58,6 +58,11 @@ isolated test database; remote migration is a separate operation.
   shows, without a later arrival overwriting an edit the visitor has made?
 - Do both directions between video and Upscale work? Do library clips stay out
   of session-job polling and saved-job selection?
+- Does the header still name the studio in full — `FLUX Studio Lite`, the same
+  words as the document title and the README — and do the mode badge, the model
+  menu and the composer foot all take their names from `src/generators.ts`?
+- Do the composer's rows share one inset, so Camera controls closes where the
+  generate button closes and the mode badge starts on the model column's line?
 - Does every shipped library setup still validate and reproduce its recorded
   prompt? Are provider identifiers and private provenance absent from public files?
 - Can a first-time visitor inspect the library without a key? Check keyboard

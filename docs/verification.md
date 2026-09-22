@@ -65,6 +65,13 @@ the main view and the composer on that same run (its scene, camera terms, 5s and
 draft on), where it previously opened on the run under an untouched opening
 composer.
 
+The same pass checked two smaller claims. The header renders the studio's name in
+full — `FLUX Studio Lite`, the same words as the document title and the
+aria-label, which a test now pins together — and the composer's two outer rows
+share one inset: the mode badge starts on the model column's line and Camera
+controls closes on the generate button's right edge, measured at 0px difference
+from 1440 down to 390, where the toolbar wraps.
+
 Generation was exercised against an isolated mock provider with a real bundled
 MP4 and the real job API: queued and waiting states, Ready, decoded playback,
 job-link reload, and a clear fallback for an unavailable job.

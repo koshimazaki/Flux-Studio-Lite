@@ -21,6 +21,7 @@ import PromptInput from "./components/PromptInput";
 import UpscaleControls from "./components/UpscaleControls";
 import GenerationControls from "./components/GenerationControls";
 import ModeBadge from "./components/ModeBadge";
+import Wordmark from "./components/Wordmark";
 import ThemePicker from "./components/ThemePicker";
 import SourceInput from "./components/SourceInput";
 import { useHiddenJobs } from "./useHiddenJobs";
@@ -197,15 +198,7 @@ export default function App() {
   return (
     <>
       <header className="topbar">
-        <a href="/" className="wordmark" aria-label="FLUX Studio Lite home">
-          <span className="brand-mark">
-            <i />
-            <i />
-            <i />
-          </span>
-          flux studio lite
-          <span className="brand-beta">FLUX 3 · Camera control</span>
-        </a>
+        <Wordmark />
         <div className="topbar-right">
           <AccountBalance
             apiKey={key}

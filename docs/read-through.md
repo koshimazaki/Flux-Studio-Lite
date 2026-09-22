@@ -36,7 +36,8 @@ build while every other check stays green.
    composer foot.
 10. `src/components/` — `PromptInput` edits the scene and coloured camera text; `GenerationControls`
     owns model, duration, ratio, resolution and draft; `UpscaleControls` owns amount and mode.
-    `SelectMenu`, `TickFader` and `ThemePicker` keep shared interactions small. Upscale replaces the
+    `SelectMenu`, `TickFader` and `ThemePicker` keep shared interactions small, and `Wordmark` and
+    `ModeBadge` are the two names the header and the prompt row show. Upscale replaces the
     camera surface. Keep each component under 500 lines.
 11. `src/components/Gallery.tsx` and `JobMedia.tsx` — library versus new jobs, decoded-frame reveal,
     user-triggered playback, hidden-page pause, explicit playback errors.
