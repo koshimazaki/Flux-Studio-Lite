@@ -28,10 +28,19 @@ build while every other check stays green.
    without ever reading it back.
 9. `src/useJobs.ts` — initial history load, per-request keys, one polling loop and submission.
    `src/job-links.ts` and `src/library.ts` resolve a linked or catalogue job without bypassing
-   ownership checks.
+   ownership checks. `src/library.ts` also carries the catalogue clip the studio opens on, which
+   `initialComposer` is built from. `src/hero.ts` derives the run the main view shows from what the
+   composer is operating on — the clip being upscaled, a catalogue clip the visitor loaded, or the
+   run `activeRun` resolves (the visitor's chosen run, which hiding a card does not give up, or the
+   newest visible one) — instead of a second flag kept in step by hand. Every control that edits the
+   composer goes through `markEdit`, which marks the edit before dispatching it, so the restore
+   effect in `src/App.tsx` stands aside for the visitor's work whichever control made it.
+   `src/generators.ts` names the two generators once for the model menu, the mode badge and the
+   composer foot.
 10. `src/components/` — `PromptInput` edits the scene and coloured camera text; `GenerationControls`
     owns model, duration, ratio, resolution and draft; `UpscaleControls` owns amount and mode.
-    `SelectMenu`, `TickFader` and `ThemePicker` keep shared interactions small. Upscale replaces the
+    `SelectMenu`, `TickFader` and `ThemePicker` keep shared interactions small, and `Wordmark` and
+    `ModeBadge` are the two names the header and the prompt row show. Upscale replaces the
     camera surface. Keep each component under 500 lines.
 11. `src/components/Gallery.tsx` and `JobMedia.tsx` — library versus new jobs, decoded-frame reveal,
     user-triggered playback, hidden-page pause, explicit playback errors.

@@ -118,6 +118,7 @@ export default function Gallery({
               </h3>
               <div className="clip-meta">
                 <span>
+                  {job.duration}s ·{" "}
                   {job.status === "Ready" && job.mediaAvailable !== false ? (
                     <>
                       $
@@ -203,8 +204,7 @@ export default function Gallery({
                 </h3>
                 <div className="clip-meta">
                   <span>
-                    {Number(source.duration.toFixed(1))}s · {source.width} ×{" "}
-                    {source.height}
+                    {Number(source.duration.toFixed(1))}s
                     {source.setup
                       ? ` · $${source.setup.costUsd.toFixed(2)}`
                       : ""}

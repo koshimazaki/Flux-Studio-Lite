@@ -1,4 +1,17 @@
 import type { Job, Source } from "../shared/types";
+import catalogue from "../public/media/gallery.json";
+import { parseLibrary } from "../shared/library";
+
+/**
+ * The catalogue clip the studio opens on: the first entry of
+ * `public/media/gallery.json`.
+ *
+ * The frontend imports the same shipped file the local adapter reads and the
+ * Worker bundles, so the opening screen and the first-run composer describe one
+ * run instead of two. `initialComposer` in `src/useComposer.ts` is built from
+ * this clip's recorded setup.
+ */
+export const featuredSource: Source | undefined = parseLibrary(catalogue)[0];
 
 /**
  * Presents a catalogue clip's recorded run as a Job.

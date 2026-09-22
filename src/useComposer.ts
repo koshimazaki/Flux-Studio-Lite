@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { useReducer, useRef, type RefObject } from "react";
 import {
   defaultCamera,
   cameraClauses,
@@ -8,16 +8,21 @@ import {
 } from "../shared/camera";
 import { presets } from "../shared/legacy-camera";
 import type { GenerateInput, Job, Source } from "../shared/types";
-import { DEFAULT_PROMPT } from "./components/PromptInput";
+import { featuredSource, librarySetupJob } from "./library";
 export type ComposerState = Omit<GenerateInput, "presetId" | "cameraText"> & {
   camera: CameraSelection;
   cameraEdits: CameraEdits;
   sourceId: string;
   upscalePrompt: string;
 };
-export const initialComposer: ComposerState = {
+/**
+ * A composer with no run loaded. Only reached when the shipped catalogue has no
+ * usable first clip, which `tests/composer.test.ts` fails on rather than letting
+ * the studio open on an invented scene.
+ */
+const emptyComposer: ComposerState = {
   generator: "video",
-  description: DEFAULT_PROMPT,
+  description: "",
   cameraEnabled: true,
   camera: defaultCamera,
   cameraEdits: {},
@@ -30,6 +35,25 @@ export const initialComposer: ComposerState = {
   upscaleFactor: 2,
   upscaleCreativity: 0,
 };
+/**
+ * The composer state a catalogue clip's recorded run restores, through the same
+ * reducer action Recreate uses. One path, so the opening screen cannot describe
+ * a run differently from the way Recreate restores it.
+ */
+function composerFromLibrary(source: Source | undefined): ComposerState {
+  const job = source ? librarySetupJob(source) : undefined;
+  return job
+    ? composerReducer(emptyComposer, { type: "restore", job })
+    : emptyComposer;
+}
+/**
+ * What the composer opens on: the run of the clip the main view features. The
+ * clip, its scene text, its camera clauses and its generation settings are one
+ * run — the one `public/media/gallery.json` records for it — rather than a clip
+ * paired with a prompt that made something else.
+ */
+export const initialComposer: ComposerState =
+  composerFromLibrary(featuredSource);
 type Action =
   | { type: "update"; patch: Partial<ComposerState> }
   | { type: "restore" | "restore-prompt"; job: Job };
@@ -136,11 +160,35 @@ export function upscaleSource(
   return latest ? generated.get(latest.id) : undefined;
 }
 
+/**
+ * The one write path for an edit the visitor made: mark it, then dispatch it.
+ * Both `set` and the camera dialogue's `Done` go through here, so a control
+ * cannot move the composer without telling the restore effect in `src/App.tsx`
+ * that the state is theirs to keep — an edit that dispatched on its own was
+ * silently restorable.
+ */
+export function markEdit(
+  dispatch: (action: Action) => void,
+  edited: RefObject<boolean>,
+  patch: Partial<ComposerState>,
+): void {
+  edited.current = true;
+  dispatch({ type: "update", patch });
+}
+
 export function useComposer() {
   const [state, dispatch] = useReducer(composerReducer, initialComposer);
+  /**
+   * True once the visitor has changed a control. The composer then holds their
+   * edit, so an arriving or newly selected run is not restored over it; see the
+   * restore effect in `src/App.tsx`.
+   */
+  const edited = useRef(false);
+  const update = (patch: Partial<ComposerState>) =>
+    markEdit(dispatch, edited, patch);
   const set = <K extends keyof ComposerState>(
     key: K,
     value: ComposerState[K],
-  ) => dispatch({ type: "update", patch: { [key]: value } });
-  return { state, set, dispatch };
+  ) => update({ [key]: value } as Pick<ComposerState, K>);
+  return { state, set, update, dispatch, edited };
 }

@@ -5,9 +5,6 @@ import {
 } from "../../shared/camera";
 import PromptField from "./PromptField";
 
-export const DEFAULT_PROMPT =
-  "A solitary red cabin on a rocky island. Early morning mist, still water and a soft overcast sky.";
-
 export default function PromptInput({
   description,
   onChange,

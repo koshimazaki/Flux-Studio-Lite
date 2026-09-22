@@ -45,8 +45,27 @@ isolated test database; remote migration is a separate operation.
 - Does a clip-title click switch to the matching generator and restore only its
   prompt/camera text while preserving current settings? Does Recreate restore
   the full saved setup without submitting it?
+- Do the composer and the main view stay on the same run: does the studio open
+  on the featured clip's own scene _and settings_ (the composed prompt should
+  read back as the prompt that clip shipped with), and does a Recreate or title
+  click move that clip to the main view instead of leaving another run's video
+  under it? The clip is presented as a catalogue source there, so it must still
+  stay out of session-job selection and polling.
+- Does the main view show the clip the composer is upscaling, including when a
+  different catalogue clip was just recreated, and does it return to the run the
+  composer holds when the model switches back to video? Does a returning session
+  with no explicit selection open the composer on the same run the main view
+  shows, without a later arrival overwriting an edit the visitor has made —
+  through any control, including the camera dialogue's `Done`?
+- Does hiding a card leave the studio on the run it is showing when that card is
+  the one selected, with only the fallback selection drawn from the visible cards?
 - Do both directions between video and Upscale work? Do library clips stay out
   of session-job polling and saved-job selection?
+- Does the header still name the studio in full — `FLUX Studio Lite`, the same
+  words as the document title and the README — and do the mode badge, the model
+  menu and the composer foot all take their names from `src/generators.ts`?
+- Do the composer's rows share one inset, so Camera controls closes where the
+  generate button closes and the mode badge starts on the model column's line?
 - Does every shipped library setup still validate and reproduce its recorded
   prompt? Are provider identifiers and private provenance absent from public files?
 - Can a first-time visitor inspect the library without a key? Check keyboard

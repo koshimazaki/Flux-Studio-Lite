@@ -20,11 +20,15 @@ import Icon from "./components/Icon";
 import PromptInput from "./components/PromptInput";
 import UpscaleControls from "./components/UpscaleControls";
 import GenerationControls from "./components/GenerationControls";
+import ModeBadge from "./components/ModeBadge";
+import Wordmark from "./components/Wordmark";
 import ThemePicker from "./components/ThemePicker";
 import SourceInput from "./components/SourceInput";
 import { useHiddenJobs } from "./useHiddenJobs";
+import { heroMedia, activeRun } from "./hero";
+import { generatorFoot } from "./generators";
 export default function App() {
-  const { state, set, dispatch } = useComposer();
+  const { state, set, update, dispatch, edited } = useComposer();
   const {
     generator,
     description,
@@ -40,6 +44,19 @@ export default function App() {
     upscaleCreativity,
   } = state;
   const [showCamera, setShowCamera] = useState(false);
+  /**
+   * The catalogue clip a Recreate or a title click loaded, while the composer
+   * holds its run. `heroMedia` gives it the main view until one of the visitor's
+   * own runs becomes what the composer holds, so the scene on screen is always
+   * the one whose prompt and camera direction are being edited below it.
+   *
+   * It is the only piece of state about what the view shows: the run on screen
+   * is derived from what the composer is operating on, not kept in step with it
+   * by a second flag.
+   */
+  const [activeCatalogueId, setActiveCatalogueId] = useState<string | null>(
+    null,
+  );
   const [showPrompt, setShowPrompt] = useState(false),
     [copied, setCopied] = useState(false);
   const [key, setKey] = usePageKey();
@@ -62,26 +79,44 @@ export default function App() {
   } = useJobs(key);
   const { hiddenIds, hide, restoreAll } = useHiddenJobs();
   const visibleJobs = jobs.filter((job) => !hiddenIds.has(job.id));
-  const featuredJob =
-    visibleJobs.find((job) => job.id === selectedId) ?? visibleJobs[0];
+  /**
+   * The run the screen holds: the one the visitor chose, even when they have
+   * hidden it from the gallery, otherwise the newest visible run. Resolving the
+   * choice against every run rather than the visible ones is what keeps the
+   * hero and the composer on one run when the selected card is hidden — the
+   * composer keeps that run, so the main view has to keep showing it.
+   */
+  const selectedRun = activeRun(selectedId, jobs, visibleJobs);
+  const samples = sources.filter((source) => source.origin === "sample");
+  const source = upscaleSource(state.sourceId, jobs, sources);
+  const hero = heroMedia({
+    generator,
+    catalogueId: activeCatalogueId,
+    upscale: source,
+    selected: selectedRun,
+    runs: visibleJobs,
+    samples,
+  });
   const hiddenCount = jobs.filter((job) => hiddenIds.has(job.id)).length;
-  const restoredSelection = useRef<string | null>(null);
+  const restoredRun = useRef<string | null>(null);
   useEffect(() => {
-    if (
-      selectedId &&
-      featuredJob?.id === selectedId &&
-      restoredSelection.current !== selectedId
-    ) {
-      restoredSelection.current = selectedId;
-      dispatch({ type: "restore", job: featuredJob });
-    }
-  }, [selectedId, featuredJob, dispatch]);
+    // Selecting a run of your own ends a catalogue clip's turn in the main view.
+    if (selectedId) setActiveCatalogueId(null);
+  }, [selectedId]);
+  useEffect(() => {
+    // The composer opens on the run the main view shows — the linked run, or the
+    // newest visible one — so the two cannot open on different runs. It stops
+    // once the visitor changes a control here: that edit is theirs to keep.
+    if (activeCatalogueId || edited.current || !selectedRun) return;
+    if (restoredRun.current === selectedRun.id) return;
+    restoredRun.current = selectedRun.id;
+    dispatch({ type: "restore", job: selectedRun });
+  }, [activeCatalogueId, edited, selectedRun, dispatch]);
   useEffect(() => {
     request<{ hasServerKey: boolean }>("/api/health")
       .then((h) => setHasServerKey(h.hasServerKey))
       .catch(() => setError("The studio connection is unavailable."));
   }, [setError]);
-  const source = upscaleSource(state.sourceId, jobs, sources);
   const sourceId = source?.id ?? "";
   const upscaleMode = upscaleCreativity === 0 ? "Precise" : "Creative";
   const estimate =
@@ -134,24 +169,28 @@ export default function App() {
     }
   }
   function retry(job: Job) {
-    restoredSelection.current = job.id;
+    setActiveCatalogueId(null);
+    restoredRun.current = job.id;
     dispatch({ type: "restore", job });
     selectJob(job.id);
   }
   function applyPrompt(job: Job) {
     // This explicit choice must not trigger the full reload/legacy-link restore.
-    restoredSelection.current = job.id;
+    setActiveCatalogueId(null);
+    restoredRun.current = job.id;
     dispatch({ type: "restore-prompt", job });
     selectJob(job.id);
   }
   /**
-   * A library clip restores its recorded run into the composer, but is never
-   * selected as the featured job: its id names a catalogue entry, so polling or
-   * linking it would look for a session job that does not exist.
+   * A library clip restores its recorded run into the composer and takes over
+   * the main view, so the clip and the prompt describing it are the same run.
+   * It is still never selected as a job: its id names a catalogue entry, so
+   * polling or linking it would look for a session job that does not exist.
    */
   function applyLibrarySetup(source: Source, full: boolean) {
     const job = librarySetupJob(source);
     if (!job) return;
+    setActiveCatalogueId(source.id);
     dispatch({ type: full ? "restore" : "restore-prompt", job });
     composerRef.current?.scrollIntoView({
       behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -163,14 +202,7 @@ export default function App() {
   return (
     <>
       <header className="topbar">
-        <a href="/" className="wordmark" aria-label="FLUX Studio home">
-          <span className="brand-mark">
-            <i />
-            <i />
-            <i />
-          </span>
-          flux studio<span className="brand-beta">FLUX 3 · Camera control</span>
-        </a>
+        <Wordmark />
         <div className="topbar-right">
           <AccountBalance
             apiKey={key}
@@ -200,33 +232,25 @@ export default function App() {
           edits={cameraEdits}
           onClose={() => setShowCamera(false)}
           onApply={(selection, edits) => {
-            dispatch({
-              type: "update",
-              patch: {
-                camera: selection,
-                cameraEdits: edits,
-                cameraEnabled: true,
-              },
+            // Through the hook's own edit path, so the camera dialogue marks
+            // the composer as edited like every other control: a run arriving
+            // while the visitor is still choosing must not be restored over
+            // their camera work.
+            update({
+              camera: selection,
+              cameraEdits: edits,
+              cameraEnabled: true,
             });
             setShowCamera(false);
           }}
         />
       )}
       <main>
-        <FeaturedVideo
-          job={featuredJob}
-          source={sources.find((s) => s.origin === "sample")}
-          onRetry={retry}
-        />
+        <FeaturedVideo job={hero.job} source={hero.source} onRetry={retry} />
         <div className="studio" ref={composerRef}>
           <section className="composer" aria-label="Video composer">
             <div className="composer-top">
-              <div className="mode-badge" aria-live="polite">
-                {generator === "video" && <Icon name="camera" size={17} />}
-                <span>
-                  {generator === "video" ? "Text to video" : "Video upscale"}
-                </span>
-              </div>
+              <ModeBadge generator={generator} />
               {generator === "video" && (
                 <button
                   className="camera-open text-button"
@@ -329,9 +353,7 @@ export default function App() {
               />
             </button>
             <span>
-              {generator === "video"
-                ? "FLUX 3 · no audio"
-                : `FLUX Video Upscale · ${upscaleMode.toLowerCase()}`}
+              {generatorFoot(generator, upscaleMode)}
               <i />
               Session ${total.toFixed(2)}
             </span>

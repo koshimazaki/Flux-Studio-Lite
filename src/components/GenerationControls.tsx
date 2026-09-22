@@ -8,6 +8,7 @@ import Icon from "./Icon";
 import SelectMenu from "./SelectMenu";
 import TickFader from "./TickFader";
 import AspectRatioIcon from "./AspectRatioIcon";
+import { generators } from "../generators";
 
 interface Props {
   generator: Generator;
@@ -27,13 +28,13 @@ interface Props {
 const modelOptions = [
   {
     value: "video",
-    label: "FLUX 3 · Text to video",
-    icon: <Icon name="camera" size={13} />,
+    label: generators.video.label,
+    icon: <Icon name={generators.video.icon} size={13} />,
   },
   {
     value: "upscale",
-    label: "FLUX · Video upscale",
-    icon: <Icon name="expand" size={13} />,
+    label: generators.upscale.label,
+    icon: <Icon name={generators.upscale.icon} size={13} />,
   },
 ];
 const aspectOptions: AspectRatio[] = [

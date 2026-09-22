@@ -1,6 +1,6 @@
 # Verification
 
-What has been tested, and what has not. Current as of 20 September 2026.
+What has been tested, and what has not. Current as of 22 September 2026.
 
 The architecture under test is Cloudflare Pages with an advanced-mode Worker,
 D1 job state, R2 private media and a four-clip static first-run library. The
@@ -22,15 +22,71 @@ Counts go stale; what each command guarantees does not.
 | D1 migration replay         | Every migration applies in order to a scratch SQLite database    |
 
 The suite covers camera geometry across all 729 selection combinations, prompt
-composition and restore, idempotent replay across both adapters, session
-ownership, rate limits, storage ceilings, lifecycle expiry, and that the two
-MP4 readers agree so an upscale cannot be priced differently on each adapter.
+composition and restore, which run the main view shows, idempotent replay across
+both adapters, session ownership, rate limits, storage ceilings, lifecycle
+expiry, and that the two MP4 readers agree so an upscale cannot be priced
+differently on each adapter.
+
+The composer and the main view are pinned to one run: the opening composer is
+built from the first catalogue clip's recorded setup and is asserted to compose
+that clip's prompt verbatim, `heroMedia` is asserted across the transitions that
+used to leave the two apart (a loaded catalogue clip, an upscale choice over it,
+a generated clip presented as the run it is), and `activeRun` is asserted to keep
+the visitor's chosen run when they hide its card and to fall back to the newest
+visible run otherwise. Every edit the visitor makes is asserted to travel one
+path, `markEdit`, and `src/App.tsx` is read to check that no control dispatches
+an update of its own. `src/App.tsx` itself is not rendered in the suite, so the
+browser checks below cover the rest of the wiring.
 
 ## Browser checks
 
 First-run library, title-based prompt reuse, full-setting Recreate, lightbox
 prompt and download actions, explicit unavailable-media messaging, and
 responsive desktop and mobile layouts.
+
+A later pass in headless Chrome against the local adapter at 1440 × 980, and
+across viewport widths from 320 to 1440, checked that the composer and the main
+view stay on one run: the studio opens with the first catalogue clip's own scene
+under that clip, Recreate and a clip-title click move the clip whose prompt was
+loaded into the main view (its lightbox carrying the same recorded prompt), and
+a finished run of the visitor's own takes the main view back when they select it
+again. It also checked that the two generator names and their icons read the same
+in the model menu, the mode badge and the composer foot, and that the rim light
+on Camera controls travels with the animation on and rests under reduced motion.
+
+A later pass in the same setup checked the transitions where the two runs used to
+drift apart. In a browser session with nothing of its own: the main view showed
+`library-01.mp4` and the composer held that clip's own run — its scene, its three
+camera clauses, 10s, HD, 16:9, draft off — with the composed prompt reading back
+as the prompt `public/media/gallery.json` records for it. Recreate on library-03
+moved that clip to the main view with its recorded prompt in the lightbox.
+Clicking Upscale on library-01 put library-01 on screen, with the foot reading
+`FLUX Video Upscale · precise`; switching the model back to video returned the
+main view to library-03, the run the composer still held. And a returning session
+with an existing finished run and no explicit selection opened with that run in
+the main view and the composer on that same run (its scene, camera terms, 5s and
+draft on), where it previously opened on the run under an untouched opening
+composer.
+
+The same pass checked two smaller claims. The header renders the studio's name in
+full — `FLUX Studio Lite`, the same words as the document title and the
+aria-label, which a test now pins together — and the composer's two outer rows
+share one inset: the mode badge starts on the model column's line and Camera
+controls closes on the generate button's right edge, measured at 0px difference
+from 1440 down to 390, where the toolbar wraps.
+
+A later pass in the same setup checked the two ways a control could still move
+the composer behind the main view, both with the run stubbed at the network layer
+so no paid call was made. With the run on screen and its card hidden, the main
+view kept that run (`library-02.mp4` under its own status caption) while the
+composer kept its scene — the same probe on the previous commit fell back to
+`library-01.mp4` under a composer still holding the hidden run. And with the
+session history held at the network layer for nine seconds, a camera phrase
+edited in the dialogue and applied was still in the composer after the held run
+arrived — the run took the main view and the edit stood in the composer, which is
+the one run the two do not share, since the visitor's edit is the composer's
+subject and the arriving run is the newest one — while the same probe on the
+previous commit lost the edit to the arriving run's own camera and scene.
 
 Generation was exercised against an isolated mock provider with a real bundled
 MP4 and the real job API: queued and waiting states, Ready, decoded playback,
