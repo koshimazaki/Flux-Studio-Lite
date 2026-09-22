@@ -12,6 +12,7 @@ import {
   composerInput,
   composerReducer,
   initialComposer,
+  markEdit,
 } from "../src/useComposer";
 import { validateInput } from "../server/validation";
 import { librarySetupJob } from "../src/library";
@@ -289,6 +290,42 @@ describe("the composer opens on the run the studio features", () => {
         job: librarySetupJob(featured!)!,
       }),
     );
+  });
+});
+
+describe("every control that edits the composer travels one path", () => {
+  it("marks the edit and dispatches it as one write", () => {
+    // The camera dialogue's `Done` dispatched its own "update" action, so its
+    // edits did not mark the composer as edited. A run arriving while the
+    // visitor was still choosing a camera was then restored over their choice:
+    // the restore effect in `src/App.tsx` only stands aside for edits made here.
+    const actions: unknown[] = [];
+    const edited = { current: false };
+    markEdit((action) => actions.push(action), edited, {
+      camera: { ...emptyCamera, movements: "orbit" },
+      cameraEdits: { orbit: "Custom orbit around the subject." },
+      cameraEnabled: true,
+    });
+    expect(edited.current).toBe(true);
+    expect(actions).toEqual([
+      {
+        type: "update",
+        patch: {
+          camera: { ...emptyCamera, movements: "orbit" },
+          cameraEdits: { orbit: "Custom orbit around the subject." },
+          cameraEnabled: true,
+        },
+      },
+    ]);
+  });
+  it("leaves the studio no second way to dispatch an update", async () => {
+    // The bug is only fixed while every edit goes through `markEdit`, and the
+    // studio is the one file that can dispatch an update of its own. Reading it
+    // is the only check the suite can make without a browser, and it fails on
+    // exactly the line that caused this.
+    const studio = await readFile("src/App.tsx", "utf8");
+    expect(studio).not.toContain('type: "update"');
+    expect(studio).toContain("update({");
   });
 });
 

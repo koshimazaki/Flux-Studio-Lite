@@ -43,7 +43,10 @@ bought, so it was removed.
 
 Any card can instead be hidden and restored in this browser. Hiding is a view
 filter over the job list rather than a change to it, so a hidden run keeps
-being polled, saved and charged exactly as a visible one does.
+being polled, saved and charged exactly as a visible one does. It is also not a
+withdrawal of the selection: hiding the card of the run the studio is showing
+leaves that run in the main view and the composer, and only the fallback — what
+the studio shows when nothing has been chosen — is drawn from the visible cards.
 
 `stopped` remains a recognised terminal status so rows created before this
 decision still read as cancelled rather than being polled again against a

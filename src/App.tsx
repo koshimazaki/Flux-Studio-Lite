@@ -25,10 +25,10 @@ import Wordmark from "./components/Wordmark";
 import ThemePicker from "./components/ThemePicker";
 import SourceInput from "./components/SourceInput";
 import { useHiddenJobs } from "./useHiddenJobs";
-import { heroMedia, activeRunId } from "./hero";
+import { heroMedia, activeRun } from "./hero";
 import { generatorFoot } from "./generators";
 export default function App() {
-  const { state, set, dispatch, edited } = useComposer();
+  const { state, set, update, dispatch, edited } = useComposer();
   const {
     generator,
     description,
@@ -79,10 +79,14 @@ export default function App() {
   } = useJobs(key);
   const { hiddenIds, hide, restoreAll } = useHiddenJobs();
   const visibleJobs = jobs.filter((job) => !hiddenIds.has(job.id));
-  // The run the screen holds: the linked one, otherwise the newest visible run.
-  const selectedRun = visibleJobs.find(
-    (job) => job.id === activeRunId(selectedId, visibleJobs),
-  );
+  /**
+   * The run the screen holds: the one the visitor chose, even when they have
+   * hidden it from the gallery, otherwise the newest visible run. Resolving the
+   * choice against every run rather than the visible ones is what keeps the
+   * hero and the composer on one run when the selected card is hidden — the
+   * composer keeps that run, so the main view has to keep showing it.
+   */
+  const selectedRun = activeRun(selectedId, jobs, visibleJobs);
   const samples = sources.filter((source) => source.origin === "sample");
   const source = upscaleSource(state.sourceId, jobs, sources);
   const hero = heroMedia({
@@ -228,13 +232,14 @@ export default function App() {
           edits={cameraEdits}
           onClose={() => setShowCamera(false)}
           onApply={(selection, edits) => {
-            dispatch({
-              type: "update",
-              patch: {
-                camera: selection,
-                cameraEdits: edits,
-                cameraEnabled: true,
-              },
+            // Through the hook's own edit path, so the camera dialogue marks
+            // the composer as edited like every other control: a run arriving
+            // while the visitor is still choosing must not be restored over
+            // their camera work.
+            update({
+              camera: selection,
+              cameraEdits: edits,
+              cameraEnabled: true,
             });
             setShowCamera(false);
           }}

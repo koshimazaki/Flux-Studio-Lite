@@ -1,4 +1,4 @@
-import { useReducer, useRef } from "react";
+import { useReducer, useRef, type RefObject } from "react";
 import {
   defaultCamera,
   cameraClauses,
@@ -160,6 +160,22 @@ export function upscaleSource(
   return latest ? generated.get(latest.id) : undefined;
 }
 
+/**
+ * The one write path for an edit the visitor made: mark it, then dispatch it.
+ * Both `set` and the camera dialogue's `Done` go through here, so a control
+ * cannot move the composer without telling the restore effect in `src/App.tsx`
+ * that the state is theirs to keep — an edit that dispatched on its own was
+ * silently restorable.
+ */
+export function markEdit(
+  dispatch: (action: Action) => void,
+  edited: RefObject<boolean>,
+  patch: Partial<ComposerState>,
+): void {
+  edited.current = true;
+  dispatch({ type: "update", patch });
+}
+
 export function useComposer() {
   const [state, dispatch] = useReducer(composerReducer, initialComposer);
   /**
@@ -168,12 +184,11 @@ export function useComposer() {
    * restore effect in `src/App.tsx`.
    */
   const edited = useRef(false);
+  const update = (patch: Partial<ComposerState>) =>
+    markEdit(dispatch, edited, patch);
   const set = <K extends keyof ComposerState>(
     key: K,
     value: ComposerState[K],
-  ) => {
-    edited.current = true;
-    dispatch({ type: "update", patch: { [key]: value } });
-  };
-  return { state, set, dispatch, edited };
+  ) => update({ [key]: value } as Pick<ComposerState, K>);
+  return { state, set, update, dispatch, edited };
 }

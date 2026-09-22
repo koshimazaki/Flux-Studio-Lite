@@ -55,7 +55,10 @@ isolated test database; remote migration is a separate operation.
   different catalogue clip was just recreated, and does it return to the run the
   composer holds when the model switches back to video? Does a returning session
   with no explicit selection open the composer on the same run the main view
-  shows, without a later arrival overwriting an edit the visitor has made?
+  shows, without a later arrival overwriting an edit the visitor has made —
+  through any control, including the camera dialogue's `Done`?
+- Does hiding a card leave the studio on the run it is showing when that card is
+  the one selected, with only the fallback selection drawn from the visible cards?
 - Do both directions between video and Upscale work? Do library clips stay out
   of session-job polling and saved-job selection?
 - Does the header still name the studio in full — `FLUX Studio Lite`, the same

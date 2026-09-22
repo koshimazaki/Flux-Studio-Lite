@@ -25,15 +25,21 @@ export interface HeroState {
  * The run the screen holds: the one a link or a choice selected, otherwise the
  * newest visible run.
  *
+ * An explicit selection survives hiding: the card's action says "Hide from this
+ * browser gallery", so hiding filters the gallery and does not give the run up,
+ * and the run the composer holds would otherwise be one the main view no longer
+ * shows. Only the fallback is drawn from the visible runs.
+ *
  * The main view and the composer both take their run from this, so a returning
  * session cannot open showing the newest generated clip over a composer that
  * still holds the opening scene.
  */
-export function activeRunId(
+export function activeRun(
   selectedId: string | null,
   runs: Job[],
-): string | null {
-  return selectedId ?? runs[0]?.id ?? null;
+  visible: Job[],
+): Job | undefined {
+  return runs.find((job) => job.id === selectedId) ?? visible[0];
 }
 
 /**

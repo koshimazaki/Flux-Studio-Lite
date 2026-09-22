@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import JobMedia from "../src/components/JobMedia";
 import Clip from "../src/components/Clip";
-import { heroMedia, activeRunId } from "../src/hero";
+import { heroMedia, activeRun } from "../src/hero";
 import type { Job, Source } from "../shared/types";
 
 const finished = {
@@ -223,12 +223,30 @@ describe("the run the screen holds", () => {
   // The history API returns newest first, on both adapters, so the first
   // visible run is the newest one.
   it("is the linked or chosen run when there is one", () => {
-    expect(activeRunId("job-old", runs)).toBe("job-old");
+    expect(activeRun("job-old", runs, runs)?.id).toBe("job-old");
   });
   it("otherwise the newest visible run, so a returning session opens on it", () => {
-    expect(activeRunId(null, runs)).toBe("job-new");
+    expect(activeRun(null, runs, runs)?.id).toBe("job-new");
   });
   it("is nothing when the session has no visible runs", () => {
-    expect(activeRunId(null, [])).toBeNull();
+    expect(activeRun(null, [], [])).toBeUndefined();
+  });
+  it("keeps the chosen run when the visitor hides its card", () => {
+    // Hiding is "Hide from this browser gallery", a filter over the cards and
+    // not a withdrawal of the choice. Reading the choice out of the visible
+    // runs left the composer holding the hidden run while the main view fell
+    // back to a library clip — two runs on one screen, from the act of hiding.
+    const newest = runs[0];
+    expect(activeRun("job-old", runs, [newest])?.id).toBe("job-old");
+    expect(activeRun("job-new", runs, [newest])?.id).toBe("job-new");
+  });
+  it("falls back to the newest visible run when the chosen one is not here", () => {
+    // A link or a stored selection can name a run this browser no longer has:
+    // an expired session is served as a status, not as a row. The fallback is
+    // then the same one the studio uses with no choice at all.
+    expect(activeRun("gone", runs, runs)?.id).toBe("job-new");
+    expect(activeRun(null, runs, [])).toBeUndefined();
+    // Everything hidden is not a reason to drop a choice the visitor made.
+    expect(activeRun("job-old", runs, [])?.id).toBe("job-old");
   });
 });
